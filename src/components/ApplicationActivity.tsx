@@ -25,18 +25,14 @@ import {
 } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
+import {
+  applicationStorageKey,
+  notifyApplicationStatusChanged,
+  type ApplicationStatus,
+} from "../lib/applicationStatus";
 import type { JobOffer } from "../types/job";
 import Button from "./Button";
 import JobSourceBadge from "./JobSourceBadge";
-
-type ApplicationStatus =
-  | "saved"
-  | "applied"
-  | "in_review"
-  | "interview"
-  | "offer"
-  | "rejected"
-  | "withdrawn";
 
 type ApplicationEventType =
   | "saved"
@@ -278,7 +274,7 @@ function statusLabel(status: ApplicationStatus) {
 }
 
 function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
-  const storageKey = `jobrater:application-progress:${userId}:${job.id}`;
+  const storageKey = applicationStorageKey(userId, job.id);
   const [tracker, setTracker] = useState<ApplicationTracker | null>(() =>
     readTracker(storageKey),
   );
@@ -301,6 +297,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(nextTracker));
       setTracker(nextTracker);
+      notifyApplicationStatusChanged(userId, job.id);
       setMessage("Application tracker updated.");
     } catch {
       setMessage("Could not save this update in your browser.");

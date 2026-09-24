@@ -14,8 +14,10 @@
     "@iconify-react/simple-icons": "^1.0.26",
     "@supabase/supabase-js": "^2.117.1",
     "@tailwindcss/vite": "^4.3.3",
+    "devicons-react": "^1.5.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-icons": "^5.7.0",
     "react-router-dom": "^7.18.4",
     "tailwindcss": "^4.3.3"
   },

@@ -1,115 +1,170 @@
 import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
-import ArrowRightCircleLineIcon from "@iconify-react/majesticons/arrow-right-circle-line";
-import LinkLineIcon from "@iconify-react/majesticons/link-line";
-import MailLineIcon from "@iconify-react/majesticons/mail-line";
+import CheckCircleLineIcon from "@iconify-react/majesticons/check-circle-line";
+import ClockLineIcon from "@iconify-react/majesticons/clock-line";
 import MessageLineIcon from "@iconify-react/majesticons/message-line";
-import UserLineIcon from "@iconify-react/majesticons/user-line";
+import UserGroupLineIcon from "@iconify-react/majesticons/user-group-line";
+import type { ComponentType } from "react";
 import type { JobOffer } from "../types/job";
 
-export default function ApplicantActivitySummary({ job }: { job: JobOffer }) {
-  const percentageOfApplicants = (value: number) =>
-    job.confirmedApplicants > 0
-      ? Math.round((value / job.confirmedApplicants) * 100)
-      : 0;
+type StageIcon = ComponentType<{
+  "aria-hidden"?: boolean | "true" | "false";
+  width?: string;
+  height?: string;
+}>;
 
-  const metrics = [
+type FunnelStage = {
+  label: string;
+  count: number;
+  medianDays: number | null;
+  timingLabel: string;
+  icon: StageIcon;
+  color: string;
+  surface: string;
+};
+
+function percentage(count: number, total: number) {
+  return total > 0 ? Math.round((count / total) * 100) : 0;
+}
+
+function medianLabel(days: number | null, label: string) {
+  if (days === null) return "Not enough data";
+  return `Median ${days} ${days === 1 ? "day" : "days"} ${label}`;
+}
+
+export default function ApplicantActivitySummary({ job }: { job: JobOffer }) {
+  const stages: FunnelStage[] = [
     {
-      label: "Applied",
-      value: job.confirmedApplicants,
+      label: "Applications",
       count: job.confirmedApplicants,
+      medianDays: null,
+      timingLabel: "",
       icon: ApplicationsLineIcon,
-      isPercentage: false,
+      color: "#3568d4",
+      surface: "#f2f6ff",
     },
     {
-      label: "Received a reply",
-      value: percentageOfApplicants(job.repliedApplicants),
+      label: "Replies",
       count: job.repliedApplicants,
+      medianDays: job.medianDaysToReply,
+      timingLabel: "to reply",
       icon: MessageLineIcon,
-      isPercentage: true,
+      color: "#ad7217",
+      surface: "#fff8e8",
     },
     {
-      label: "Next interview step",
-      value: percentageOfApplicants(job.nextInterviewApplicants),
+      label: "Interviews",
       count: job.nextInterviewApplicants,
-      icon: ArrowRightCircleLineIcon,
-      isPercentage: true,
+      medianDays: job.medianDaysReplyToInterview,
+      timingLabel: "after reply",
+      icon: UserGroupLineIcon,
+      color: "#79529a",
+      surface: "#f8f1fc",
     },
     {
-      label: "Contacted HR",
-      value: percentageOfApplicants(job.contactedHrApplicants),
-      count: job.contactedHrApplicants,
-      icon: UserLineIcon,
-      isPercentage: true,
-    },
-    {
-      label: "LinkedIn connection",
-      value: percentageOfApplicants(job.linkedinConnectionApplicants),
-      count: job.linkedinConnectionApplicants,
-      icon: LinkLineIcon,
-      isPercentage: true,
-    },
-    {
-      label: "Additional email",
-      value: percentageOfApplicants(job.additionalEmailApplicants),
-      count: job.additionalEmailApplicants,
-      icon: MailLineIcon,
-      isPercentage: true,
+      label: "Offers",
+      count: job.offerApplicants,
+      medianDays: job.medianDaysInterviewToOffer,
+      timingLabel: "after interview",
+      icon: CheckCircleLineIcon,
+      color: "#278b63",
+      surface: "#edf8f2",
     },
   ];
 
   return (
     <section
-      className="border-y border-gray-200"
-      aria-labelledby="applicant-activity-heading"
+      className="border-y border-[#dfe3dd] bg-[#fbfcfa]"
+      aria-labelledby="recruitment-pipeline-heading"
     >
-      <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-1 px-4 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8">
+        <div>
           <h2
-            id="applicant-activity-heading"
-            className=" font-semibold text-[#667069]"
+            id="recruitment-pipeline-heading"
+            className="font-semibold text-[#27322c]"
           >
-            Applicants activity
+            Recruitment pipeline
           </h2>
+          <p className="mt-1 text-sm text-[#707b74]">
+            Anonymous outcomes from {job.confirmedApplicants} confirmed{" "}
+            {job.confirmedApplicants === 1 ? "application" : "applications"}
+          </p>
         </div>
+        <span className="text-xs text-[#7a847e]">
+          Percentages use confirmed applications
+        </span>
       </div>
 
-      <dl
-        className="flex flex-wrap overflow-x-auto border-t border-gray-300"
-        aria-label="Applicant activity percentages"
-      >
-        {metrics.map((metric) => {
-          const MetricIcon = metric.icon;
+      <div className="job-type-scrollbar overflow-x-auto border-t border-[#dfe3dd]">
+        <ol className="grid min-w-[46rem] grid-cols-4 sm:min-w-0">
+          {stages.map((stage, index) => {
+            const Icon = stage.icon;
+            const stagePercentage =
+              index === 0
+                ? 100
+                : percentage(stage.count, job.confirmedApplicants);
 
-          return (
-            <div
-              key={metric.label}
-              className="min-w-40 bg-[#f7f8f8] flex-1 border border-gray-300 px-4 py-4 last:border-r-0 sm:px-5"
-            >
-              <dt className="flex items-center gap-2 text-gray-600">
-                <span className="">{metric.label}</span>
-              </dt>
-              <dd className="mt-1 text-lg font-semibold flex items-center gap-2 text-[#27322c]">
-                <MetricIcon
-                  aria-hidden="true"
-                  width="16"
-                  height="16"
-                  className="shrink-0 text-[#278b63]"
-                />
-                {metric.count}
-                {metric.isPercentage && (
+            return (
+              <li
+                key={stage.label}
+                className="relative border-r border-[#dfe3dd] px-4 py-5 last:border-r-0 sm:px-5 lg:px-6"
+              >
+                <div className="relative flex items-center gap-3">
                   <span
-                    className="font-normal text-[#707b74]"
-                    aria-label={`${metric.count} applicants`}
+                    className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full border border-white shadow-[0_0_0_1px_#d9dfda]"
+                    style={{
+                      backgroundColor: stage.surface,
+                      color: stage.color,
+                    }}
                   >
-                    {metric.value}
-                    {metric.isPercentage && "%"}
+                    <Icon aria-hidden="true" width="18" height="18" />
                   </span>
-                )}
-              </dd>
-            </div>
-          );
-        })}
-      </dl>
+                  <span className="min-w-0">
+                    <span className="block text-xs font-medium text-[#667169]">
+                      {stage.label}
+                    </span>
+                    <span className="flex items-baseline gap-1.5">
+                      <strong className="text-xl font-semibold text-[#27322c]">
+                        {stage.count}
+                      </strong>
+                      <span
+                        className="text-xs font-semibold"
+                        style={{ color: stage.color }}
+                      >
+                        {stagePercentage}%
+                      </span>
+                    </span>
+                  </span>
+                </div>
+
+                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#e5e9e5]">
+                  <span
+                    className="block h-full rounded-full"
+                    style={{
+                      backgroundColor: stage.color,
+                      width: `${stagePercentage}%`,
+                    }}
+                  />
+                </div>
+
+                <span className="mt-3 flex items-center gap-1.5 text-xs text-[#707b74]">
+                  {index === 0 ? (
+                    "Starting point"
+                  ) : (
+                    <>
+                      <ClockLineIcon
+                        aria-hidden="true"
+                        width="14"
+                        height="14"
+                      />
+                      {medianLabel(stage.medianDays, stage.timingLabel)}
+                    </>
+                  )}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </section>
   );
 }

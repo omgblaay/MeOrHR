@@ -30,14 +30,9 @@ Each connected offer row displays:
 
 Every offer has a detail page containing its company and source, role metadata, compensation, tags, publication date, and last update time. A link opens the original listing on its source platform.
 
-The applicant activity summary shows counts and percentages for:
-
-- Applications
-- Replies
-- Invitations to the next interview step
-- HR outreach without a reply
-- LinkedIn connections
-- Additional follow-up emails
+The recruitment pipeline shows anonymized applications, replies, interview
+invitations, and offers. Each stage includes its conversion from confirmed
+applications and the median waiting time from the preceding stage.
 
 The page also includes an expandable role description and a prototype discussion area. Descriptions are currently generated from offer metadata, and comments are sample data that remain only for the current browser session.
 
@@ -88,7 +83,9 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 ## Priorytetowe funkcje
 
-Pierwszy etap wdrożenia jest już rozpoczęty: oferty obsługują wiele powiązanych źródeł, każde źródło ma własny link i datę publikacji, a kliknięcia są zliczane niezależnie od potwierdzonych aplikacji.
+Pierwszy etap wdrożenia obejmuje wiele źródeł jednej oferty, potwierdzone
+aplikacje oraz anonimową oś rekrutacji z konwersją i medianami czasu między
+etapami.
 
 | Funkcja | Co widzi lub robi użytkownik | Dlaczego jest wartościowa |
 | --- | --- | --- |

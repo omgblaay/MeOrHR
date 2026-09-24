@@ -79,6 +79,10 @@ export type JobOffer = {
   sourceClicks: number
   repliedApplicants: number
   nextInterviewApplicants: number
+  offerApplicants: number
+  medianDaysToReply: number | null
+  medianDaysReplyToInterview: number | null
+  medianDaysInterviewToOffer: number | null
   contactedHrApplicants: number
   linkedinConnectionApplicants: number
   additionalEmailApplicants: number

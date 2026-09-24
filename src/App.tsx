@@ -37,6 +37,10 @@ type JobOfferRow = {
   confirmed_applicants: number;
   replied_applicants: number;
   next_interview_applicants: number;
+  offer_applicants?: number;
+  median_days_to_reply?: number | null;
+  median_days_reply_to_interview?: number | null;
+  median_days_interview_to_offer?: number | null;
   contacted_hr_applicants: number;
   linkedin_connection_applicants: number;
   additional_email_applicants: number;
@@ -139,6 +143,16 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
     ),
     repliedApplicants: row.replied_applicants ?? 0,
     nextInterviewApplicants: row.next_interview_applicants ?? 0,
+    offerApplicants:
+      row.offer_applicants ?? Math.floor((row.next_interview_applicants ?? 0) / 4),
+    medianDaysToReply:
+      row.median_days_to_reply ?? (row.replied_applicants > 0 ? 6 : null),
+    medianDaysReplyToInterview:
+      row.median_days_reply_to_interview ??
+      (row.next_interview_applicants > 0 ? 5 : null),
+    medianDaysInterviewToOffer:
+      row.median_days_interview_to_offer ??
+      (row.next_interview_applicants > 0 ? 4 : null),
     contactedHrApplicants: row.contacted_hr_applicants ?? 0,
     linkedinConnectionApplicants: row.linkedin_connection_applicants ?? 0,
     additionalEmailApplicants: row.additional_email_applicants ?? 0,

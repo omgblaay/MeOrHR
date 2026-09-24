@@ -1,13 +1,14 @@
 import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
-import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import ChevronRightLineIcon from "@iconify-react/majesticons/chevron-right-line";
 import ClockLineIcon from "@iconify-react/majesticons/clock-line";
 import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
-import ExternalLinkLineIcon from "@iconify-react/majesticons/external-link-line";
 import { useNavigate } from "react-router-dom";
-import Tag from "./components/Tag";
+import JobCategoryIcon from "./components/JobCategoryIcon";
+import JobSourceBadge from "./components/JobSourceBadge";
 import ResponseBar from "./components/ResponseBar";
+import TechnologyTag from "./components/TechnologyTag";
+import UserApplicationStatus from "./components/UserApplicationStatus";
 import type { JobOffer } from "./types/job";
 
 export default function JobCard({ job }: { job: JobOffer }) {
@@ -27,47 +28,68 @@ export default function JobCard({ job }: { job: JobOffer }) {
           openJob();
         }
       }}
-      className="group cursor-pointer border-b border-slate-200 bg-white px-4 py-4 transition-all duration-300 hover:bg-[#fafcfa] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#173f35] sm:px-6 sm:py-5 sm:hover:scale-99 lg:px-8"
+      className="group relative cursor-pointer border-b border-[#dfe3dd] bg-white transition-colors hover:bg-[#f9fbf8] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#173f35]"
     >
-      <div className="flex gap-3 sm:gap-5">
-        <div
-          className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-md text-xs font-bold text-white sm:size-12"
-          style={{ backgroundColor: job.logoColor }}
-          aria-hidden="true"
-        >
-          {job.companyLogoUrl ? (
-            <img
-              className="size-full object-cover"
-              src={job.companyLogoUrl}
-              alt=""
-            />
-          ) : (
-            job.initials
-          )}
-        </div>
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_17rem]">
+        <div className="min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div
+              className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-md text-xs font-bold text-white sm:size-12"
+              style={{ backgroundColor: job.logoColor }}
+              aria-hidden="true"
+            >
+              {job.companyLogoUrl ? (
+                <img
+                  className="size-full object-cover"
+                  src={job.companyLogoUrl}
+                  alt=""
+                />
+              ) : (
+                job.initials
+              )}
+            </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2 sm:gap-3">
-            <div className="min-w-0">
-              <div className="mb-1.5 flex min-w-0 items-center gap-2 text-sm sm:mb-2 sm:flex-wrap sm:gap-4 sm:text-base">
-                <span className="flex min-w-0 items-center gap-1 font-medium sm:font-normal">
-                  <BriefcaseLineIcon
-                    className="hidden sm:block"
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                    <span className="truncate font-semibold text-[#27322c]">
+                      {job.company}
+                    </span>
+                    <span
+                      className="hidden text-[#c3c9c4] sm:inline"
+                      aria-hidden="true"
+                    >
+                      /
+                    </span>
+                    <JobSourceBadge source={job.sourcePlatform} />
+                    <UserApplicationStatus jobId={job.id} />
+                  </div>
+
+                  <h2 className="mt-2 text-xl font-semibold leading-snug text-[#18201c] sm:text-2xl">
+                    {job.title}
+                  </h2>
+                </div>
+
+                <span className="grid size-8 shrink-0 place-items-center text-[#7a847e] transition-transform group-hover:translate-x-1 group-hover:text-[#173f35]">
+                  <ChevronRightLineIcon
                     aria-hidden="true"
-                    width="14"
-                    height="14"
+                    width="20"
+                    height="20"
                   />
-                  <span className="truncate">{job.company}</span>
                 </span>
-                <span className="hidden items-center gap-1 sm:flex">
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-[#667169]">
+                <span className="inline-flex min-w-0 items-center gap-1.5">
                   <LocationMarkerLineIcon
                     aria-hidden="true"
                     width="15"
                     height="15"
                   />
-                  {job.location}
+                  <span className="truncate">{job.location}</span>
                 </span>
-                <span className="hidden items-center gap-1 sm:flex">
+                <span className="inline-flex items-center gap-1.5">
                   <ApplicationsLineIcon
                     aria-hidden="true"
                     width="15"
@@ -77,83 +99,92 @@ export default function JobCard({ job }: { job: JobOffer }) {
                 </span>
               </div>
 
-              <div className="mb-2 sm:flex sm:items-start sm:gap-2">
-                <span className="hidden sm:inline-flex">
-                  <Tag tag="">{job.category}</Tag>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                {job.salary && (
+                  <span className="font-semibold text-[#244a3d]">
+                    {job.salary}
+                  </span>
+                )}
+                <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-[#dbe3dc] bg-[#f5f8f5] px-2 text-xs font-semibold text-[#405d52]">
+                  <JobCategoryIcon
+                    category={job.category}
+                    size={14}
+                    className="size-5"
+                  />
+                  {job.category}
                 </span>
-                <h2 className="text-lg font-semibold leading-snug text-[#1c201d] sm:truncate sm:text-xl">
-                  {job.title}
-                </h2>
               </div>
-            </div>
 
-            <span className="grid size-7 shrink-0 place-items-center text-[#7a847e] transition group-hover:translate-x-0.5 group-hover:text-[#173f35] sm:size-9">
-              <ChevronRightLineIcon aria-hidden="true" width="19" height="19" />
-            </span>
-          </div>
-
-          {job.salary && (
-            <span className="block text-sm font-semibold text-[#32453d] sm:text-base sm:font-medium">
-              {job.salary}
-            </span>
-          )}
-
-          <div className="mt-2 flex items-center gap-x-3 gap-y-1 text-xs text-[#667169] sm:hidden">
-            <span className="flex min-w-0 items-center gap-1">
-              <LocationMarkerLineIcon aria-hidden="true" width="14" height="14" />
-              <span className="truncate">{job.location}</span>
-            </span>
-            <span className="shrink-0">{job.workplace} · {job.type}</span>
-          </div>
-
-          <div className="job-type-scrollbar -mr-4 mt-3 flex gap-1.5 overflow-x-auto pr-4 sm:mr-0 sm:mt-4 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:pr-0">
-            <span className="shrink-0 sm:hidden">
-              <Tag tag="">{job.category}</Tag>
-            </span>
-            {job.tags.map((tag) => (
-              <span className="shrink-0" key={tag}>
-                <Tag tag={tag} />
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-3 border-t border-[#edf0ec] pt-3 sm:mt-4 sm:flex sm:items-center sm:justify-between sm:gap-3 sm:pt-4">
-            <div className="grid grid-cols-3 divide-x divide-[#edf0ec] text-xs sm:flex sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2 sm:divide-x-0">
-              <span className="flex min-w-0 flex-col gap-1 pr-2 sm:flex-row sm:items-center sm:gap-1.5 sm:pr-0">
-                <UsersLineIcon aria-hidden="true" width="15" height="15" />
-                <span>
-                  <strong>{job.confirmedApplicants}</strong>{" "}
-                  <span className="text-[#667169] sm:hidden">applied</span>
-                  <span className="hidden sm:inline">confirmed applications</span>
-                </span>
-              </span>
-              <span className="flex min-w-0 flex-col gap-1 px-2 sm:flex-row sm:items-center sm:gap-1.5 sm:px-0">
-                <ExternalLinkLineIcon
-                  aria-hidden="true"
-                  width="15"
-                  height="15"
-                />
-                <span>
-                  <strong className="font-semibold text-[#1c201d]">{job.sourceClicks}</strong>{" "}
-                  <span className="text-[#667169]">clicks</span>
-                  <span className="hidden sm:inline"> source</span>
-                </span>
-              </span>
-              <div className="flex min-w-0 flex-col gap-1 pl-2 sm:flex-row sm:items-center sm:gap-2.5 sm:pl-0">
-                <span className="text-[#667169] sm:text-[#1c201d]">Response</span>
-                <ResponseBar
-                  responseRate={responseRate}
-                  className="h-4 w-full min-w-14 sm:w-28"
-                />
+              <div className="job-type-scrollbar -mr-4 mt-4 flex gap-1.5 overflow-x-auto pr-4 sm:mr-0 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:pr-0">
+                {job.tags.map((tag) => (
+                  <span className="shrink-0" key={tag}>
+                    <TechnologyTag technology={tag} />
+                  </span>
+                ))}
               </div>
+
+              <span className="mt-4 flex items-center gap-1.5 text-xs text-[#78827b] lg:hidden">
+                <ClockLineIcon aria-hidden="true" width="14" height="14" />
+                Posted {job.posted}
+              </span>
             </div>
-            <span className="mt-3 flex items-center gap-1.5 text-xs text-[#667169] sm:mt-0 sm:text-[#1c201d]">
-              <ClockLineIcon aria-hidden="true" width="14" height="14" />
-              {job.posted}
-            </span>
           </div>
         </div>
+
+        <aside
+          className="grid grid-cols-2 border-t border-[#e3e7e3] bg-[#fbfcfa] lg:grid-cols-1 lg:border-l lg:border-t-0"
+          aria-label="Offer insights"
+        >
+          <Insight
+            icon={<UsersLineIcon aria-hidden="true" width="17" height="17" />}
+            value={job.confirmedApplicants}
+            label="confirmed applications"
+          />
+          <div className="min-w-0 border-l border-[#e3e7e3] px-3 py-4 sm:px-5 lg:border-l-0 lg:px-6">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-[#667169]">
+                Response rate
+              </span>
+              <strong className="hidden text-sm text-[#27322c] sm:block">
+                {responseRate}%
+              </strong>
+            </div>
+            <ResponseBar
+              responseRate={responseRate}
+              className="mt-2 h-4 w-full min-w-14 lg:h-3"
+            />
+          </div>
+
+          <span className="hidden items-center gap-1.5 border-t border-[#e3e7e3] px-6 py-3 text-xs text-[#78827b] lg:flex">
+            <ClockLineIcon aria-hidden="true" width="14" height="14" />
+            Posted {job.posted}
+          </span>
+        </aside>
       </div>
     </article>
+  );
+}
+
+function Insight({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: number;
+  label: string;
+}) {
+  return (
+    <div className="min-w-0 border-r border-[#e3e7e3] px-3 py-4 last:border-r-0 sm:px-5 lg:border-b lg:border-r-0 lg:px-6">
+      <span className="flex items-center gap-1.5 text-[#526058]">
+        {icon}
+        <strong className="text-lg font-semibold text-[#27322c]">
+          {value}
+        </strong>
+      </span>
+      <span className="mt-1 block text-xs leading-4 text-[#667169]">
+        {label}
+      </span>
+    </div>
   );
 }

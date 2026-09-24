@@ -1,34 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ComponentType, PointerEvent, WheelEvent } from "react";
-import AcademicCapLineIcon from "@iconify-react/majesticons/academic-cap-line";
-import AnalyticsLineIcon from "@iconify-react/majesticons/analytics-line";
-import BeakerLineIcon from "@iconify-react/majesticons/beaker-line";
-import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
-import BugLineIcon from "@iconify-react/majesticons/bug-2-line";
+import type { PointerEvent, WheelEvent } from "react";
 import ChevronLeftLineIcon from "@iconify-react/majesticons/chevron-left-line";
 import ChevronRightLineIcon from "@iconify-react/majesticons/chevron-right-line";
-import CodeBlockLineIcon from "@iconify-react/majesticons/code-block-line";
-import CodeLineIcon from "@iconify-react/majesticons/code-line";
-import ColorSwatchLineIcon from "@iconify-react/majesticons/color-swatch-line";
-import CpuLineIcon from "@iconify-react/majesticons/cpu-line";
-import DataLineIcon from "@iconify-react/majesticons/data-line";
-import DatabaseLineIcon from "@iconify-react/majesticons/database-line";
-import DesktopComputerLineIcon from "@iconify-react/majesticons/desktop-computer-line";
-import DeviceMobileLineIcon from "@iconify-react/majesticons/device-mobile-line";
-import GlobeGridLineIcon from "@iconify-react/majesticons/globe-grid-line";
-import PresentationChartLineIcon from "@iconify-react/majesticons/presentation-chart-line";
-import RobotLineIcon from "@iconify-react/majesticons/robot-line";
-import ServerLineIcon from "@iconify-react/majesticons/server-line";
-import SettingsCogLineIcon from "@iconify-react/majesticons/settings-cog-line";
-import ShieldLineIcon from "@iconify-react/majesticons/shield-line";
-import SupportLineIcon from "@iconify-react/majesticons/support-line";
-import TerminalLineIcon from "@iconify-react/majesticons/terminal-line";
-
-type IconComponent = ComponentType<{
-  "aria-hidden"?: boolean | "true" | "false";
-  height?: string;
-  width?: string;
-}>;
+import JobCategoryIcon from "./JobCategoryIcon";
 
 type JobTypeOption = {
   value: string;
@@ -39,34 +13,6 @@ type JobTypeScrollerProps = {
   options: JobTypeOption[];
   value: string;
   onValueChange: (value: string) => void;
-};
-
-const categoryIcons: Record<string, IconComponent> = {
-  "AI/ML": RobotLineIcon,
-  JavaScript: CodeLineIcon,
-  HTML: CodeBlockLineIcon,
-  PHP: TerminalLineIcon,
-  Ruby: BeakerLineIcon,
-  Python: TerminalLineIcon,
-  Java: CodeBlockLineIcon,
-  ".NET": DesktopComputerLineIcon,
-  Scala: CodeLineIcon,
-  C: CpuLineIcon,
-  Mobile: DeviceMobileLineIcon,
-  Testing: BugLineIcon,
-  DevOps: ServerLineIcon,
-  Admin: SettingsCogLineIcon,
-  "UX/UI": ColorSwatchLineIcon,
-  PM: PresentationChartLineIcon,
-  Game: CpuLineIcon,
-  Analytics: AnalyticsLineIcon,
-  Security: ShieldLineIcon,
-  Data: DataLineIcon,
-  Go: GlobeGridLineIcon,
-  Support: SupportLineIcon,
-  ERP: DatabaseLineIcon,
-  Architecture: BriefcaseLineIcon,
-  Other: AcademicCapLineIcon,
 };
 
 export default function JobTypeScroller({
@@ -200,7 +146,6 @@ export default function JobTypeScroller({
       >
         <div className="flex min-w-max">
           {options.map((option) => {
-            const Icon = categoryIcons[option.value] ?? BriefcaseLineIcon;
             const isActive = value === option.value;
 
             return (
@@ -223,7 +168,7 @@ export default function JobTypeScroller({
                   onValueChange(option.value);
                 }}
               >
-                <Icon aria-hidden="true" width="22" height="22" />
+                <JobCategoryIcon category={option.value} />
                 {option.label}
               </button>
             );
