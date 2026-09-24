@@ -74,7 +74,7 @@ export default function ApplicantActivitySummary({ job }: { job: JobOffer }) {
       </div>
 
       <dl
-        className="job-type-scrollbar flex overflow-x-auto border-t border-gray-300"
+        className="flex flex-wrap overflow-x-auto border-t border-gray-300"
         aria-label="Applicant activity percentages"
       >
         {metrics.map((metric) => {
@@ -83,7 +83,7 @@ export default function ApplicantActivitySummary({ job }: { job: JobOffer }) {
           return (
             <div
               key={metric.label}
-              className="min-w-40 bg-[#f7f8f8] flex-1 border-r border-gray-300 px-4 py-4 last:border-r-0 sm:px-5"
+              className="min-w-40 bg-[#f7f8f8] flex-1 border border-gray-300 px-4 py-4 last:border-r-0 sm:px-5"
             >
               <dt className="flex items-center gap-2 text-gray-600">
                 <span className="">{metric.label}</span>
