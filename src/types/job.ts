@@ -28,6 +28,35 @@ export const jobCategories = [
 
 export type JobCategory = (typeof jobCategories)[number]
 
+export const jobSources = [
+  'linkedin',
+  'indeed',
+  'stepstone',
+  'justjoinit',
+  'nofluffjobs',
+  'pracuj',
+  'glassdoor',
+  'xing',
+  'welcome_to_the_jungle',
+  'wellfound',
+  'eures',
+  'company_career_page',
+  'other',
+] as const
+
+export type JobSource = (typeof jobSources)[number]
+
+export type JobOfferSource = {
+  id: number
+  platform: JobSource
+  url: string
+  publishedAt: string | null
+  firstSeenAt: string
+  lastSeenAt: string
+  closedAt: string | null
+  clickCount: number
+}
+
 export type JobOffer = {
   id: number
   title: string
@@ -42,8 +71,17 @@ export type JobOffer = {
   salary: string | null
   tags: string[]
   sourceUrl: string | null
+  sourcePlatform: JobSource
+  sources: JobOfferSource[]
   posted: string
-  applicants: number
+  updated: string
+  confirmedApplicants: number
+  sourceClicks: number
+  repliedApplicants: number
+  nextInterviewApplicants: number
+  contactedHrApplicants: number
+  linkedinConnectionApplicants: number
+  additionalEmailApplicants: number
   responseRate: number
   applied: boolean
   responded: boolean

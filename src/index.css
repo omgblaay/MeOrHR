@@ -4,11 +4,13 @@
 
 @theme {
   --font-sans: "Geist", "SF Pro Text", "Segoe UI", sans-serif;
+
 }
 
 @layer base {
   * {
     box-sizing: border-box;
+    font-size: 16px;
   }
 
   html {

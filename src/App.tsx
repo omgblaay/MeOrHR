@@ -7,7 +7,14 @@ import SearchInput from "./components/Search";
 import { supabase } from "./lib/supabase";
 import JobCard from "./JobCard";
 import JobOfferPage from "./JobOfferPage";
-import { jobCategories, type JobCategory, type JobOffer } from "./types/job";
+import LoginPage from "./LoginPage";
+import {
+  jobCategories,
+  type JobCategory,
+  type JobOffer,
+  type JobOfferSource,
+  type JobSource,
+} from "./types/job";
 
 type JobCategoryFilter = "all" | JobCategory;
 
@@ -23,11 +30,31 @@ type JobOfferRow = {
   salary: string | null;
   tags: string[];
   source_url: string | null;
+  source_platform: JobSource;
   published_at: string | null;
+  updated_at: string;
   applicants: number;
+  confirmed_applicants: number;
+  replied_applicants: number;
+  next_interview_applicants: number;
+  contacted_hr_applicants: number;
+  linkedin_connection_applicants: number;
+  additional_email_applicants: number;
   response_rate: number;
   applied: boolean;
   responded: boolean;
+  job_offer_sources: JobOfferSourceRow[];
+};
+
+type JobOfferSourceRow = {
+  id: number;
+  platform: JobSource;
+  url: string;
+  published_at: string | null;
+  first_seen_at: string;
+  last_seen_at: string;
+  closed_at: string | null;
+  click_count: number;
 };
 
 const logoColors = [
@@ -74,6 +101,19 @@ function formatPostedAt(value: string | null) {
 }
 
 function mapJobOffer(row: JobOfferRow): JobOffer {
+  const sources: JobOfferSource[] = (row.job_offer_sources ?? []).map(
+    (source) => ({
+      id: source.id,
+      platform: source.platform,
+      url: source.url,
+      publishedAt: source.published_at,
+      firstSeenAt: source.first_seen_at,
+      lastSeenAt: source.last_seen_at,
+      closedAt: source.closed_at,
+      clickCount: source.click_count,
+    }),
+  );
+
   return {
     id: row.id,
     title: row.title,
@@ -88,8 +128,20 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
     salary: row.salary,
     tags: row.tags,
     sourceUrl: row.source_url,
+    sourcePlatform: row.source_platform ?? "other",
+    sources,
     posted: formatPostedAt(row.published_at),
-    applicants: row.applicants,
+    updated: formatPostedAt(row.updated_at),
+    confirmedApplicants: row.confirmed_applicants ?? row.applicants,
+    sourceClicks: sources.reduce(
+      (total, source) => total + source.clickCount,
+      0,
+    ),
+    repliedApplicants: row.replied_applicants ?? 0,
+    nextInterviewApplicants: row.next_interview_applicants ?? 0,
+    contactedHrApplicants: row.contacted_hr_applicants ?? 0,
+    linkedinConnectionApplicants: row.linkedin_connection_applicants ?? 0,
+    additionalEmailApplicants: row.additional_email_applicants ?? 0,
     responseRate: row.response_rate,
     applied: row.applied,
     responded: row.responded,
@@ -97,7 +149,7 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
 }
 
 const categoryFilters: { value: JobCategoryFilter; label: string }[] = [
-  { value: "all", label: "All categories" },
+  { value: "all", label: "All" },
   ...jobCategories.map((category) => ({ value: category, label: category })),
 ];
 
@@ -119,7 +171,7 @@ function App() {
 
       const { data, error } = await supabase
         .from("job_offers")
-        .select("*")
+        .select("*, job_offer_sources(*)")
         .order("published_at", { ascending: false, nullsFirst: false });
 
       if (!isCurrentRequest) return;
@@ -191,7 +243,7 @@ function App() {
               </section>
 
               <div className="flex items-center justify-between border-b border-[#dfe3dd] px-4 pb-3 sm:px-6 lg:px-8">
-                <p className="text-sm font-semibold text-[#27322c]">
+                <p className=" font-semibold text-[#27322c]">
                   {isLoading
                     ? "Loading offers..."
                     : `${filteredJobs.length} ${filteredJobs.length === 1 ? "offer" : "offers"}`}
@@ -213,7 +265,7 @@ function App() {
                   <h2 className="text-base font-semibold text-[#28332d]">
                     Couldn&apos;t load offers
                   </h2>
-                  <p className="mx-auto mt-1 max-w-md text-sm text-[#707b74]">
+                  <p className="mx-auto mt-1 max-w-md  text-[#707b74]">
                     {loadError}
                   </p>
                   <Button
@@ -234,7 +286,7 @@ function App() {
                   <h2 className="text-base font-semibold text-[#28332d]">
                     No matching offers
                   </h2>
-                  <p className="mt-1 text-sm text-[#707b74]">
+                  <p className="mt-1  text-[#707b74]">
                     Try another search or filter.
                   </p>
                 </div>
@@ -254,6 +306,7 @@ function App() {
           />
         }
       />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

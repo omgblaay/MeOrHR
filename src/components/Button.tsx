@@ -1,36 +1,46 @@
-import { forwardRef } from 'react'
-import type { ButtonHTMLAttributes } from 'react'
+import { forwardRef } from "react";
+import type { ButtonHTMLAttributes } from "react";
 
-type ButtonVariant = 'primary' | 'secondary' | 'filter' | 'icon'
-type ButtonSize = 'sm' | 'md' | 'icon'
+type ButtonVariant = "primary" | "secondary" | "filter" | "icon";
+type ButtonSize = "sm" | "md" | "icon";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: ButtonVariant
-  size?: ButtonSize
-  active?: boolean
-}
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  active?: boolean;
+};
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'rounded-md bg-[#eaff6a] text-[#173f35] hover:bg-[#def258]',
-  secondary: 'rounded-md border border-[#cfd5cf] bg-white text-[#465149] hover:border-[#8f9b93]',
-  filter: 'rounded-full border',
-  icon:
-    'rounded-md border  border-[#dfe3dd] bg-white text-[#536058] hover:border-[#173f35] hover:bg-[#f1f5f1] hover:text-[#173f35]',
-}
+  primary: "rounded-md bg-[#eaff6a] text-[#173f35] hover:bg-[#def258]",
+  secondary:
+    "rounded-md border border-[#cfd5cf] bg-white text-[#465149] hover:border-[#8f9b93]",
+  filter: "rounded-full border",
+  icon: "rounded-md border  border-[#dfe3dd] bg-white text-[#536058] hover:border-[#173f35] hover:bg-[#f1f5f1] hover:text-[#173f35]",
+};
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'px-3.5 py-2 text-sm',
-  md: 'px-4 py-2 text-sm',
-  icon: 'size-9 p-0',
-}
+  sm: "px-3.5 py-2 ",
+  md: "px-4 py-2 ",
+  icon: "size-9 p-0",
+};
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ active = false, children, className = '', size = 'md', variant = 'primary', ...props }, ref) => {
+  (
+    {
+      active = false,
+      children,
+      className = "",
+      size = "md",
+      variant = "primary",
+      ...props
+    },
+    ref,
+  ) => {
     const filterClasses =
-      variant === 'filter'
+      variant === "filter"
         ? active
-          ? 'bg-[#173f35] text-white '
-          : 'border-none text-[#465149] hover:bg-red'
-        : ''
+          ? "bg-[#173f35] text-white "
+          : "border-none text-[#465149] hover:bg-red"
+        : "";
 
     return (
       <button
@@ -41,10 +51,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {children}
       </button>
-    )
+    );
   },
-)
+);
 
-Button.displayName = 'Button'
+Button.displayName = "Button";
 
-export default Button
+export default Button;

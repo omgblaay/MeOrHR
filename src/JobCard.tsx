@@ -4,6 +4,7 @@ import ChevronRightLineIcon from "@iconify-react/majesticons/chevron-right-line"
 import ClockLineIcon from "@iconify-react/majesticons/clock-line";
 import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
+import ExternalLinkLineIcon from "@iconify-react/majesticons/external-link-line";
 import { useNavigate } from "react-router-dom";
 import Tag from "./components/Tag";
 import ResponseBar from "./components/ResponseBar";
@@ -48,7 +49,7 @@ export default function JobCard({ job }: { job: JobOffer }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="flex flex-wrap gap-4 text-sm mb-2">
+              <div className="flex flex-wrap gap-4  mb-2">
                 <span className="flex gap-1 items-center">
                   <BriefcaseLineIcon
                     aria-hidden="true"
@@ -100,7 +101,11 @@ export default function JobCard({ job }: { job: JobOffer }) {
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#657168]">
               <span className="flex items-center gap-1.5">
                 <UsersLineIcon aria-hidden="true" width="15" height="15" />
-                {job.applicants} applied
+                {job.confirmedApplicants} confirmed applications
+              </span>
+              <span className="flex items-center gap-1.5">
+                <ExternalLinkLineIcon aria-hidden="true" width="15" height="15" />
+                {job.sourceClicks} source clicks
               </span>
               <div className="flex items-center gap-2.5">
                 <span className="whitespace-nowrap font-medium text-[#526058]">
