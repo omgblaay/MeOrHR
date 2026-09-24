@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes } from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'filter' | 'icon'
@@ -23,28 +24,28 @@ const sizeClasses: Record<ButtonSize, string> = {
   icon: 'size-9 p-0',
 }
 
-export default function Button({
-  active = false,
-  children,
-  className = '',
-  size = 'md',
-  variant = 'primary',
-  ...props
-}: ButtonProps) {
-  const filterClasses =
-    variant === 'filter'
-      ? active
-        ? 'bg-[#173f35] text-white '
-        : 'border-none text-[#465149] hover:bg-red'
-      : ''
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ active = false, children, className = '', size = 'md', variant = 'primary', ...props }, ref) => {
+    const filterClasses =
+      variant === 'filter'
+        ? active
+          ? 'bg-[#173f35] text-white '
+          : 'border-none text-[#465149] hover:bg-red'
+        : ''
 
-  return (
-    <button
-      type="button"
-      className={`cursor-pointer inline-flex shrink-0 items-center justify-center font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 gap-2 focus-visible:outline-[#173f35] disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${filterClasses} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
+    return (
+      <button
+        ref={ref}
+        type="button"
+        className={`cursor-pointer inline-flex shrink-0 items-center justify-center font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 gap-2 focus-visible:outline-[#173f35] disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${filterClasses} ${className}`}
+        {...props}
+      >
+        {children}
+      </button>
+    )
+  },
+)
+
+Button.displayName = 'Button'
+
+export default Button
