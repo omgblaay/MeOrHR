@@ -1012,7 +1012,7 @@ export default function ApplicationActivity({ job }: { job: JobOffer }) {
   const location = useLocation();
 
   return (
-    <section className="border-b border-[#dfe3dd]">
+    <section className="border-b bg-[#f9faf4] border-[#dfe3dd]">
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <ApplicationsLineIcon
@@ -1021,9 +1021,7 @@ export default function ApplicationActivity({ job }: { job: JobOffer }) {
             height="18"
             className="text-[#526058]"
           />
-          <h2 className="font-semibold uppercase text-[#667069]">
-            Your application
-          </h2>
+          <h2 className="font-semibold ">Your application</h2>
         </div>
 
         <div className="mt-6">

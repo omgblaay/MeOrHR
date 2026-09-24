@@ -98,23 +98,25 @@ export default function JobCard({ job }: { job: JobOffer }) {
           </div>
 
           <div className="mt-4 flex flex-col gap-3 border-t border-[#edf0ec] pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#657168]">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs ">
               <span className="flex items-center gap-1.5">
                 <UsersLineIcon aria-hidden="true" width="15" height="15" />
-                {job.confirmedApplicants} confirmed applications
+                <strong>{job.confirmedApplicants} </strong>confirmed
+                applications
               </span>
               <span className="flex items-center gap-1.5">
-                <ExternalLinkLineIcon aria-hidden="true" width="15" height="15" />
+                <ExternalLinkLineIcon
+                  aria-hidden="true"
+                  width="15"
+                  height="15"
+                />
                 {job.sourceClicks} source clicks
               </span>
               <div className="flex items-center gap-2.5">
-                <span className="whitespace-nowrap font-medium text-[#526058]">
-                  {responseRate}% response rate
-                </span>
-                <ResponseBar responseRate={responseRate} />
+                Response rate: <ResponseBar responseRate={responseRate} />
               </div>
             </div>
-            <span className="flex items-center gap-1.5 text-xs text-[#858e88]">
+            <span className="flex items-center gap-1.5 text-xs">
               <ClockLineIcon aria-hidden="true" width="14" height="14" />
               {job.posted}
             </span>

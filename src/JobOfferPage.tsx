@@ -150,13 +150,11 @@ export default function JobOfferPage({
 
             <ApplicantActivitySummary job={job} />
 
-            <OfferSources sources={job.sources} />
-
             <section className="border-b border-[#dfe3dd]">
               <div className="px-4 py-8 sm:px-6 lg:px-8">
                 <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-5">
                   <div>
-                    <dt className="mt-1text-md text-[#7a847e]">Location</dt>
+                    <Dt>Location</Dt>
                     <Dd>
                       <LocationMarkerLineIcon
                         aria-hidden="true"
@@ -205,15 +203,16 @@ export default function JobOfferPage({
                   </div>
                 </dl>
 
-                <div className="mt-10 flex flex-wrap gap-2">
+                <div className="mt-10 flex flex-wrap gap-2 mb-5">
                   {job.tags.map((tag) => (
                     <Tag key={tag} tag={tag} />
                   ))}
                 </div>
+                <OfferDescription job={job} />
               </div>
             </section>
-            <OfferDescription job={job} />
             <ApplicationActivity job={job} />
+            <OfferSources sources={job.sources} />
             <CommentsSection />
           </>
         )}

@@ -66,7 +66,7 @@ export default function ApplicantActivitySummary({ job }: { job: JobOffer }) {
         <div className="flex items-center gap-2">
           <h2
             id="applicant-activity-heading"
-            className=" font-semibold uppercase text-[#667069]"
+            className=" font-semibold text-[#667069]"
           >
             Applicants activity
           </h2>

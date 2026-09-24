@@ -8,7 +8,7 @@ export default function Tag({
   children?: ReactNode;
 }) {
   return (
-    <span className="rounded bg-[#e7eee8] px-2.5 py-1  text-font-medium text-[#294b40]">
+    <span className="rounded-2xl bg-[#f2f6f2] px-3 h-8 items-center flex text-[#294b40]">
       {children ?? tag}
     </span>
   );

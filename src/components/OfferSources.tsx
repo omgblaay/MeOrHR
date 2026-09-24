@@ -29,7 +29,10 @@ export default function OfferSources({
         : "sm:grid-cols-2 lg:grid-cols-3";
 
   return (
-    <section className="border-b border-[#dfe3dd]" aria-labelledby="offer-sources-heading">
+    <section
+      className="border-b border-[#dfe3dd]"
+      aria-labelledby="offer-sources-heading"
+    >
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <LinkLineIcon
@@ -42,12 +45,13 @@ export default function OfferSources({
             id="offer-sources-heading"
             className="font-semibold uppercase text-[#667069]"
           >
-            Available from {sources.length} {sources.length === 1 ? "source" : "sources"}
+            Available from {sources.length}{" "}
+            {sources.length === 1 ? "source" : "sources"}
           </h2>
         </div>
 
         <div
-          className={`mt-5 grid gap-px overflow-hidden rounded-md border border-[#dfe3dd] bg-[#dfe3dd] ${gridColumns}`}
+          className={`mt-5 grid gap-px overflow-hidden rounded-xl border border-[#dfe3dd] bg-[#dfe3dd] ${gridColumns}`}
         >
           {sources.map((source) => (
             <a
@@ -64,7 +68,8 @@ export default function OfferSources({
                   Published {formatSourceDate(source.publishedAt)}
                 </span>
                 <span className="mt-1 block text-xs text-[#7a847e]">
-                  {source.clickCount} {source.clickCount === 1 ? "click" : "clicks"}
+                  {source.clickCount}{" "}
+                  {source.clickCount === 1 ? "click" : "clicks"}
                 </span>
               </span>
               <ExternalLinkLineIcon

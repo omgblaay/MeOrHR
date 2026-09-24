@@ -7,10 +7,7 @@ export default function OfferDescription({ job }: { job: JobOffer }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <section className="border-b border-[#dfe3dd] px-4 py-8 sm:px-6 lg:px-8">
-      <h2 className=" font-semibold uppercase text-[#667069]">
-        About the role
-      </h2>
+    <>
       <div
         id="offer-description"
         className={`mt-5 max-w-3xl space-y-4 overflow-hidden  leading-7 text-[#465149] transition-[max-height] duration-300 ${
@@ -62,6 +59,6 @@ export default function OfferDescription({ job }: { job: JobOffer }) {
           </>
         )}
       </button>
-    </section>
+    </>
   );
 }
