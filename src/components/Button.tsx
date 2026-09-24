@@ -23,7 +23,6 @@ const sizeClasses: Record<ButtonSize, string> = {
   md: 'px-4 py-2 text-sm',
   icon: 'size-9 p-0',
 }
-
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ active = false, children, className = '', size = 'md', variant = 'primary', ...props }, ref) => {
     const filterClasses =
@@ -37,7 +36,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         type="button"
-        className={`cursor-pointer inline-flex shrink-0 items-center justify-center font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 gap-2 focus-visible:outline-[#173f35] disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${filterClasses} ${className}`}
+        className={`inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173f35] disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${filterClasses} ${className}`}
         {...props}
       >
         {children}
