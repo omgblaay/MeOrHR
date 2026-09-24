@@ -210,7 +210,9 @@ function createEvent(
   };
 }
 
-function migrateLegacyProgress(progress: LegacyProgress): ApplicationTracker | null {
+function migrateLegacyProgress(
+  progress: LegacyProgress,
+): ApplicationTracker | null {
   if (!Object.values(progress).some(Boolean)) return null;
 
   const date = localDateValue();
@@ -270,7 +272,9 @@ function daysBetween(firstDate: string, secondDate: string) {
 }
 
 function statusLabel(status: ApplicationStatus) {
-  return statusOptions.find((option) => option.value === status)?.label ?? status;
+  return (
+    statusOptions.find((option) => option.value === status)?.label ?? status
+  );
 }
 
 function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
@@ -306,9 +310,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
   function startApplication() {
     const nextTracker: ApplicationTracker = {
       status: "applied",
-      events: [
-        { ...createEvent("applied"), source: job.sourcePlatform },
-      ],
+      events: [{ ...createEvent("applied"), source: job.sourcePlatform }],
     };
     saveTracker(nextTracker);
     setStatusDraft("applied");
@@ -385,8 +387,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
           Start a private timeline and help improve anonymous hiring insights.
         </p>
         <Button className="mt-5" onClick={startApplication}>
-          <CheckLineIcon aria-hidden="true" width="17" height="17" />
-          I applied
+          <CheckLineIcon aria-hidden="true" width="17" height="17" />I applied
         </Button>
         <PrivacyNote />
       </div>
@@ -472,10 +473,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
           onCancel={() => setOpenForm(null)}
           onSubmit={submitStatus}
         >
-          <StatusRadioGrid
-            value={statusDraft}
-            onChange={setStatusDraft}
-          />
+          <StatusRadioGrid value={statusDraft} onChange={setStatusDraft} />
         </EntryForm>
       )}
 
@@ -549,7 +547,9 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
                       aria-label="Private note"
                     />
                     <div className="flex gap-2">
-                      <Button type="submit" size="sm">Save</Button>
+                      <Button type="submit" size="sm">
+                        Save
+                      </Button>
                       <Button
                         type="button"
                         size="sm"
@@ -589,7 +589,11 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
                         title="Edit event"
                         onClick={() => beginEdit(event)}
                       >
-                        <EditPenLineIcon aria-hidden="true" width="16" height="16" />
+                        <EditPenLineIcon
+                          aria-hidden="true"
+                          width="16"
+                          height="16"
+                        />
                       </IconButton>
                       <IconButton
                         label={`Remove ${eventLabels[event.type]}`}
@@ -597,7 +601,11 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
                         danger
                         onClick={() => removeEvent(event.id)}
                       >
-                        <TrashLineIcon aria-hidden="true" width="16" height="16" />
+                        <TrashLineIcon
+                          aria-hidden="true"
+                          width="16"
+                          height="16"
+                        />
                       </IconButton>
                     </div>
                   </>
@@ -608,7 +616,11 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
         )}
       </div>
 
-      <p className="mt-4 text-xs text-[#707b74]" role="status" aria-live="polite">
+      <p
+        className="mt-4 text-xs text-[#707b74]"
+        role="status"
+        aria-live="polite"
+      >
         {message}
       </p>
     </div>
@@ -643,7 +655,9 @@ function TimelineDot({
           role="tooltip"
           className="pointer-events-none absolute left-1/2 top-5 z-30 w-60 -translate-x-1/2 rounded-md bg-[#18201c] px-3 py-2.5 text-left text-xs leading-5 text-white opacity-0 shadow-lg group-hover/dot:opacity-100 group-focus/dot:opacity-100"
         >
-          <strong className="block font-semibold">{eventLabels[event.type]}</strong>
+          <strong className="block font-semibold">
+            {eventLabels[event.type]}
+          </strong>
           <span className="block text-[#cbd2cd]">{formatDate(event.date)}</span>
           {event.note && (
             <span className="mt-1 block border-t border-white/20 pt-1.5 text-[#edf1ee]">
@@ -698,7 +712,10 @@ function StatusProgress({
 
   return (
     <div className="job-type-scrollbar overflow-x-auto border-b border-[#dfe3dd] py-6">
-      <div className="relative min-w-[36rem] px-4" aria-label="Application progress">
+      <div
+        className="relative min-w-[36rem] px-4"
+        aria-label="Application progress"
+      >
         <div className="absolute left-[10%] right-[10%] top-[1.125rem] h-1 bg-[#e0e4e0]">
           <span
             className="block h-full bg-[#278b63] transition-[width] duration-300"
@@ -927,7 +944,8 @@ function EntryForm({
       </div>
       <label className="mt-4 block">
         <span className="mb-2 block font-semibold text-[#27322c]">
-          Private note <span className="font-normal text-[#7a847e]">(optional)</span>
+          Private note{" "}
+          <span className="font-normal text-[#7a847e]">(optional)</span>
         </span>
         <textarea
           rows={2}
@@ -938,7 +956,9 @@ function EntryForm({
         />
       </label>
       <div className="mt-4 flex gap-2">
-        <Button type="submit" size="sm">Save</Button>
+        <Button type="submit" size="sm">
+          Save
+        </Button>
         <Button type="button" size="sm" variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
