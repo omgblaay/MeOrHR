@@ -1,5 +1,6 @@
 import ClockLineIcon from "@iconify-react/majesticons/clock-line";
 import CloseCircleLineIcon from "@iconify-react/majesticons/close-circle-line";
+import EditPenLineIcon from "@iconify-react/majesticons/edit-pen-4-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -24,6 +25,7 @@ export default function OfferCommunityFlags({ job }: { job: JobOffer }) {
   );
   const [goneReports, setGoneReports] = useState(job.goneReports);
   const [updatingFlag, setUpdatingFlag] = useState<JobOfferFlag | null>(null);
+  const [isEditingFlags, setIsEditingFlags] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -100,6 +102,7 @@ export default function OfferCommunityFlags({ job }: { job: JobOffer }) {
       setGoneReports((count) => Math.max(0, count + (selected ? 1 : -1)));
     }
     notifyOfferFlagChanged({ jobId: job.id, flag, selected });
+    setIsEditingFlags(false);
   }
 
   return (
@@ -155,27 +158,55 @@ export default function OfferCommunityFlags({ job }: { job: JobOffer }) {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <FlagButton
-            pressed={selectedFlags.includes("talent_pool")}
-            disabled={updatingFlag !== null}
-            onClick={() => toggleFlag("talent_pool")}
-          >
-            <UsersLineIcon aria-hidden="true" width="16" height="16" />
-            Talent pool only
-          </FlagButton>
-          <FlagButton
-            pressed={selectedFlags.includes("gone")}
-            disabled={updatingFlag !== null}
-            onClick={() => toggleFlag("gone")}
-          >
-            <CloseCircleLineIcon aria-hidden="true" width="16" height="16" />
-            Offer is gone
-          </FlagButton>
-        </div>
+        {selectedFlags.length > 0 && !isEditingFlags ? (
+          <div className="flex flex-wrap items-center gap-3 text-sm text-brandgray-650">
+            <p>
+              You marked this offer as{" "}
+              <strong className="font-semibold text-brandgray-900">
+                {formatSelectedFlags(selectedFlags)}
+              </strong>
+              .
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsEditingFlags(true)}
+              className="inline-flex items-center gap-1.5 font-semibold text-brand-900 underline decoration-brandgray-300 underline-offset-4 transition hover:decoration-brand-900"
+            >
+              <EditPenLineIcon aria-hidden="true" width="15" height="15" />
+              Edit
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            <FlagButton
+              pressed={selectedFlags.includes("talent_pool")}
+              disabled={updatingFlag !== null}
+              onClick={() => toggleFlag("talent_pool")}
+            >
+              <UsersLineIcon aria-hidden="true" width="16" height="16" />
+              Mark as talent pool
+            </FlagButton>
+            <FlagButton
+              pressed={selectedFlags.includes("gone")}
+              disabled={updatingFlag !== null}
+              onClick={() => toggleFlag("gone")}
+            >
+              <CloseCircleLineIcon aria-hidden="true" width="16" height="16" />
+              Mark as gone
+            </FlagButton>
+          </div>
+        )}
       </div>
     </section>
   );
+}
+
+function formatSelectedFlags(flags: JobOfferFlag[]) {
+  const labels = flags.map((flag) =>
+    flag === "talent_pool" ? "talent pool only" : "gone",
+  );
+
+  return labels.length === 2 ? `${labels[0]} and ${labels[1]}` : labels[0];
 }
 
 function FlagMessage({

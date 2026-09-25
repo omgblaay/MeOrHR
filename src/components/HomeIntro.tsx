@@ -5,6 +5,8 @@ import PlusLineIcon from "@iconify-react/majesticons/plus-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
 import { useNavigate } from "react-router-dom";
 import Button from "./Button";
+import HomeOfferSearch from "./HomeOfferSearch";
+import type { JobOffer } from "../types/job";
 
 const communitySteps = [
   {
@@ -27,7 +29,13 @@ const communitySteps = [
   },
 ];
 
-export default function HomeHero() {
+export default function HomeHero({
+  jobOffers,
+  isLoading,
+}: {
+  jobOffers: JobOffer[];
+  isLoading: boolean;
+}) {
   const navigate = useNavigate();
 
   return (
@@ -45,7 +53,8 @@ export default function HomeHero() {
             candidates understand whether an experience is personal or part of a
             wider hiring pattern.
           </p>
-          <div className="mt-7 flex flex-wrap gap-3">
+          <HomeOfferSearch jobOffers={jobOffers} isLoading={isLoading} />
+          <div className="mt-4 flex flex-wrap gap-3">
             <Button onClick={() => navigate("/offers/new")}>
               <PlusLineIcon aria-hidden="true" width="18" height="18" />
               Add an offer

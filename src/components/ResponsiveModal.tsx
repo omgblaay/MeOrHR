@@ -75,7 +75,7 @@ export default function ResponsiveModal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative max-h-[92dvh] w-full overflow-y-auto rounded-2xl bg-red-500 shadow-[0_20px_60px_rgba(24,32,28,0.28)] outline-none sm:max-w-3xl sm:rounded-md"
+        className="relative max-h-[92dvh] w-full overflow-y-auto rounded-t-md bg-white shadow-[0_20px_60px_rgba(24,32,28,0.28)] outline-none sm:max-w-3xl sm:rounded-md"
       >
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-brandgray-200 bg-white px-4 py-4 sm:px-6">
           <h2 id={titleId} className="text-lg font-semibold text-brandgray-900">
@@ -86,7 +86,7 @@ export default function ResponsiveModal({
             onClick={onClose}
             title="Close"
             aria-label="Close dialog"
-            className="grid size-9 cursor-pointer place-items-center rounded- text-brandgray-600 transition hover:bg-brandgray-100 hover:text-brandgray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
+            className="grid size-9 cursor-pointer place-items-center rounded-md text-brandgray-600 transition hover:bg-brandgray-100 hover:text-brandgray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
           >
             <CloseLineIcon aria-hidden="true" width="20" height="20" />
           </button>

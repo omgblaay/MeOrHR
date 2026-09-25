@@ -67,7 +67,10 @@ export default function MyOffersPage({
         </header>
 
         {isLoading ? (
-          <div className="space-y-px bg-brandgray-200" aria-label="Loading offers">
+          <div
+            className="space-y-px bg-brandgray-200"
+            aria-label="Loading offers"
+          >
             {[0, 1, 2].map((item) => (
               <div key={item} className="h-24 animate-pulse bg-white" />
             ))}

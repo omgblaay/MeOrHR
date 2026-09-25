@@ -63,7 +63,7 @@ export default function JobOfferPage({
       <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
         <div className="border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8">
           <Link
-            to="/"
+            to="/explore"
             className="inline-flex items-center gap-2  font-semibold text-brandgray-700 transition hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-900"
           >
             <ArrowLeftLineIcon aria-hidden="true" width="18" height="18" />

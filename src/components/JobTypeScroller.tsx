@@ -152,7 +152,7 @@ export default function JobTypeScroller({
               <button
                 key={option.value}
                 type="button"
-                className={`flex cursor-pointer transition-all duration-300 hover:scale-95 h-24 w-20 shrink-0 flex-col items-center justify-center gap-2 border-r border-brandgray-250 px-2 text-center text-xs font-semibold leading-tight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-900 sm:h-26 sm:w-26 ${
+                className={`flex cursor-pointer justify-around transition-all duration-300 hover:scale-95 h-24 w-20 shrink-0 flex-col items-center gap-2 border-r border-brandgray-250 px-2 text-center text-xs font-semibold leading-tight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-900 sm:h-26 sm:w-26 ${
                   isActive
                     ? "bg-brand-900 text-white"
                     : "bg-white text-brandgray-750 hover:bg-brandgray-100 hover:text-brand-900"
@@ -168,7 +168,7 @@ export default function JobTypeScroller({
                   onValueChange(option.value);
                 }}
               >
-                <JobCategoryIcon category={option.value} />
+                <JobCategoryIcon category={option.value} size="24" />
                 {option.label}
               </button>
             );

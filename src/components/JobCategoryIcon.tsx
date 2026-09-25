@@ -1,5 +1,3 @@
-import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
-import ShieldLineIcon from "@iconify-react/majesticons/shield-line";
 import AndroidOriginal from "devicons-react/icons/AndroidOriginal";
 import COriginal from "devicons-react/icons/COriginal";
 import DatagripOriginal from "devicons-react/icons/DatagripOriginal";
@@ -23,14 +21,12 @@ import SalesforceOriginal from "devicons-react/icons/SalesforceOriginal";
 import ScalaOriginal from "devicons-react/icons/ScalaOriginal";
 import TensorflowOriginal from "devicons-react/icons/TensorflowOriginal";
 import UnityOriginal from "devicons-react/icons/UnityOriginal";
-import type { ComponentType } from "react";
+import type { ComponentType, SVGProps } from "react";
+import { FaBriefcase, FaShieldHalved } from "react-icons/fa6";
 
-type CategoryIconComponent = ComponentType<{
-  "aria-hidden"?: boolean | "true" | "false";
-  className?: string;
-  height?: string;
-  width?: string;
-}>;
+type CategoryIconComponent = ComponentType<
+  SVGProps<SVGElement> & { size?: number | string }
+>;
 
 const categoryIcons: Record<string, CategoryIconComponent> = {
   "AI/ML": TensorflowOriginal,
@@ -51,7 +47,7 @@ const categoryIcons: Record<string, CategoryIconComponent> = {
   PM: JiraOriginal,
   Game: UnityOriginal,
   Analytics: GrafanaOriginal,
-  Security: ShieldLineIcon,
+  Security: FaShieldHalved,
   Data: DatagripOriginal,
   Go: GoOriginal,
   Support: SalesforceOriginal,
@@ -62,22 +58,24 @@ const categoryIcons: Record<string, CategoryIconComponent> = {
 
 export default function JobCategoryIcon({
   category,
-  size = 22,
-  className = "size-15",
+  size = 12,
+  className = "",
 }: {
   category: string;
-  size?: number;
+  size?: number | string;
   className?: string;
 }) {
-  const Icon = categoryIcons[category] ?? BriefcaseLineIcon;
+  const Icon = categoryIcons[category] ?? FaBriefcase;
 
   return (
-    <span className={`place-items-center  ${className}`} aria-hidden="true">
+    <span
+      className={`inline-grid shrink-0 place-items-center ${className}`}
+      aria-hidden="true"
+    >
       <Icon
         aria-hidden="true"
         className="text-brand-900"
-        width={String(size)}
-        height={String(size)}
+        size={size}
       />
     </span>
   );

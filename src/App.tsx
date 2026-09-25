@@ -286,7 +286,7 @@ function App() {
             <AppHeader />
 
             <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
-              <HomeHero />
+              <HomeHero jobOffers={jobOffers} isLoading={isLoading} />
 
               <section
                 id="offers"

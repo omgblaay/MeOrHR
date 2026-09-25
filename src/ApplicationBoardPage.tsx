@@ -11,6 +11,7 @@ import UserGroupLineIcon from "@iconify-react/majesticons/user-group-line";
 import { useEffect, useState, type ComponentType, type DragEvent } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "./auth/useAuth";
+import JobCard from "./JobCard";
 import RadioGroup from "./components/RadioGroup";
 import AppFooter from "./components/AppFooter";
 import AppHeader from "./components/AppHeader";
@@ -439,11 +440,7 @@ function ApplicationList({
             return (
               <section key={status} aria-labelledby={`list-${status}`}>
                 <header className="flex h-11 items-center gap-2 border-b border-brandgray-300">
-                  <span
-                    className={`grid size-7 place-items-center rounded-md ${style.iconClass}`}
-                  >
-                    <Icon aria-hidden="true" width="15" height="15" />
-                  </span>
+                  <Icon aria-hidden="true" width="15" height="15" />
                   <h2
                     id={`list-${status}`}
                     className="font-semibold text-brandgray-900"
@@ -457,68 +454,12 @@ function ApplicationList({
 
                 <div className="divide-y divide-brandgray-200">
                   {applications.map(({ job, lastActivity }) => (
-                    <article
+                    <JobCard
                       key={job.id}
-                      className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span
-                          className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-md text-xs font-semibold text-white"
-                          style={{ backgroundColor: job.logoColor }}
-                          aria-hidden="true"
-                        >
-                          {job.companyLogoUrl ? (
-                            <img
-                              src={job.companyLogoUrl}
-                              alt=""
-                              className="size-full bg-white object-contain"
-                            />
-                          ) : (
-                            job.initials
-                          )}
-                        </span>
-                        <div className="min-w-0">
-                          <Link
-                            to={`/jobs/${job.id}`}
-                            className="block truncate font-semibold text-brandgray-900 hover:text-brand-650"
-                          >
-                            {job.title}
-                          </Link>
-                          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-brandgray-550">
-                            <span className="font-medium text-brandgray-700">
-                              {job.company}
-                            </span>
-                            <span aria-hidden="true">·</span>
-                            <span className="inline-flex min-w-0 items-center gap-1">
-                              <LocationMarkerLineIcon
-                                aria-hidden="true"
-                                width="13"
-                                height="13"
-                              />
-                              {job.location}
-                            </span>
-                            {lastActivity && (
-                              <>
-                                <span aria-hidden="true">·</span>
-                                <span>
-                                  Updated {formatBoardDate(lastActivity)}
-                                </span>
-                              </>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                      <span
-                        className={`inline-flex h-8 w-fit items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold ${style.column}`}
-                        aria-label={`Your status: ${applicationStatusLabels[status]}`}
-                      >
-                        <Icon aria-hidden="true" width="14" height="14" />
-                        <span className="text-brandgray-500">You</span>
-                        <span aria-hidden="true">·</span>
-                        {applicationStatusLabels[status]}
-                      </span>
-                    </article>
+                      job={job}
+                      variant="small"
+                      lastActivity={lastActivity}
+                    />
                   ))}
                 </div>
               </section>
