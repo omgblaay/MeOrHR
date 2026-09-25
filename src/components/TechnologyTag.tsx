@@ -35,12 +35,12 @@ const technologyPresentations: Record<string, TechnologyPresentation> = {
   python: { icon: PythonOriginal },
   postgresql: { icon: PostgresqlOriginal },
   sql: { icon: PostgresqlOriginal },
-  aws: { icon: FaAws, color: "#e87900" },
+  aws: { icon: FaAws, color: "var(--color-orange-400)" },
   figma: { icon: FigmaOriginal },
   "next.js": { icon: NextjsOriginal },
   supabase: { icon: SupabaseOriginal },
   tailwind: { icon: TailwindcssOriginal },
-  looker: { icon: SiLooker, color: "#4285f4" },
+  looker: { icon: SiLooker, color: "var(--color-blue-400)" },
   ai: { icon: TensorflowOriginal },
   "machine learning": { icon: TensorflowOriginal },
   backend: { icon: DockerOriginal },
@@ -51,12 +51,12 @@ const technologyPresentations: Record<string, TechnologyPresentation> = {
 export default function TechnologyTag({ technology }: { technology: string }) {
   const presentation = technologyPresentations[technology.toLowerCase()] ?? {
     icon: FaCode,
-    color: "#526058",
+    color: "var(--color-brandgray-700)",
   };
   const Icon = presentation.icon;
 
   return (
-    <span className="inline-flex h-8 items-center gap-2 rounded-full border border-[#e2e8e3] bg-[#f7f9f7] px-3 text-sm text-[#294b40]">
+    <span className="inline-flex h-8 items-center gap-2 rounded-full border border-brandgray-200 bg-brandgray-50 px-3 text-sm text-brand-850">
       <Icon
         aria-hidden="true"
         className="size-3.5 shrink-0"

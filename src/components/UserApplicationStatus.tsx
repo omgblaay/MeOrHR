@@ -28,37 +28,37 @@ const statusPresentation: Record<
   saved: {
     label: "Saved",
     icon: BookmarkLineIcon,
-    classes: "border-[#cbd1cc] bg-[#f0f2f0] text-[#414a45]",
+    classes: "border-brandgray-300 bg-brandgray-100 text-brandgray-850",
   },
   applied: {
     label: "Applied",
     icon: ApplicationsLineIcon,
-    classes: "border-[#b9c9ed] bg-[#f2f6ff] text-[#244f9f]",
+    classes: "border-blue-300 bg-blue-50 text-blue-800",
   },
   in_review: {
     label: "In review",
     icon: ClockLineIcon,
-    classes: "border-[#ead19f] bg-[#fff8e8] text-[#80500b]",
+    classes: "border-amber-200 bg-amber-50 text-amber-700",
   },
   interview: {
     label: "Interview",
     icon: UserGroupLineIcon,
-    classes: "border-[#d8c2e5] bg-[#f8f1fc] text-[#633f80]",
+    classes: "border-purple-200 bg-purple-50 text-purple-700",
   },
   offer: {
     label: "Offer",
     icon: CheckCircleLineIcon,
-    classes: "border-[#addbc7] bg-[#edf8f2] text-[#1f704f]",
+    classes: "border-brand-200 bg-brand-50 text-brand-600",
   },
   rejected: {
     label: "Rejected",
     icon: CloseCircleLineIcon,
-    classes: "border-[#ebc2be] bg-[#fff3f1] text-[#913a34]",
+    classes: "border-red-200 bg-red-50 text-red-700",
   },
   withdrawn: {
     label: "Withdrawn",
     icon: DoorExitLineIcon,
-    classes: "border-[#cbd0d3] bg-[#f1f3f4] text-[#465058]",
+    classes: "border-brandgray-300 bg-brandgray-100 text-brandgray-750",
   },
 };
 
@@ -107,13 +107,15 @@ export default function UserApplicationStatus({ jobId }: { jobId: number }) {
 
   return (
     <span
-      className={`inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border px-2 text-base font-semibold ${
-        presentation ? presentation.classes : "border-gray-200 text-[#707b74]"
+      className={`inline-flex px-2 shrink-0 items-center gap-1.5 rounded-xl border h-8 ${
+        presentation
+          ? presentation.classes
+          : "border-gray-200 text-brandgray-550"
       }`}
       aria-label={`Your application status: ${presentation?.label ?? "Not tracked"}`}
     >
-      <Icon aria-hidden="true" width="14" height="14" />
-      <span className="font-medium opacity-75">You</span>
+      <Icon aria-hidden="true" className="size-4" />
+      <span className="text-brandgray-400">You</span>
       <span aria-hidden="true">·</span>
       {presentation?.label ?? "Not tracked"}
     </span>

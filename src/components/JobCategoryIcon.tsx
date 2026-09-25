@@ -63,7 +63,7 @@ const categoryIcons: Record<string, CategoryIconComponent> = {
 export default function JobCategoryIcon({
   category,
   size = 22,
-  className = "size-8",
+  className = "size-15",
 }: {
   category: string;
   size?: number;
@@ -72,13 +72,10 @@ export default function JobCategoryIcon({
   const Icon = categoryIcons[category] ?? BriefcaseLineIcon;
 
   return (
-    <span
-      className={`grid shrink-0 place-items-center rounded-md bg-white shadow-[0_0_0_1px_rgba(23,63,53,0.08)] ${className}`}
-      aria-hidden="true"
-    >
+    <span className={`place-items-center  ${className}`} aria-hidden="true">
       <Icon
         aria-hidden="true"
-        className="text-[#173f35]"
+        className="text-brand-900"
         width={String(size)}
         height={String(size)}
       />

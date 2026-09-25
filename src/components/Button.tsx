@@ -11,11 +11,11 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "rounded-md bg-[#eaff6a] text-[#173f35] hover:bg-[#def258]",
+  primary: "rounded-md bg-lime-300 text-brand-900 hover:bg-lime-400",
   secondary:
-    "rounded-md border border-[#cfd5cf] bg-white text-[#465149] hover:border-[#8f9b93]",
+    "rounded-md border border-brandgray-300 bg-white text-brandgray-750 hover:border-brandgray-450",
   filter: "rounded-full border",
-  icon: "rounded-md border  border-[#dfe3dd] bg-white text-[#536058] hover:border-[#173f35] hover:bg-[#f1f5f1] hover:text-[#173f35]",
+  icon: "rounded-md border  border-brandgray-250 bg-white text-brandgray-700 hover:border-brand-900 hover:bg-brandgray-100 hover:text-brand-900",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -38,15 +38,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const filterClasses =
       variant === "filter"
         ? active
-          ? "bg-[#173f35] text-white "
-          : "border-none text-[#465149] hover:bg-red"
+          ? "bg-brand-900 text-white "
+          : "border-none text-brandgray-750 hover:bg-brandgray-100"
         : "";
 
     return (
       <button
         ref={ref}
         type="button"
-        className={`inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173f35] disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${filterClasses} ${className}`}
+        className={`inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${filterClasses} ${className}`}
         {...props}
       >
         {children}

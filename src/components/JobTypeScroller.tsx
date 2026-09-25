@@ -132,7 +132,7 @@ export default function JobTypeScroller({
     <div className="relative">
       <div
         ref={scrollerRef}
-        className={`job-type-scrollbar overflow-x-auto border-y border-[#dfe3dd] select-none ${
+        className={`job-type-scrollbar overflow-x-auto border-y border-brandgray-250 select-none ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
         role="group"
@@ -152,10 +152,10 @@ export default function JobTypeScroller({
               <button
                 key={option.value}
                 type="button"
-                className={`flex cursor-pointer transition-all duration-300 hover:scale-95 h-24 w-20 shrink-0 flex-col items-center justify-center gap-2 border-r border-[#dfe3dd] px-2 text-center text-xs font-semibold leading-tight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-[#173f35] sm:h-26 sm:w-26 ${
+                className={`flex cursor-pointer transition-all duration-300 hover:scale-95 h-24 w-20 shrink-0 flex-col items-center justify-center gap-2 border-r border-brandgray-250 px-2 text-center text-xs font-semibold leading-tight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-900 sm:h-26 sm:w-26 ${
                   isActive
-                    ? "bg-[#173f35] text-white"
-                    : "bg-white text-[#465149] hover:bg-[#f2f5f1] hover:text-[#173f35]"
+                    ? "bg-brand-900 text-white"
+                    : "bg-white text-brandgray-750 hover:bg-brandgray-100 hover:text-brand-900"
                 }`}
                 aria-pressed={isActive}
                 onClick={(event) => {
@@ -179,7 +179,7 @@ export default function JobTypeScroller({
       {scrollEdges.left && (
         <button
           type="button"
-          className="absolute left-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-[#cfd5cf] bg-white text-[#173f35] shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-[#f2f5f1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173f35]"
+          className="absolute left-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-brandgray-300 bg-white text-brand-900 shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-brandgray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
           aria-label="Show previous job types"
           onClick={() => scrollByPage(-1)}
         >
@@ -190,7 +190,7 @@ export default function JobTypeScroller({
       {scrollEdges.right && (
         <button
           type="button"
-          className="absolute right-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-[#cfd5cf] bg-white text-[#173f35] shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-[#f2f5f1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173f35]"
+          className="absolute right-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-brandgray-300 bg-white text-brand-900 shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-brandgray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
           aria-label="Show more job types"
           onClick={() => scrollByPage(1)}
         >

@@ -6,11 +6,13 @@ import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-l
 import type { ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import AppHeader from "./components/AppHeader";
+import AppFooter from "./components/AppFooter";
 import ApplicantActivitySummary from "./components/ApplicantActivitySummary";
 import ApplicationActivity from "./components/ApplicationActivity";
 import Button from "./components/Button";
 import CommentsSection from "./components/CommentsSection";
 import JobCategoryIcon from "./components/JobCategoryIcon";
+import JobCommentCount from "./components/JobCommentCount";
 import JobSourceBadge from "./components/JobSourceBadge";
 import OfferDescription from "./components/OfferDescription";
 import OfferSources from "./components/OfferSources";
@@ -52,11 +54,11 @@ export default function JobOfferPage({
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-[#dfe3dd] bg-white">
-        <div className="border-b border-[#dfe3dd] px-4 py-4 sm:px-6 lg:px-8">
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+        <div className="border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8">
           <Link
             to="/"
-            className="inline-flex items-center gap-2  font-semibold text-[#526058] transition hover:text-[#173f35] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#173f35]"
+            className="inline-flex items-center gap-2  font-semibold text-brandgray-700 transition hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-900"
           >
             <ArrowLeftLineIcon aria-hidden="true" width="18" height="18" />
             Back to offers
@@ -68,38 +70,40 @@ export default function JobOfferPage({
             className="animate-pulse px-4 py-10 sm:px-6 lg:px-8"
             aria-label="Loading job offer"
           >
-            <div className="h-8 w-2/3 bg-[#edf0ec]" />
-            <div className="mt-5 h-4 w-1/3 bg-[#edf0ec]" />
-            <div className="mt-10 h-40 border-y border-[#edf0ec] bg-[#f7f9f6]" />
+            <div className="h-8 w-2/3 bg-brandgray-150" />
+            <div className="mt-5 h-4 w-1/3 bg-brandgray-150" />
+            <div className="mt-10 h-40 border-y border-brandgray-150 bg-brandgray-50" />
           </div>
         ) : loadError ? (
           <div className="px-4 py-20 text-center sm:px-6 lg:px-8">
-            <h1 className="text-xl font-semibold text-[#18201c]">
+            <h1 className="text-xl font-semibold text-brand-950">
               Couldn&apos;t load this offer
             </h1>
-            <p className="mx-auto mt-2 max-w-lg  text-[#707b74]">{loadError}</p>
+            <p className="mx-auto mt-2 max-w-lg  text-brandgray-550">
+              {loadError}
+            </p>
             <Button className="mt-6" onClick={onRetry}>
               Try again
             </Button>
           </div>
         ) : !job ? (
           <div className="px-4 py-20 text-center sm:px-6 lg:px-8">
-            <h1 className="text-xl font-semibold text-[#18201c]">
+            <h1 className="text-xl font-semibold text-brand-950">
               Offer not found
             </h1>
-            <p className="mt-2  text-[#707b74]">
+            <p className="mt-2  text-brandgray-550">
               This offer may have been removed or the link is incorrect.
             </p>
             <Link
               to="/"
-              className="mt-6 inline-flex  font-semibold text-[#173f35] underline underline-offset-4"
+              className="mt-6 inline-flex  font-semibold text-brand-900 underline underline-offset-4"
             >
               Browse all offers
             </Link>
           </div>
         ) : (
           <>
-            <section className="border-b border-[#dfe3dd] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+            <section className="border-b border-brandgray-250 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
               <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex min-w-0 gap-4 sm:gap-5">
                   <div
@@ -120,26 +124,35 @@ export default function JobOfferPage({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <JobSourceBadge source={job.sourcePlatform} />
-                      <span className="text-[#c1c8c2]" aria-hidden="true">
+                      <span className="text-brandgray-350" aria-hidden="true">
                         ·
                       </span>
-                      <span className="text-sm text-[#707b74]">
+                      <span className="text-sm text-brandgray-550">
                         Posted {job.posted}
                       </span>
-                      <span className="text-[#c1c8c2]" aria-hidden="true">
+                      <span className="text-brandgray-350" aria-hidden="true">
                         ·
                       </span>
-                      <span className="text-sm text-[#707b74]">
+                      <span className="text-sm text-brandgray-550">
                         Updated {job.updated}
                       </span>
+                      <span className="text-brandgray-350" aria-hidden="true">
+                        ·
+                      </span>
+                      <a
+                        href="#discussion"
+                        className="text-sm text-brandgray-550 transition hover:text-brand-900"
+                      >
+                        <JobCommentCount jobId={job.id} />
+                      </a>
                     </div>
 
-                    <h1 className="mt-3 text-2xl font-semibold text-[#18201c] sm:text-3xl">
+                    <h1 className="mt-3 text-2xl font-semibold text-brand-950 sm:text-3xl">
                       {job.title}
                     </h1>
 
                     <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-                      <p className="flex items-center gap-2 text-[#566159]">
+                      <p className="flex items-center gap-2 text-brandgray-700">
                         <BriefcaseLineIcon
                           aria-hidden="true"
                           width="16"
@@ -152,12 +165,12 @@ export default function JobOfferPage({
                   </div>
                 </div>
 
-                <div className="flex shrink-0 flex-col gap-4 lg:min-w-64 lg:items-end lg:border-l lg:border-[#e0e5e0] lg:pl-8 lg:text-right">
+                <div className="flex shrink-0 flex-col gap-4 lg:min-w-64 lg:items-end lg:border-l lg:border-brandgray-250 lg:pl-8 lg:text-right">
                   <div>
-                    <span className="block text-xs font-medium uppercase text-[#7a847e]">
+                    <span className="block text-xs font-medium uppercase text-brandgray-500">
                       Compensation
                     </span>
-                    <strong className="mt-1 block max-w-sm text-xl font-semibold leading-snug text-[#244a3d]">
+                    <strong className="mt-1 block max-w-sm text-xl font-semibold leading-snug text-brand-850">
                       {job.salary ?? "Not disclosed"}
                     </strong>
                   </div>
@@ -171,7 +184,7 @@ export default function JobOfferPage({
                         const source = job.sources[0];
                         if (source) recordSourceClick(source.id);
                       }}
-                      className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-[#eaff6a] px-4 font-semibold text-[#173f35] transition hover:bg-[#def258] lg:w-auto"
+                      className="inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-md bg-lime-300 px-4 font-semibold text-brand-900 transition hover:bg-lime-400 lg:w-auto"
                     >
                       View original offer
                       <ExternalLinkLineIcon
@@ -187,9 +200,9 @@ export default function JobOfferPage({
               </div>
             </section>
 
-            <section className="border-b border-[#dfe3dd]">
+            <section className="border-b border-brandgray-250">
               <div className="px-4 sm:px-6 lg:px-8">
-                <dl className="grid divide-y divide-[#e4e8e4] sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x [&>div]:py-5 lg:[&>div]:px-6 lg:[&>div:first-child]:pl-0 lg:[&>div:last-child]:pr-0">
+                <dl className="grid divide-y divide-brandgray-200 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x [&>div]:py-5 lg:[&>div]:px-6 lg:[&>div:first-child]:pl-0 lg:[&>div:last-child]:pr-0">
                   <div>
                     <Dt>Location</Dt>
                     <Dd>
@@ -236,10 +249,8 @@ export default function JobOfferPage({
                   </div>
                 </dl>
 
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-[#e4e8e4] py-4 text-sm text-[#667169]">
-                  <span className="font-semibold text-[#405048]">
-                    Offer lifecycle
-                  </span>
+                <div className="flex flex-wrap items-center gap-10 border-t border-brandgray-200 py-4 text-sm text-brandgray-600">
+                  <span className=" text-brandgray-400">Offer lifecycle</span>
                   <LifecyclePoint
                     label="First detected"
                     value={
@@ -247,17 +258,16 @@ export default function JobOfferPage({
                         ? formatLifecycleDate(firstSeenAt)
                         : job.posted
                     }
-                  />
+                  />{" "}
                   <LifecyclePoint
                     label="Last checked"
                     value={
                       lastSeenAt ? formatLifecycleDate(lastSeenAt) : job.updated
                     }
-                  />
+                  />{" "}
                   <LifecyclePoint
                     label={isClosed ? "Closed" : "Active"}
                     value={`${job.sources.length || 1} ${job.sources.length === 1 ? "source" : "sources"}`}
-                    active={!isClosed}
                   />
                 </div>
               </div>
@@ -265,7 +275,7 @@ export default function JobOfferPage({
 
             <ApplicantActivitySummary job={job} />
 
-            <section className="border-b border-[#dfe3dd]">
+            <section className="border-b border-brandgray-250">
               <div className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mb-5 flex flex-wrap gap-2">
                   {job.tags.map((tag) => (
@@ -277,17 +287,18 @@ export default function JobOfferPage({
             </section>
             <ApplicationActivity job={job} />
             <OfferSources sources={job.sources} />
-            <CommentsSection />
+            <CommentsSection key={job.id} jobId={job.id} />
           </>
         )}
       </main>
+      <AppFooter />
     </div>
   );
 }
 
 function Dd({ children }: { children: ReactNode }) {
   return (
-    <dd className="mt-1  flex flex-row gap-1 items-center  font-semibold text-[#27322c]">
+    <dd className="mt-1  flex flex-row gap-1 items-center  font-semibold text-brandgray-900">
       {children}
     </dd>
   );
@@ -295,7 +306,7 @@ function Dd({ children }: { children: ReactNode }) {
 
 function Dt({ children }: { children: ReactNode }) {
   return (
-    <dt className="mt-1 flex flex-row gap-1 items-center text-[#7a847e]">
+    <dt className="mt-1 flex flex-row gap-1 items-center text-brandgray-500">
       {children}
     </dt>
   );
@@ -315,20 +326,14 @@ function formatLifecycleDate(value: string) {
 function LifecyclePoint({
   label,
   value,
-  active = false,
 }: {
   label: string;
   value: string;
-  active?: boolean;
 }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span
-        className={`size-1.5 rounded-full ${active ? "bg-[#278b63]" : "bg-[#a7b0a9]"}`}
-        aria-hidden="true"
-      />
       <span>{label}</span>
-      <strong className="font-semibold text-[#405048]">{value}</strong>
+      <strong className="font-semibold text-brandgray-800">{value}</strong>
     </span>
   );
 }

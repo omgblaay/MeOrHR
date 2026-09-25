@@ -22,7 +22,7 @@ export default function ResponseBar({
         {responseRate}%
       </span> */}
       <span
-        className="block h-full bg-[#35a36f]"
+        className="block h-full bg-brand-400"
         style={{ width: `${safeResponseRate}%` }}
       />
     </div>
