@@ -1,4 +1,5 @@
 import BriefcaseIcon from "@iconify-react/majesticons/briefcase";
+import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
 import ChevronDownLineIcon from "@iconify-react/majesticons/chevron-down-line";
 import LogoutLineIcon from "@iconify-react/majesticons/logout-line";
@@ -82,7 +83,7 @@ export default function AppHeader() {
 
   return (
     <header className="border-b border-brandgray-250">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between border-x border-brandgray-250 bg-white px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between border-x border-brandgray-250 bg-white px-4 sm:px-6 lg:px-8">
         <Link
           to="/"
           className="flex items-center gap-2.5 text-lg font-semibold text-brand-900"
@@ -167,10 +168,23 @@ export default function AppHeader() {
                       </p>
                     </div>
                     <Link
-                      to="/settings"
+                      to="/my-offers"
                       role="menuitem"
                       onClick={() => setIsAccountMenuOpen(false)}
                       className="mt-1 flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 font-medium text-brandgray-750 transition hover:bg-brandgray-100 hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-brand-900"
+                    >
+                      <BriefcaseLineIcon
+                        aria-hidden="true"
+                        width="18"
+                        height="18"
+                      />
+                      Job offers
+                    </Link>
+                    <Link
+                      to="/settings"
+                      role="menuitem"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 font-medium text-brandgray-750 transition hover:bg-brandgray-100 hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-brand-900"
                     >
                       <SettingsCogLineIcon
                         aria-hidden="true"

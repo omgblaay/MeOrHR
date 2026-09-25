@@ -6,16 +6,12 @@ import CloseCircleLineIcon from "@iconify-react/majesticons/close-circle-line";
 import DoorExitLineIcon from "@iconify-react/majesticons/door-exit-line";
 import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-line";
 import UserGroupLineIcon from "@iconify-react/majesticons/user-group-line";
-import ViewGridLineIcon from "@iconify-react/majesticons/view-grid-line";
-import ViewListLineIcon from "@iconify-react/majesticons/view-list-line";
-import {
-  useEffect,
-  useState,
-  type ComponentType,
-  type DragEvent,
-} from "react";
+// import ViewGridLineIcon from "@iconify-react/majesticons/view-grid-line";
+// import ViewListLineIcon from "@iconify-react/majesticons/view-list-line";
+import { useEffect, useState, type ComponentType, type DragEvent } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "./auth/useAuth";
+import RadioGroup from "./components/RadioGroup";
 import AppFooter from "./components/AppFooter";
 import AppHeader from "./components/AppHeader";
 import JobCategoryIcon from "./components/JobCategoryIcon";
@@ -89,7 +85,7 @@ type TrackedOffer = {
   lastActivity: string | null;
 };
 
-type BoardView = "board" | "list";
+type BoardView = "Board" | "List";
 
 export default function ApplicationBoardPage({
   jobOffers,
@@ -97,7 +93,7 @@ export default function ApplicationBoardPage({
 }: ApplicationBoardPageProps) {
   const { user, isAuthLoading } = useAuth();
   const [, setRevision] = useState(0);
-  const [view, setView] = useState<BoardView>("board");
+  const [view, setView] = useState<BoardView>("Board");
   const [draggedJobId, setDraggedJobId] = useState<number | null>(null);
   const [activeDropStatus, setActiveDropStatus] =
     useState<ApplicationStatus | null>(null);
@@ -132,7 +128,7 @@ export default function ApplicationBoardPage({
     return (
       <div className="min-h-screen">
         <AppHeader />
-        <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl animate-pulse border-x border-brandgray-250 bg-brandgray-50" />
+        <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] animate-pulse border-x border-brandgray-250 bg-brandgray-50" />
       </div>
     );
   }
@@ -158,7 +154,7 @@ export default function ApplicationBoardPage({
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
         <header className="border-b border-brandgray-250 bg-brandgray-50 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -172,6 +168,14 @@ export default function ApplicationBoardPage({
                 Keep every tracked offer in view and move it as your application
                 progresses.
               </p>
+
+              <RadioGroup
+                name="workplace"
+                value={view}
+                options={["Board", "List"]}
+                onChange={(opt) => setView(String(opt) as BoardView)}
+                className="max-w-64"
+              />
             </div>
             <div className="flex items-end gap-5">
               <p className="border-l-2 border-brand-500 pl-3 text-sm text-brandgray-600">
@@ -180,12 +184,8 @@ export default function ApplicationBoardPage({
                 </strong>
                 tracked {trackedOffers.length === 1 ? "offer" : "offers"}
               </p>
-              <div
-                className="flex rounded-md border border-brandgray-300 bg-white p-0.5"
-                role="group"
-                aria-label="Application display"
-              >
-                <ViewButton
+
+              {/* <ViewButton
                   active={view === "board"}
                   icon={ViewGridLineIcon}
                   label="Board"
@@ -196,170 +196,178 @@ export default function ApplicationBoardPage({
                   icon={ViewListLineIcon}
                   label="List"
                   onClick={() => setView("list")}
-                />
-              </div>
+                /> */}
             </div>
           </div>
         </header>
 
         {!isLoading && trackedOffers.length === 0 && (
           <div className="border-b border-brandgray-250 bg-amber-100 px-4 py-4 text-sm text-amber-900 sm:px-6 lg:px-8">
-            Your board is empty. Open an offer and choose <strong>Saved</strong>
-            {" "}or <strong>I applied</strong> to add it here.
+            Your board is empty. Open an offer and choose <strong>Saved</strong>{" "}
+            or <strong>I applied</strong> to add it here.
           </div>
         )}
 
-        {view === "board" ? (
-          <section aria-label="Application status board" className="overflow-hidden">
+        {view === "Board" ? (
+          <section
+            aria-label="Application status board"
+            className="overflow-hidden"
+          >
             <div className="job-type-scrollbar overflow-x-auto p-4 sm:p-6 lg:p-8">
               <div className="grid min-w-[119rem] grid-cols-7 gap-3">
-              {applicationStatuses.map((status) => {
-                const style = statusStyle[status];
-                const Icon = style.icon;
-                const applications = trackedOffers.filter(
-                  (application) => application.status === status,
-                );
-                const isActiveDrop = activeDropStatus === status;
+                {applicationStatuses.map((status) => {
+                  const style = statusStyle[status];
+                  const Icon = style.icon;
+                  const applications = trackedOffers.filter(
+                    (application) => application.status === status,
+                  );
+                  const isActiveDrop = activeDropStatus === status;
 
-                return (
-                  <section
-                    key={status}
-                    onDragOver={(event) => {
-                      event.preventDefault();
-                      setActiveDropStatus(status);
-                    }}
-                    onDragLeave={(event) => {
-                      if (!event.currentTarget.contains(event.relatedTarget as Node)) {
-                        setActiveDropStatus(null);
-                      }
-                    }}
-                    onDrop={(event) => handleDrop(event, status)}
-                    className={`min-h-[30rem] border transition ${style.column} ${
-                      isActiveDrop ? "ring-2 ring-brand-900 ring-offset-2" : ""
-                    }`}
-                  >
-                    <header className="flex h-14 items-center gap-2 border-b border-inherit px-3">
-                      <span
-                        className={`grid size-7 place-items-center rounded-md ${style.iconClass}`}
-                      >
-                        <Icon aria-hidden="true" width="15" height="15" />
-                      </span>
-                      <h2 className="font-semibold text-brandgray-900">
-                        {applicationStatusLabels[status]}
-                      </h2>
-                      <span className="ml-auto text-sm font-semibold text-brandgray-550">
-                        {applications.length}
-                      </span>
-                    </header>
+                  return (
+                    <section
+                      key={status}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setActiveDropStatus(status);
+                      }}
+                      onDragLeave={(event) => {
+                        if (
+                          !event.currentTarget.contains(
+                            event.relatedTarget as Node,
+                          )
+                        ) {
+                          setActiveDropStatus(null);
+                        }
+                      }}
+                      onDrop={(event) => handleDrop(event, status)}
+                      className={`min-h-[30rem] border transition ${style.column} ${
+                        isActiveDrop
+                          ? "ring-2 ring-brand-900 ring-offset-2"
+                          : ""
+                      }`}
+                    >
+                      <header className="flex h-14 items-center gap-2 border-b border-inherit px-3">
+                        <span
+                          className={`grid size-7 place-items-center rounded-md ${style.iconClass}`}
+                        >
+                          <Icon aria-hidden="true" width="15" height="15" />
+                        </span>
+                        <h2 className="font-semibold text-brandgray-900">
+                          {applicationStatusLabels[status]}
+                        </h2>
+                        <span className="ml-auto text-sm font-semibold text-brandgray-550">
+                          {applications.length}
+                        </span>
+                      </header>
 
-                    <div className="space-y-2 p-2">
-                      {isLoading ? (
-                        <div className="h-36 animate-pulse border border-brandgray-250 bg-white/70" />
-                      ) : applications.length > 0 ? (
-                        applications.map(({ job, lastActivity }) => (
-                          <article
-                            key={job.id}
-                            draggable
-                            onDragStart={(event) => {
-                              event.dataTransfer.setData(
-                                "text/job-id",
-                                String(job.id),
-                              );
-                              event.dataTransfer.effectAllowed = "move";
-                              setDraggedJobId(job.id);
-                            }}
-                            onDragEnd={() => {
-                              setDraggedJobId(null);
-                              setActiveDropStatus(null);
-                            }}
-                            className={`border border-brandgray-250 bg-white p-3 shadow-[0_1px_2px_rgba(22,34,27,0.05)] transition ${
-                              draggedJobId === job.id ? "opacity-45" : ""
-                            }`}
-                          >
-                            <div className="flex items-start gap-2.5">
-                              <span
-                                className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-md text-xs font-semibold text-white"
-                                style={{ backgroundColor: job.logoColor }}
-                              >
-                                {job.companyLogoUrl ? (
-                                  <img
-                                    src={job.companyLogoUrl}
-                                    alt=""
-                                    className="size-full bg-white object-contain"
-                                  />
-                                ) : (
-                                  job.initials
-                                )}
-                              </span>
-                              <div className="min-w-0">
-                                <p className="truncate text-xs font-medium text-brandgray-500">
-                                  {job.company}
-                                </p>
-                                <Link
-                                  to={`/jobs/${job.id}`}
-                                  className="mt-0.5 block font-semibold leading-5 text-brandgray-900 hover:text-brand-650"
+                      <div className="space-y-2 p-2">
+                        {isLoading ? (
+                          <div className="h-36 animate-pulse border border-brandgray-250 bg-white/70" />
+                        ) : applications.length > 0 ? (
+                          applications.map(({ job, lastActivity }) => (
+                            <article
+                              key={job.id}
+                              draggable
+                              onDragStart={(event) => {
+                                event.dataTransfer.setData(
+                                  "text/job-id",
+                                  String(job.id),
+                                );
+                                event.dataTransfer.effectAllowed = "move";
+                                setDraggedJobId(job.id);
+                              }}
+                              onDragEnd={() => {
+                                setDraggedJobId(null);
+                                setActiveDropStatus(null);
+                              }}
+                              className={`border border-brandgray-250 bg-white p-3 shadow-[0_1px_2px_rgba(22,34,27,0.05)] transition ${
+                                draggedJobId === job.id ? "opacity-45" : ""
+                              }`}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <span
+                                  className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-md text-xs font-semibold text-white"
+                                  style={{ backgroundColor: job.logoColor }}
                                 >
-                                  {job.title}
-                                </Link>
+                                  {job.companyLogoUrl ? (
+                                    <img
+                                      src={job.companyLogoUrl}
+                                      alt=""
+                                      className="size-full bg-white object-contain"
+                                    />
+                                  ) : (
+                                    job.initials
+                                  )}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="truncate text-xs font-medium text-brandgray-500">
+                                    {job.company}
+                                  </p>
+                                  <Link
+                                    to={`/jobs/${job.id}`}
+                                    className="mt-0.5 block font-semibold leading-5 text-brandgray-900 hover:text-brand-650"
+                                  >
+                                    {job.title}
+                                  </Link>
+                                </div>
                               </div>
-                            </div>
 
-                            <div className="mt-3 flex items-center gap-1.5 text-xs text-brandgray-550">
-                              <LocationMarkerLineIcon
-                                aria-hidden="true"
-                                width="14"
-                                height="14"
-                              />
-                              <span className="truncate">{job.location}</span>
-                            </div>
-                            <div className="mt-2 flex items-center gap-2 text-xs text-brandgray-550">
-                              <JobCategoryIcon
-                                category={job.category}
-                                size={14}
-                                className="size-5"
-                              />
-                              <span>{job.category}</span>
-                              <span aria-hidden="true">·</span>
-                              <span>{job.workplace}</span>
-                            </div>
+                              <div className="mt-3 flex items-center gap-1.5 text-xs text-brandgray-550">
+                                <LocationMarkerLineIcon
+                                  aria-hidden="true"
+                                  width="14"
+                                  height="14"
+                                />
+                                <span className="truncate">{job.location}</span>
+                              </div>
+                              <div className="mt-2 flex items-center gap-2 text-xs text-brandgray-550">
+                                <JobCategoryIcon
+                                  category={job.category}
+                                  size={14}
+                                  className="size-5"
+                                />
+                                <span>{job.category}</span>
+                                <span aria-hidden="true">·</span>
+                                <span>{job.workplace}</span>
+                              </div>
 
-                            <label className="mt-3 block border-t border-brandgray-150 pt-3 text-xs font-semibold text-brandgray-600">
-                              Move to
-                              <Select
-                                variant="compact"
-                                value={status}
-                                onChange={(event) =>
-                                  moveOffer(
-                                    job.id,
-                                    event.target.value as ApplicationStatus,
-                                  )
-                                }
-                                className="mt-1.5"
-                              >
-                                {applicationStatuses.map((option) => (
-                                  <option key={option} value={option}>
-                                    {applicationStatusLabels[option]}
-                                  </option>
-                                ))}
-                              </Select>
-                            </label>
+                              <label className="mt-3 block border-t border-brandgray-150 pt-3 text-xs font-semibold text-brandgray-600">
+                                Move to
+                                <Select
+                                  variant="compact"
+                                  value={status}
+                                  onChange={(event) =>
+                                    moveOffer(
+                                      job.id,
+                                      event.target.value as ApplicationStatus,
+                                    )
+                                  }
+                                  className="mt-1.5"
+                                >
+                                  {applicationStatuses.map((option) => (
+                                    <option key={option} value={option}>
+                                      {applicationStatusLabels[option]}
+                                    </option>
+                                  ))}
+                                </Select>
+                              </label>
 
-                            {lastActivity && (
-                              <p className="mt-2 text-xs text-brandgray-450">
-                                Last activity {formatBoardDate(lastActivity)}
-                              </p>
-                            )}
-                          </article>
-                        ))
-                      ) : (
-                        <p className="px-2 py-5 text-center text-xs text-brandgray-450">
-                          Drop an offer here
-                        </p>
-                      )}
-                    </div>
-                  </section>
-                );
-              })}
+                              {lastActivity && (
+                                <p className="mt-2 text-xs text-brandgray-450">
+                                  Last activity {formatBoardDate(lastActivity)}
+                                </p>
+                              )}
+                            </article>
+                          ))
+                        ) : (
+                          <p className="px-2 py-5 text-center text-xs text-brandgray-450">
+                            Drop an offer here
+                          </p>
+                        )}
+                      </div>
+                    </section>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -375,33 +383,33 @@ export default function ApplicationBoardPage({
   );
 }
 
-function ViewButton({
-  active,
-  icon: Icon,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  icon: StatusIcon;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 ${
-        active
-          ? "bg-brand-900 text-white"
-          : "text-brandgray-600 hover:bg-brandgray-100 hover:text-brandgray-900"
-      }`}
-    >
-      <Icon aria-hidden="true" width="16" height="16" />
-      {label}
-    </button>
-  );
-}
+// function ViewButton({
+//   active,
+//   icon: Icon,
+//   label,
+//   onClick,
+// }: {
+//   active: boolean;
+//   icon: StatusIcon;
+//   label: string;
+//   onClick: () => void;
+// }) {
+//   return (
+//     <button
+//       type="button"
+//       onClick={onClick}
+//       aria-pressed={active}
+//       className={`inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 ${
+//         active
+//           ? "bg-brand-900 text-white"
+//           : "text-brandgray-600 hover:bg-brandgray-100 hover:text-brandgray-900"
+//       }`}
+//     >
+//       <Icon aria-hidden="true" width="16" height="16" />
+//       {label}
+//     </button>
+//   );
+// }
 
 function ApplicationList({
   trackedOffers,

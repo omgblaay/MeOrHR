@@ -1,10 +1,12 @@
 import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
 import ChevronRightLineIcon from "@iconify-react/majesticons/chevron-right-line";
 import ClockLineIcon from "@iconify-react/majesticons/clock-line";
+import CloseCircleLineIcon from "@iconify-react/majesticons/close-circle-line";
 import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
 import { useNavigate } from "react-router-dom";
-import JobCategoryIcon from "./components/JobCategoryIcon";
+import JobCategoryBadge from "./components/JobCategoryBadge";
+import JobCompanyLogo from "./components/JobCompanyLogo";
 import JobCommentCount from "./components/JobCommentCount";
 import JobSourceBadge from "./components/JobSourceBadge";
 import ResponseBar from "./components/ResponseBar";
@@ -21,7 +23,7 @@ export default function JobCard({ job }: { job: JobOffer }) {
     <article
       role="link"
       tabIndex={0}
-      aria-label={`View ${job.title} at ${job.company}`}
+      aria-label={`View ${job.title} at ${job.company}${job.isGone ? ", marked gone" : ""}`}
       onClick={openJob}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -29,31 +31,30 @@ export default function JobCard({ job }: { job: JobOffer }) {
           openJob();
         }
       }}
-      className="group relative cursor-pointer border-b border-brandgray-250 bg-white transition-colors hover:bg-brandgray-25 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-900"
+      className={`group relative cursor-pointer border-b border-brandgray-250 transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-900 ${
+        job.isGone
+          ? "bg-brandgray-100 hover:bg-brandgray-150"
+          : "bg-white hover:bg-brandgray-25"
+      }`}
     >
       <div className="grid lg:grid-cols-[minmax(0,1fr)_17rem]">
         <div className="min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
           <div className="flex items-start gap-3 sm:gap-4">
-            <div
-              className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-md text-xs font-bold text-white sm:size-12"
-              style={{ backgroundColor: job.logoColor }}
-              aria-hidden="true"
-            >
-              {job.companyLogoUrl ? (
-                <img
-                  className="size-full object-cover"
-                  src={job.companyLogoUrl}
-                  alt=""
-                />
-              ) : (
-                job.initials
-              )}
-            </div>
+            <JobCompanyLogo
+              job={job}
+              size="job-card"
+              className="hidden sm:grid"
+            />
 
             <div className="min-w-0 flex-1">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                    <JobCompanyLogo
+                      job={job}
+                      size="job-card-mobile"
+                      className="sm:hidden"
+                    />
                     <span className="truncate font-semibold text-brandgray-900">
                       {job.company}
                     </span>
@@ -64,6 +65,16 @@ export default function JobCard({ job }: { job: JobOffer }) {
                       /
                     </span>
                     <JobSourceBadge source={job.sourcePlatform} />
+                    {job.isGone && (
+                      <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-2 text-xs font-semibold text-red-700">
+                        <CloseCircleLineIcon
+                          aria-hidden="true"
+                          width="14"
+                          height="14"
+                        />
+                        Gone
+                      </span>
+                    )}
                     <UserApplicationStatus jobId={job.id} />
                   </div>
 
@@ -82,6 +93,7 @@ export default function JobCard({ job }: { job: JobOffer }) {
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-brandgray-600">
+                <JobCategoryBadge category={job.category} />
                 <span className="inline-flex min-w-0 items-center gap-1.5">
                   <LocationMarkerLineIcon
                     aria-hidden="true"
@@ -106,17 +118,9 @@ export default function JobCard({ job }: { job: JobOffer }) {
                     {job.salary}
                   </span>
                 )}
-                <span className="inline-flex h-7 items-center gap-1.5 rounded-md border border-brandgray-250 bg-brandgray-50 px-2 text-xs font-semibold text-brand-750">
-                  <JobCategoryIcon
-                    category={job.category}
-                    size={14}
-                    className="size-5"
-                  />
-                  {job.category}
-                </span>
               </div>
 
-              <div className="job-type-scrollbar -mr-4 mt-4 flex gap-1.5 overflow-x-auto pr-4 sm:mr-0 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:pr-0">
+              <div className="job-type-scrollbar -mr-4 mt-4 flex gap-1.5 overflow-x-auto pr-4 sm:mr-0 flex-wrap sm:gap-2 sm:overflow-visible sm:pr-0">
                 {job.tags.map((tag) => (
                   <span className="shrink-0" key={tag}>
                     <TechnologyTag technology={tag} />

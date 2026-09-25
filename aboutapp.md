@@ -14,7 +14,11 @@ JobRater is a community-informed job board for discovering technology roles and 
 
 ### Browse offers
 
-The main page loads job offers from Supabase and sorts them by publication date. Users can search across titles, companies, locations, work arrangements, categories, employment types, and technology tags.
+The homepage shows the three most recently published job offers. A separate
+Explore page provides the full Supabase-backed offer list, with search,
+category filtering, pagination, and a choice of 5, 10, or 25 offers per page.
+Users can search across titles, companies, locations, work arrangements,
+categories, employment types, and technology tags.
 
 A horizontally scrollable job-type selector provides filters for categories including JavaScript, AI/ML, Python, DevOps, Data, UX/UI, and others. Edge controls appear when more categories are available outside the visible area.
 
@@ -35,6 +39,13 @@ interview invitations. A separate 30-day signal counts applications that did
 not receive a reply, using only applications old enough to qualify. Offers
 remain available as a private tracker status and are not shown as a public
 company metric until enough reliable outcome data exists.
+
+Authenticated users can independently mark a listing as talent-pool only or
+gone. Each user can contribute at most one mark of each type per offer. Offers
+online for at least 45 days receive a separate "might be a talent pool" caution;
+this age-based hint is not presented as a confirmed community report. Gone
+offers remain visible with a distinct card state and can be filtered on the
+Explore page.
 
 The page also includes an expandable role description and a prototype discussion area. Descriptions are currently generated from offer metadata, and comments are sample data that remain only for the current browser session.
 
@@ -61,7 +72,8 @@ the role, company, location, category, work model, contract type, optional
 compensation and technology tags, plus the original source and publication date.
 Successful submissions create both the offer and its first source record before
 opening the new offer page. Duplicate source URLs are rejected with an inline
-message.
+message. Each new offer records its publisher. Publishers can review their
+listings from the account menu and edit only their own offers.
 
 ### Profile settings
 

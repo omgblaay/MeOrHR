@@ -1,31 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 import AppHeader from "./components/AppHeader";
 import AddOfferPage from "./AddOfferPage";
+import EditOfferPage from "./EditOfferPage";
+import ExploreOffersPage from "./ExploreOffersPage";
 import AppFooter from "./components/AppFooter";
 import Button from "./components/Button";
 import HomeHero, { AboutJobRater } from "./components/HomeIntro";
-import JobTypeScroller from "./components/JobTypeScroller";
-import SearchInput from "./components/Search";
 import { supabase } from "./lib/supabase";
+import {
+  offerFlagChangedEvent,
+  type OfferFlagChangedDetail,
+} from "./lib/offerFlags";
 import JobCard from "./JobCard";
 import JobOfferPage from "./JobOfferPage";
 import LoginPage from "./LoginPage";
 import LegalPage from "./LegalPage";
+import MyOffersPage from "./MyOffersPage";
 import SettingsPage from "./SettingsPage";
 import ApplicationBoardPage from "./ApplicationBoardPage";
 import {
-  jobCategories,
   type JobCategory,
   type JobOffer,
   type JobOfferSource,
   type JobSource,
 } from "./types/job";
 
-type JobCategoryFilter = "all" | JobCategory;
-
 type JobOfferRow = {
   id: number;
+  created_by: string | null;
+  created_at: string;
   title: string;
   company: string;
   company_logo_url: string | null;
@@ -54,6 +58,11 @@ type JobOfferRow = {
   applied: boolean;
   responded: boolean;
   job_offer_sources: JobOfferSourceRow[];
+  job_offer_flags: JobOfferFlagRow[];
+};
+
+type JobOfferFlagRow = {
+  flag: "talent_pool" | "gone";
 };
 
 type JobOfferSourceRow = {
@@ -131,9 +140,20 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
   const applicantsOlderThan30Days =
     row.applicants_older_than_30_days ??
     (offerIsOlderThan30Days ? confirmedApplicants : 0);
+  const talentPoolReports = (row.job_offer_flags ?? []).filter(
+    (flag) => flag.flag === "talent_pool",
+  ).length;
+  const goneReports = (row.job_offer_flags ?? []).filter(
+    (flag) => flag.flag === "gone",
+  ).length;
+  const allSourcesClosed = Boolean(
+    sources.length > 0 && sources.every((source) => source.closedAt),
+  );
 
   return {
     id: row.id,
+    createdBy: row.created_by ?? null,
+    createdAt: row.created_at,
     title: row.title,
     company: row.company,
     companyLogoUrl: row.company_logo_url,
@@ -148,6 +168,7 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
     sourceUrl: row.source_url,
     sourcePlatform: row.source_platform ?? "other",
     sources,
+    publishedAt: row.published_at,
     posted: formatPostedAt(row.published_at),
     updated: formatPostedAt(row.updated_at),
     confirmedApplicants,
@@ -168,6 +189,9 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
     medianDaysReplyToInterview:
       row.median_days_reply_to_interview ??
       (row.next_interview_applicants > 0 ? 5 : null),
+    talentPoolReports,
+    goneReports,
+    isGone: goneReports > 0 || allSourcesClosed,
     contactedHrApplicants: row.contacted_hr_applicants ?? 0,
     linkedinConnectionApplicants: row.linkedin_connection_applicants ?? 0,
     additionalEmailApplicants: row.additional_email_applicants ?? 0,
@@ -177,15 +201,7 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
   };
 }
 
-const categoryFilters: { value: JobCategoryFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  ...jobCategories.map((category) => ({ value: category, label: category })),
-];
-
 function App() {
-  const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] =
-    useState<JobCategoryFilter>("all");
   const [jobOffers, setJobOffers] = useState<JobOffer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -200,7 +216,7 @@ function App() {
 
       const { data, error } = await supabase
         .from("job_offers")
-        .select("*, job_offer_sources(*)")
+        .select("*, job_offer_sources(*), job_offer_flags(flag)")
         .order("published_at", { ascending: false, nullsFirst: false });
 
       if (!isCurrentRequest) return;
@@ -222,31 +238,44 @@ function App() {
     };
   }, [reloadToken]);
 
-  const filteredJobs = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  useEffect(() => {
+    const updateOfferFlags = (event: Event) => {
+      const { jobId, flag, selected } = (
+        event as CustomEvent<OfferFlagChangedDetail>
+      ).detail;
 
-    return jobOffers.filter((job) => {
-      const matchesSearch =
-        !normalizedQuery ||
-        [
-          job.title,
-          job.company,
-          job.location,
-          job.workplace,
-          job.category,
-          job.type,
-          ...job.tags,
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalizedQuery);
+      setJobOffers((offers) =>
+        offers.map((offer) => {
+          if (offer.id !== jobId) return offer;
 
-      const matchesFilter =
-        activeCategory === "all" || job.category === activeCategory;
+          const change = selected ? 1 : -1;
+          const talentPoolReports =
+            flag === "talent_pool"
+              ? Math.max(0, offer.talentPoolReports + change)
+              : offer.talentPoolReports;
+          const goneReports =
+            flag === "gone"
+              ? Math.max(0, offer.goneReports + change)
+              : offer.goneReports;
+          const allSourcesClosed = Boolean(
+            offer.sources.length > 0 &&
+              offer.sources.every((source) => source.closedAt),
+          );
 
-      return matchesSearch && matchesFilter;
-    });
-  }, [activeCategory, jobOffers, query]);
+          return {
+            ...offer,
+            talentPoolReports,
+            goneReports,
+            isGone: goneReports > 0 || allSourcesClosed,
+          };
+        }),
+      );
+    };
+
+    window.addEventListener(offerFlagChangedEvent, updateOfferFlags);
+    return () =>
+      window.removeEventListener(offerFlagChangedEvent, updateOfferFlags);
+  }, []);
 
   return (
     <Routes>
@@ -256,78 +285,91 @@ function App() {
           <div className="min-h-screen">
             <AppHeader />
 
-            <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+            <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
               <HomeHero />
 
               <section
                 id="offers"
-                aria-label="Search and filter jobs"
-                className="scroll-mt-4 px-4 pb-6 pt-9 sm:px-6 sm:pt-12 lg:px-8"
+                aria-labelledby="latest-offers-title"
+                className="scroll-mt-4"
               >
-                <SearchInput query={query} setQuery={setQuery} />
-                <JobTypeScroller
-                  options={categoryFilters}
-                  value={activeCategory}
-                  onValueChange={(category) =>
-                    setActiveCategory(category as JobCategoryFilter)
-                  }
-                />
-              </section>
-
-              <div className="flex items-center justify-between border-b border-brandgray-250 px-4 pb-3 sm:px-6 lg:px-8">
-                <p className=" font-semibold text-brandgray-900">
-                  {isLoading
-                    ? "Loading offers..."
-                    : `${filteredJobs.length} ${filteredJobs.length === 1 ? "offer" : "offers"}`}
-                </p>
-                <p className="text-xs text-brandgray-500">Newest first</p>
-              </div>
-
-              {isLoading ? (
-                <div aria-label="Loading job offers">
-                  {[0, 1, 2].map((placeholder) => (
-                    <div
-                      key={placeholder}
-                      className="h-52 animate-pulse border-b border-brandgray-200 bg-brandgray-50"
-                    />
-                  ))}
-                </div>
-              ) : loadError ? (
-                <div className="border-b border-brandgray-250 py-16 text-center">
-                  <h2 className="text-base font-semibold text-brandgray-900">
-                    Couldn&apos;t load offers
-                  </h2>
-                  <p className="mx-auto mt-1 max-w-md  text-brandgray-550">
-                    {loadError}
-                  </p>
-                  <Button
-                    className="mt-5"
-                    onClick={() => setReloadToken((token) => token + 1)}
+                <div className="flex items-end justify-between gap-4 border-b border-brandgray-250 px-4 py-5 sm:px-6 lg:px-8">
+                  <div>
+                    <p className="text-sm font-semibold text-brand-500">
+                      Fresh opportunities
+                    </p>
+                    <h2
+                      id="latest-offers-title"
+                      className="mt-1 text-xl font-semibold text-brandgray-900"
+                    >
+                      Latest job offers
+                    </h2>
+                  </div>
+                  <Link
+                    to="/explore"
+                    className="shrink-0 font-semibold text-brand-900 underline decoration-brandgray-300 underline-offset-4 transition hover:decoration-brand-900"
                   >
-                    Try again
-                  </Button>
+                    Explore all
+                  </Link>
                 </div>
-              ) : filteredJobs.length > 0 ? (
-                <div>
-                  {filteredJobs.map((job) => (
-                    <JobCard key={job.id} job={job} />
-                  ))}
-                </div>
-              ) : (
-                <div className="border-b border-brandgray-250 py-16 text-center">
-                  <h2 className="text-base font-semibold text-brandgray-900">
-                    No matching offers
-                  </h2>
-                  <p className="mt-1  text-brandgray-550">
-                    Try another search or filter.
-                  </p>
-                </div>
-              )}
+
+                {isLoading ? (
+                  <div aria-label="Loading latest job offers">
+                    {[0, 1, 2].map((placeholder) => (
+                      <div
+                        key={placeholder}
+                        className="h-52 animate-pulse border-b border-brandgray-200 bg-brandgray-50"
+                      />
+                    ))}
+                  </div>
+                ) : loadError ? (
+                  <div className="border-b border-brandgray-250 py-16 text-center">
+                    <h3 className="font-semibold text-brandgray-900">
+                      Couldn&apos;t load offers
+                    </h3>
+                    <p className="mx-auto mt-1 max-w-md text-brandgray-550">
+                      {loadError}
+                    </p>
+                    <Button
+                      className="mt-5"
+                      onClick={() => setReloadToken((token) => token + 1)}
+                    >
+                      Try again
+                    </Button>
+                  </div>
+                ) : jobOffers.length > 0 ? (
+                  <div>
+                    {jobOffers.slice(0, 3).map((job) => (
+                      <JobCard key={job.id} job={job} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border-b border-brandgray-250 py-16 text-center">
+                    <h3 className="font-semibold text-brandgray-900">
+                      No offers yet
+                    </h3>
+                    <p className="mt-1 text-brandgray-550">
+                      Be the first person to add one.
+                    </p>
+                  </div>
+                )}
+              </section>
 
               <AboutJobRater />
             </main>
             <AppFooter />
           </div>
+        }
+      />
+      <Route
+        path="/explore"
+        element={
+          <ExploreOffersPage
+            jobOffers={jobOffers}
+            isLoading={isLoading}
+            loadError={loadError}
+            onRetry={() => setReloadToken((token) => token + 1)}
+          />
         }
       />
       <Route
@@ -345,11 +387,30 @@ function App() {
         path="/offers/new"
         element={
           <AddOfferPage
-            onOfferCreated={() => {
+            onOfferSaved={() => {
               setIsLoading(true);
               setReloadToken((token) => token + 1);
             }}
           />
+        }
+      />
+      <Route
+        path="/jobs/:jobId/edit"
+        element={
+          <EditOfferPage
+            jobOffers={jobOffers}
+            isLoading={isLoading}
+            onOfferSaved={() => {
+              setIsLoading(true);
+              setReloadToken((token) => token + 1);
+            }}
+          />
+        }
+      />
+      <Route
+        path="/my-offers"
+        element={
+          <MyOffersPage jobOffers={jobOffers} isLoading={isLoading} />
         }
       />
       <Route path="/login" element={<LoginPage />} />

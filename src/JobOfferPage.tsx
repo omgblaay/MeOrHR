@@ -1,10 +1,12 @@
 import ArrowLeftLineIcon from "@iconify-react/majesticons/arrow-left-line";
 import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
 import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
+import EditPenLineIcon from "@iconify-react/majesticons/edit-pen-4-line";
 import ExternalLinkLineIcon from "@iconify-react/majesticons/external-link-line";
 import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-line";
 import type { ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useAuth } from "./auth/useAuth";
 import AppHeader from "./components/AppHeader";
 import AppFooter from "./components/AppFooter";
 import ApplicantActivitySummary from "./components/ApplicantActivitySummary";
@@ -12,9 +14,12 @@ import ApplicationActivity from "./components/ApplicationActivity";
 import Button from "./components/Button";
 import CommentsSection from "./components/CommentsSection";
 import JobCategoryIcon from "./components/JobCategoryIcon";
+import JobCompanyLogo from "./components/JobCompanyLogo";
 import JobCommentCount from "./components/JobCommentCount";
 import JobSourceBadge from "./components/JobSourceBadge";
 import OfferDescription from "./components/OfferDescription";
+import OfferCommunityFlags from "./components/OfferCommunityFlags";
+import OfferPublisher from "./components/OfferPublisher";
 import OfferSources from "./components/OfferSources";
 import TechnologyTag from "./components/TechnologyTag";
 import UserApplicationStatus from "./components/UserApplicationStatus";
@@ -34,6 +39,7 @@ export default function JobOfferPage({
   loadError,
   onRetry,
 }: JobOfferPageProps) {
+  const { user } = useAuth();
   const { jobId } = useParams();
   const job = jobOffers.find((offer) => offer.id === Number(jobId));
 
@@ -54,7 +60,7 @@ export default function JobOfferPage({
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
         <div className="border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8">
           <Link
             to="/"
@@ -103,24 +109,11 @@ export default function JobOfferPage({
           </div>
         ) : (
           <>
+            <OfferCommunityFlags job={job} />
             <section className="border-b border-brandgray-250 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
               <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex min-w-0 gap-4 sm:gap-5">
-                  <div
-                    className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-md  font-bold text-white sm:size-16"
-                    style={{ backgroundColor: job.logoColor }}
-                    aria-hidden="true"
-                  >
-                    {job.companyLogoUrl ? (
-                      <img
-                        className="size-full object-cover"
-                        src={job.companyLogoUrl}
-                        alt=""
-                      />
-                    ) : (
-                      job.initials
-                    )}
-                  </div>
+                  <JobCompanyLogo job={job} size="job-offer" />
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2.5">
                       <JobSourceBadge source={job.sourcePlatform} />
@@ -195,6 +188,19 @@ export default function JobOfferPage({
                     </a>
                   ) : (
                     <Button disabled>Source unavailable</Button>
+                  )}
+                  {user?.id === job.createdBy && (
+                    <Link
+                      to={`/jobs/${job.id}/edit`}
+                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border border-brandgray-300 bg-white px-4 font-semibold text-brandgray-750 transition hover:border-brandgray-450 hover:text-brandgray-900 lg:w-auto"
+                    >
+                      <EditPenLineIcon
+                        aria-hidden="true"
+                        width="17"
+                        height="17"
+                      />
+                      Edit offer
+                    </Link>
                   )}
                 </div>
               </div>
@@ -288,6 +294,10 @@ export default function JobOfferPage({
             <ApplicationActivity job={job} />
             <OfferSources sources={job.sources} />
             <CommentsSection key={job.id} jobId={job.id} />
+            <OfferPublisher
+              createdBy={job.createdBy}
+              createdAt={job.createdAt}
+            />
           </>
         )}
       </main>
@@ -323,13 +333,7 @@ function formatLifecycleDate(value: string) {
   }).format(new Date(value));
 }
 
-function LifecyclePoint({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function LifecyclePoint({ label, value }: { label: string; value: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span>{label}</span>

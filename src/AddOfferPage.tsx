@@ -2,6 +2,7 @@ import ArrowLeftLineIcon from "@iconify-react/majesticons/arrow-left-line";
 import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import CalendarLineIcon from "@iconify-react/majesticons/calendar-line";
 import ExternalLinkLineIcon from "@iconify-react/majesticons/external-link-line";
+import EditPenLineIcon from "@iconify-react/majesticons/edit-pen-4-line";
 import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-line";
 import PlusLineIcon from "@iconify-react/majesticons/plus-line";
 import TagLineIcon from "@iconify-react/majesticons/tag-line";
@@ -15,11 +16,13 @@ import Input from "./components/Input";
 import JobCategoryIcon from "./components/JobCategoryIcon";
 import Label from "./components/Label";
 import Select from "./components/Select";
+import RadioGroup from "./components/RadioGroup";
 import { supabase } from "./lib/supabase";
 import {
   jobCategories,
   jobSources,
   type JobCategory,
+  type JobOffer,
   type JobSource,
 } from "./types/job";
 
@@ -45,31 +48,52 @@ function localDateValue() {
   return date.toISOString().slice(0, 10);
 }
 
+function dateInputValue(value: string | null | undefined) {
+  if (!value) return localDateValue();
+
+  const date = new Date(value);
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 10);
+}
+
 type AddOfferPageProps = {
-  onOfferCreated: () => void;
+  onOfferSaved: () => void;
+  offer?: JobOffer;
 };
 
-export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
+export default function AddOfferPage({
+  onOfferSaved,
+  offer,
+}: AddOfferPageProps) {
   const { user, isAuthLoading } = useAuth();
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [company, setCompany] = useState("");
-  const [companyLogoUrl, setCompanyLogoUrl] = useState("");
-  const [category, setCategory] = useState<JobCategory>("JavaScript");
-  const [location, setLocation] = useState("");
+  const isEditing = Boolean(offer);
+  const [title, setTitle] = useState(offer?.title ?? "");
+  const [company, setCompany] = useState(offer?.company ?? "");
+  const [companyLogoUrl, setCompanyLogoUrl] = useState(
+    offer?.companyLogoUrl ?? "",
+  );
+  const [category, setCategory] = useState<JobCategory>(
+    offer?.category ?? "JavaScript",
+  );
+  const [location, setLocation] = useState(offer?.location ?? "");
   const [workplace, setWorkplace] = useState<"Remote" | "Hybrid" | "On-site">(
-    "Remote",
+    offer?.workplace ?? "Remote",
   );
   const [employmentType, setEmploymentType] = useState<
     "Full-time" | "Contract"
-  >("Full-time");
-  const [salary, setSalary] = useState("");
-  const [tags, setTags] = useState("");
+  >(offer?.type ?? "Full-time");
+  const [salary, setSalary] = useState(offer?.salary ?? "");
+  const [tags, setTags] = useState(offer?.tags.join(", ") ?? "");
   const [sourcePlatform, setSourcePlatform] = useState<JobSource>(
-    "company_career_page",
+    offer?.sourcePlatform ?? "company_career_page",
   );
-  const [sourceUrl, setSourceUrl] = useState("");
-  const [publishedAt, setPublishedAt] = useState(localDateValue());
+  const [sourceUrl, setSourceUrl] = useState(
+    offer?.sources[0]?.url ?? offer?.sourceUrl ?? "",
+  );
+  const [publishedAt, setPublishedAt] = useState(
+    dateInputValue(offer?.sources[0]?.publishedAt ?? offer?.publishedAt),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -77,7 +101,7 @@ export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
     return (
       <div className="min-h-screen">
         <AppHeader />
-        <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white px-4 py-10 sm:px-6 lg:px-8">
+        <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white px-4 py-10 sm:px-6 lg:px-8">
           <div className="h-8 w-52 animate-pulse bg-brandgray-150" />
           <div className="mt-8 h-96 animate-pulse bg-brandgray-50" />
         </main>
@@ -86,11 +110,23 @@ export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: "/offers/new" }} />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: offer ? `/jobs/${offer.id}/edit` : "/offers/new" }}
+      />
+    );
+  }
+
+  if (offer && offer.createdBy !== user.id) {
+    return <Navigate to={`/jobs/${offer.id}`} replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!user) return;
+
     setErrorMessage("");
     setIsSubmitting(true);
 
@@ -106,26 +142,79 @@ export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
       ? new Date(`${publishedAt}T12:00:00`).toISOString()
       : null;
 
-    const { data: offer, error: offerError } = await supabase
-      .from("job_offers")
-      .insert({
-        title: title.trim(),
-        company: company.trim(),
-        company_logo_url: companyLogoUrl.trim() || null,
-        category,
-        location: location.trim(),
-        workplace,
-        employment_type: employmentType,
-        salary: salary.trim() || null,
-        tags: parsedTags,
-        source_url: sourceUrl.trim(),
-        source_platform: sourcePlatform,
+    const offerFields = {
+      title: title.trim(),
+      company: company.trim(),
+      company_logo_url: companyLogoUrl.trim() || null,
+      category,
+      location: location.trim(),
+      workplace,
+      employment_type: employmentType,
+      salary: salary.trim() || null,
+      tags: parsedTags,
+      source_url: sourceUrl.trim(),
+      source_platform: sourcePlatform,
+      published_at: publishedTimestamp,
+    };
+
+    if (offer) {
+      const { error: offerError } = await supabase
+        .from("job_offers")
+        .update(offerFields)
+        .eq("id", offer.id)
+        .eq("created_by", user.id);
+
+      if (offerError) {
+        setErrorMessage(
+          offerError.code === "23505"
+            ? "This source URL is already attached to an offer."
+            : offerError.message,
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      const sourceFields = {
+        platform: sourcePlatform,
+        url: sourceUrl.trim(),
         published_at: publishedTimestamp,
-      })
+        last_seen_at: new Date().toISOString(),
+      };
+      const primarySource = offer.sources[0];
+      const { error: sourceError } = primarySource
+        ? await supabase
+            .from("job_offer_sources")
+            .update(sourceFields)
+            .eq("id", primarySource.id)
+            .eq("job_offer_id", offer.id)
+        : await supabase.from("job_offer_sources").insert({
+            ...sourceFields,
+            job_offer_id: offer.id,
+            first_seen_at: new Date().toISOString(),
+          });
+
+      if (sourceError) {
+        setErrorMessage(
+          sourceError.code === "23505"
+            ? "This source URL is already attached to an offer."
+            : sourceError.message,
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      onOfferSaved();
+      navigate(`/jobs/${offer.id}`);
+      return;
+    }
+
+    const { data: createdOffer, error: offerError } = await supabase
+      .from("job_offers")
+      .insert({ ...offerFields, created_by: user.id })
       .select("id")
       .single();
 
-    if (offerError || !offer) {
+    if (offerError || !createdOffer) {
       setErrorMessage(
         offerError?.code === "23505"
           ? "This source URL is already attached to an offer."
@@ -139,7 +228,7 @@ export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
     const { error: sourceError } = await supabase
       .from("job_offer_sources")
       .insert({
-        job_offer_id: offer.id,
+        job_offer_id: createdOffer.id,
         platform: sourcePlatform,
         url: sourceUrl.trim(),
         published_at: publishedTimestamp,
@@ -148,7 +237,7 @@ export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
       });
 
     if (sourceError) {
-      await supabase.from("job_offers").delete().eq("id", offer.id);
+      await supabase.from("job_offers").delete().eq("id", createdOffer.id);
       setErrorMessage(
         sourceError.code === "23505"
           ? "This source URL is already attached to an offer."
@@ -158,28 +247,30 @@ export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
       return;
     }
 
-    onOfferCreated();
-    navigate(`/jobs/${offer.id}`);
+    onOfferSaved();
+    navigate(`/jobs/${createdOffer.id}`);
   }
 
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
         <div className="border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8">
           <Link
-            to="/"
+            to={offer ? `/jobs/${offer.id}` : "/"}
             className="inline-flex items-center gap-2 font-semibold text-brandgray-700 transition hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-900"
           >
             <ArrowLeftLineIcon aria-hidden="true" width="18" height="18" />
-            Back to offers
+            {isEditing ? "Back to offer" : "Back to offers"}
           </Link>
         </div>
 
         <div className="border-b border-brandgray-250 px-4 py-8 sm:px-6 lg:px-8">
-          <p className="text-sm font-semibold text-brand-500">New listing</p>
+          <p className="text-sm font-semibold text-brand-500">
+            {isEditing ? "Your listing" : "New listing"}
+          </p>
           <h1 className="mt-1 text-2xl font-semibold text-brand-950 sm:text-3xl">
-            Add a job offer
+            {isEditing ? "Edit job offer" : "Add a job offer"}
           </h1>
         </div>
 
@@ -354,14 +445,24 @@ export default function AddOfferPage({ onOfferCreated }: AddOfferPageProps) {
             </p>
             <div className="flex gap-2">
               <Link
-                to="/"
+                to={offer ? `/jobs/${offer.id}` : "/"}
                 className="inline-flex h-10 items-center justify-center rounded-md border border-brandgray-300 bg-white px-4 font-semibold text-brandgray-750 transition hover:border-brandgray-450 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
               >
                 Cancel
               </Link>
               <Button type="submit" disabled={isSubmitting}>
-                <PlusLineIcon aria-hidden="true" width="17" height="17" />
-                {isSubmitting ? "Adding offer..." : "Add job offer"}
+                {isEditing ? (
+                  <EditPenLineIcon aria-hidden="true" width="17" height="17" />
+                ) : (
+                  <PlusLineIcon aria-hidden="true" width="17" height="17" />
+                )}
+                {isSubmitting
+                  ? isEditing
+                    ? "Saving changes..."
+                    : "Adding offer..."
+                  : isEditing
+                    ? "Save changes"
+                    : "Add job offer"}
               </Button>
             </div>
           </div>
@@ -425,42 +526,5 @@ function FieldGroup({
       <legend className="font-semibold text-brandgray-900">{label}</legend>
       {children}
     </fieldset>
-  );
-}
-
-function RadioGroup({
-  name,
-  value,
-  options,
-  onChange,
-}: {
-  name: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
-}) {
-  return (
-    <span className="mt-2 text-lime-900 flex flex-row verflow-hidden rounded-xl border border-brandgray-100 bg-brandgray-100 p-px">
-      {options.map((option) => (
-        <label
-          key={option}
-          className={`relative flex h-10 flex-1 cursor-pointer items-center justify-center px-2 text-center text-sm font-semibold transition rounded-xl ${
-            value === option
-              ? "z-10 bg-lime-400 "
-              : "text-brandgray-700 hover:bg-lime-200 text-gray-400 hover:text-gray-900"
-          }`}
-        >
-          <input
-            type="radio"
-            name={name}
-            value={option}
-            checked={value === option}
-            onChange={() => onChange(option)}
-            className="sr-only"
-          />
-          {option}
-        </label>
-      ))}
-    </span>
   );
 }

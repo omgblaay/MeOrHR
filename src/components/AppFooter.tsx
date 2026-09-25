@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function AppFooter() {
   return (
-    <footer className="mx-auto max-w-6xl border-x border-t border-brandgray-250 bg-brandgray-50">
+    <footer className="mx-auto max-w-[90rem] border-x border-t border-brandgray-250 bg-brandgray-50">
       <div className="flex flex-col gap-6 px-4 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
           <span className="grid size-8 place-items-center rounded-md bg-brand-900 text-white">
@@ -21,7 +21,7 @@ export default function AppFooter() {
           aria-label="Footer navigation"
           className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-brandgray-700"
         >
-          <Link className="hover:text-brand-900" to="/">
+          <Link className="hover:text-brand-900" to="/explore">
             Offers
           </Link>
           <Link className="hover:text-brand-900" to="/offers/new">

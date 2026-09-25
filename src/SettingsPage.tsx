@@ -70,7 +70,7 @@ export default function SettingsPage() {
     return (
       <div className="min-h-screen">
         <AppHeader />
-        <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white px-4 py-12 sm:px-6 lg:px-8">
+        <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto h-96 max-w-2xl animate-pulse bg-brandgray-100" />
         </main>
       </div>
@@ -198,7 +198,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
         <div className="border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8">
           <Link
             to="/"

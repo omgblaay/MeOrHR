@@ -59,6 +59,8 @@ export type JobOfferSource = {
 
 export type JobOffer = {
   id: number
+  createdBy: string | null
+  createdAt: string
   title: string
   company: string
   companyLogoUrl: string | null
@@ -73,6 +75,7 @@ export type JobOffer = {
   sourceUrl: string | null
   sourcePlatform: JobSource
   sources: JobOfferSource[]
+  publishedAt: string | null
   posted: string
   updated: string
   confirmedApplicants: number
@@ -83,6 +86,9 @@ export type JobOffer = {
   noReplyAfter30DaysApplicants: number
   medianDaysToReply: number | null
   medianDaysReplyToInterview: number | null
+  talentPoolReports: number
+  goneReports: number
+  isGone: boolean
   contactedHrApplicants: number
   linkedinConnectionApplicants: number
   additionalEmailApplicants: number

@@ -1,9 +1,10 @@
-import ArrowDownLineIcon from "@iconify-react/majesticons/arrow-down-line";
+import ChevronRightLineIcon from "@iconify-react/majesticons/chevron-right-line";
 import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import ChartBarLineIcon from "@iconify-react/majesticons/chart-bar-line";
 import PlusLineIcon from "@iconify-react/majesticons/plus-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import Button from "./Button";
 
 const communitySteps = [
   {
@@ -27,6 +28,8 @@ const communitySteps = [
 ];
 
 export default function HomeHero() {
+  const navigate = useNavigate();
+
   return (
     <>
       <section className="border-b border-brandgray-250 bg-brandgray-50 px-4 pb-0 pt-10 sm:px-6 sm:pt-14 lg:px-8">
@@ -39,24 +42,25 @@ export default function HomeHero() {
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-brandgray-650 sm:text-lg">
             Post job offers, share how companies respond, and help other
-            candidates understand whether an experience is personal or part of
-            a wider hiring pattern.
+            candidates understand whether an experience is personal or part of a
+            wider hiring pattern.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              to="/offers/new"
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-brand-900 px-4 py-2.5 font-semibold text-white transition hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
-            >
+            <Button onClick={() => navigate("/offers/new")}>
               <PlusLineIcon aria-hidden="true" width="18" height="18" />
               Add an offer
-            </Link>
-            <a
-              href="#offers"
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-brandgray-300 bg-white px-4 py-2.5 font-semibold text-brandgray-750 transition hover:border-brandgray-450 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => navigate("/explore")}
             >
               Browse offers
-              <ArrowDownLineIcon aria-hidden="true" width="17" height="17" />
-            </a>
+              <ChevronRightLineIcon
+                aria-hidden="true"
+                width="17"
+                height="17"
+              />
+            </Button>
           </div>
         </div>
 
