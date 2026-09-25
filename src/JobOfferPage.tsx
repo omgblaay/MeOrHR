@@ -282,7 +282,7 @@ export default function JobOfferPage({
             <ApplicantActivitySummary job={job} />
 
             <section className="border-b border-brandgray-250">
-              <div className="px-4 py-8 sm:px-6 lg:px-8">
+              <div id="your-status" className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mb-5 flex flex-wrap gap-2">
                   {job.tags.map((tag) => (
                     <TechnologyTag key={tag} technology={tag} />

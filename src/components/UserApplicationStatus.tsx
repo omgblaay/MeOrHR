@@ -106,18 +106,19 @@ export default function UserApplicationStatus({ jobId }: { jobId: number }) {
   const Icon = presentation?.icon ?? UserLineIcon;
 
   return (
-    <span
-      className={`inline-flex px-2 shrink-0 items-center gap-1.5 rounded-xl border h-8 ${
-        presentation
-          ? presentation.classes
-          : "border-gray-200 text-brandgray-550"
-      }`}
+    <a
+      href="#your-status"
+      className={`inline-flex px-2 shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 h-8 `}
+      // ${
+      //   presentation
+      //     ? presentation.classes
+      //     : "border-gray-200 text-brandgray-550"
+      // }
       aria-label={`Your application status: ${presentation?.label ?? "Not tracked"}`}
     >
-      <Icon aria-hidden="true" className="size-4" />
-      <span className="text-brandgray-400">You</span>
-      <span aria-hidden="true">·</span>
+      <Icon aria-hidden="true" className="w-5 h-5" />
+      <span className="text-gray-500">Your status:</span>
       {presentation?.label ?? "Not tracked"}
-    </span>
+    </a>
   );
 }

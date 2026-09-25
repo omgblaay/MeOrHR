@@ -5,10 +5,7 @@ import UsersLineIcon from "@iconify-react/majesticons/users-line";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import {
-  notifyOfferFlagChanged,
-  type JobOfferFlag,
-} from "../lib/offerFlags";
+import { notifyOfferFlagChanged, type JobOfferFlag } from "../lib/offerFlags";
 import { supabase } from "../lib/supabase";
 import type { JobOffer } from "../types/job";
 
@@ -39,9 +36,7 @@ export default function OfferCommunityFlags({ job }: { job: JobOffer }) {
       .eq("user_id", user.id)
       .then(({ data }) => {
         if (!isCurrent) return;
-        setSelectedFlags(
-          (data ?? []).map((item) => item.flag as JobOfferFlag),
-        );
+        setSelectedFlags((data ?? []).map((item) => item.flag as JobOfferFlag));
       });
 
     return () => {
@@ -222,7 +217,12 @@ function FlagMessage({
 }) {
   return (
     <div className={`flex items-start gap-2 ${color}`}>
-      <Icon aria-hidden="true" width="18" height="18" className="mt-0.5 shrink-0" />
+      <Icon
+        aria-hidden="true"
+        width="18"
+        height="18"
+        className="mt-0.5 shrink-0"
+      />
       <p className="text-sm">
         <strong className="font-semibold">{title}.</strong>{" "}
         <span className="text-brandgray-650">{detail}</span>
@@ -243,18 +243,23 @@ function FlagButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      disabled={disabled}
-      onClick={onClick}
-      className={`inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 disabled:cursor-wait disabled:opacity-60 ${
+    <label
+      className={`inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-semibold transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-900 ${
+        disabled ? "cursor-wait opacity-60" : "cursor-pointer"
+      } ${
         pressed
-          ? "border-brand-900 bg-brand-900 text-white"
+          ? "border-lime-700 bg-lime-300"
           : "border-brandgray-300 bg-white text-brandgray-700 hover:border-brandgray-450 hover:text-brandgray-900"
       }`}
     >
+      <input
+        type="checkbox"
+        checked={pressed}
+        disabled={disabled}
+        onChange={onClick}
+        className="size-4 shrink-0 cursor-inherit accent-brand-900"
+      />
       {children}
-    </button>
+    </label>
   );
 }

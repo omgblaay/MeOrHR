@@ -121,11 +121,11 @@ export default function JobCard({
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-4 text-xs text-brandgray-500 lg:hidden">
+            <JobCommentCount jobId={job.id} />
             <span className="flex items-center gap-1.5">
               <ClockLineIcon aria-hidden="true" width="14" height="14" />
               Posted {job.posted}
             </span>
-            <JobCommentCount jobId={job.id} />
           </div>
         </div>
       </div>

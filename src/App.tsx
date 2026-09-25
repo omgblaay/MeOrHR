@@ -7,6 +7,7 @@ import ExploreOffersPage from "./ExploreOffersPage";
 import AppFooter from "./components/AppFooter";
 import Button from "./components/Button";
 import HomeHero, { AboutJobRater } from "./components/HomeIntro";
+import PageMetadata from "./components/PageMetadata";
 import { supabase } from "./lib/supabase";
 import {
   offerFlagChangedEvent,
@@ -278,7 +279,9 @@ function App() {
   }, []);
 
   return (
-    <Routes>
+    <>
+      <PageMetadata jobOffers={jobOffers} />
+      <Routes>
       <Route
         path="/"
         element={
@@ -427,7 +430,8 @@ function App() {
       <Route path="/terms" element={<LegalPage type="terms" />} />
       <Route path="/privacy" element={<LegalPage type="privacy" />} />
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 
