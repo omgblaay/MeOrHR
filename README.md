@@ -1,78 +1,154 @@
-# React + TypeScript + Vite
+# JobRater
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Community-powered job offers and recruitment insights.
 
-Currently, two official plugins are available:
+[Open the live app](https://job-rater.vercel.app/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+JobRater helps candidates understand whether silence after an application is
+personal or part of a wider company pattern. People can share job offers, track
+their own applications, and compare aggregate signals about replies, interviews,
+and long periods without a response.
 
-## React Compiler
+## Features
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Browse and search technology job offers by title, company, location, work
+  model, contract type, category, and technology.
+- Review applicant activity, response rates, interview progression, and the
+  number of applications unanswered after 30 days.
+- Follow one offer across multiple sources, including LinkedIn, Indeed,
+  StepStone, Just Join IT, company career pages, and other European job boards.
+- Track a private application status: Saved, Applied, In review, Interview,
+  Offer, Rejected, or Withdrawn.
+- Record dated application activities and optional private notes.
+- Manage tracked offers in a draggable Kanban board or compact list grouped by
+  status.
+- Add new offers as an authenticated user.
+- Create an optional profile with a nickname, short bio, and profile image.
+- Use the browser-local offer discussion prototype and remove your own comments.
+- Use responsive job cards, offer pages, modals, and mobile drawers.
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+## Recruitment Signals
 
-## Expanding the ESLint configuration
+The public recruitment summary focuses on signals candidates are likely to keep
+up to date:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```text
+Confirmed applications -> Replies -> Interview invitations
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+JobRater also shows applications with no reply after 30 days. Newer
+applications are excluded from this metric so they are not incorrectly treated
+as ignored.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+An offer remains available as a private tracker status, but it is not currently
+used as a public company metric because outcomes are rare and easy to
+under-report.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Technology
 
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Tailwind CSS 4
+- Supabase Postgres, Authentication, and Storage
+- Iconify and Devicons
+- Vercel
+
+## Local Development
+
+### Prerequisites
+
+- Node.js 20 or newer
+- npm
+- A Supabase project
+
+### Setup
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Create the local environment file:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. Add your Supabase project credentials to `.env.local`:
+
+   ```dotenv
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+4. Apply the SQL files from [`supabase/migrations`](supabase/migrations) to the
+   Supabase project in timestamp order. You can use the Supabase CLI or the SQL
+   editor in the Supabase dashboard.
+
+5. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+Vite prints the local URL when the server starts.
+
+## Available Scripts
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server |
+| `npm run build` | Type-check and create a production build |
+| `npm run lint` | Run ESLint |
+| `npm run preview` | Preview the production build locally |
+
+## Supabase
+
+Database changes are versioned in [`supabase/migrations`](supabase/migrations).
+The current schema includes:
+
+- `job_offers` for offer details and aggregate recruitment metrics
+- `job_offer_sources` for source URLs and offer history
+- `profiles` for optional public account information
+- A profile-image storage bucket with image-only upload policies
+- Row-level security for public reads and authenticated writes
+
+Never commit a Supabase service-role key. The frontend should only receive the
+public project URL and anonymous key through `VITE_` environment variables.
+
+## Current Data Boundaries
+
+Job offers, sources, authentication, and profiles use Supabase. Personal
+application progress and comments are currently stored in the browser and are
+not synchronized between devices. The next backend milestone is moving those
+records to Supabase and deriving community statistics from authenticated,
+anonymized activity.
+
+## Deployment
+
+The application is deployed on Vercel at
+[job-rater.vercel.app](https://job-rater.vercel.app/).
+
+For another Vercel deployment, configure these project environment variables
+for every required environment:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
 ```
+
+Then deploy the repository with the standard Vite build command:
+
+```text
+npm run build
+```
+
+The generated output directory is `dist`.
+
+## Product Notes
+
+See [`aboutapp.md`](aboutapp.md) for the fuller product direction, feature
+rationale, data-model notes, and planned work.
