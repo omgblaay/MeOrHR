@@ -1,34 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ComponentType, PointerEvent, WheelEvent } from "react";
-import AcademicCapLineIcon from "@iconify-react/majesticons/academic-cap-line";
-import AnalyticsLineIcon from "@iconify-react/majesticons/analytics-line";
-import BeakerLineIcon from "@iconify-react/majesticons/beaker-line";
-import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
-import BugLineIcon from "@iconify-react/majesticons/bug-2-line";
+import type { PointerEvent, WheelEvent } from "react";
 import ChevronLeftLineIcon from "@iconify-react/majesticons/chevron-left-line";
 import ChevronRightLineIcon from "@iconify-react/majesticons/chevron-right-line";
-import CodeBlockLineIcon from "@iconify-react/majesticons/code-block-line";
-import CodeLineIcon from "@iconify-react/majesticons/code-line";
-import ColorSwatchLineIcon from "@iconify-react/majesticons/color-swatch-line";
-import CpuLineIcon from "@iconify-react/majesticons/cpu-line";
-import DataLineIcon from "@iconify-react/majesticons/data-line";
-import DatabaseLineIcon from "@iconify-react/majesticons/database-line";
-import DesktopComputerLineIcon from "@iconify-react/majesticons/desktop-computer-line";
-import DeviceMobileLineIcon from "@iconify-react/majesticons/device-mobile-line";
-import GlobeGridLineIcon from "@iconify-react/majesticons/globe-grid-line";
-import PresentationChartLineIcon from "@iconify-react/majesticons/presentation-chart-line";
-import RobotLineIcon from "@iconify-react/majesticons/robot-line";
-import ServerLineIcon from "@iconify-react/majesticons/server-line";
-import SettingsCogLineIcon from "@iconify-react/majesticons/settings-cog-line";
-import ShieldLineIcon from "@iconify-react/majesticons/shield-line";
-import SupportLineIcon from "@iconify-react/majesticons/support-line";
-import TerminalLineIcon from "@iconify-react/majesticons/terminal-line";
-
-type IconComponent = ComponentType<{
-  "aria-hidden"?: boolean | "true" | "false";
-  height?: string;
-  width?: string;
-}>;
+import JobCategoryIcon from "./JobCategoryIcon";
 
 type JobTypeOption = {
   value: string;
@@ -39,34 +13,6 @@ type JobTypeScrollerProps = {
   options: JobTypeOption[];
   value: string;
   onValueChange: (value: string) => void;
-};
-
-const categoryIcons: Record<string, IconComponent> = {
-  "AI/ML": RobotLineIcon,
-  JavaScript: CodeLineIcon,
-  HTML: CodeBlockLineIcon,
-  PHP: TerminalLineIcon,
-  Ruby: BeakerLineIcon,
-  Python: TerminalLineIcon,
-  Java: CodeBlockLineIcon,
-  ".NET": DesktopComputerLineIcon,
-  Scala: CodeLineIcon,
-  C: CpuLineIcon,
-  Mobile: DeviceMobileLineIcon,
-  Testing: BugLineIcon,
-  DevOps: ServerLineIcon,
-  Admin: SettingsCogLineIcon,
-  "UX/UI": ColorSwatchLineIcon,
-  PM: PresentationChartLineIcon,
-  Game: CpuLineIcon,
-  Analytics: AnalyticsLineIcon,
-  Security: ShieldLineIcon,
-  Data: DataLineIcon,
-  Go: GlobeGridLineIcon,
-  Support: SupportLineIcon,
-  ERP: DatabaseLineIcon,
-  Architecture: BriefcaseLineIcon,
-  Other: AcademicCapLineIcon,
 };
 
 export default function JobTypeScroller({
@@ -186,7 +132,7 @@ export default function JobTypeScroller({
     <div className="relative">
       <div
         ref={scrollerRef}
-        className={`job-type-scrollbar overflow-x-auto border-y border-[#dfe3dd] select-none ${
+        className={`job-type-scrollbar overflow-x-auto border-y border-brandgray-250 select-none ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
         role="group"
@@ -200,17 +146,16 @@ export default function JobTypeScroller({
       >
         <div className="flex min-w-max">
           {options.map((option) => {
-            const Icon = categoryIcons[option.value] ?? BriefcaseLineIcon;
             const isActive = value === option.value;
 
             return (
               <button
                 key={option.value}
                 type="button"
-                className={`flex cursor-pointer transition-all duration-300 hover:scale-95 h-24 w-20 shrink-0 flex-col items-center justify-center gap-2 border-r border-[#dfe3dd] px-2 text-center text-xs font-semibold leading-tight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-[#173f35] sm:h-26 sm:w-26 ${
+                className={`flex cursor-pointer transition-all duration-300 hover:scale-95 h-24 w-20 shrink-0 flex-col items-center justify-center gap-2 border-r border-brandgray-250 px-2 text-center text-xs font-semibold leading-tight focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-900 sm:h-26 sm:w-26 ${
                   isActive
-                    ? "bg-[#173f35] text-white"
-                    : "bg-white text-[#465149] hover:bg-[#f2f5f1] hover:text-[#173f35]"
+                    ? "bg-brand-900 text-white"
+                    : "bg-white text-brandgray-750 hover:bg-brandgray-100 hover:text-brand-900"
                 }`}
                 aria-pressed={isActive}
                 onClick={(event) => {
@@ -223,7 +168,7 @@ export default function JobTypeScroller({
                   onValueChange(option.value);
                 }}
               >
-                <Icon aria-hidden="true" width="22" height="22" />
+                <JobCategoryIcon category={option.value} />
                 {option.label}
               </button>
             );
@@ -234,7 +179,7 @@ export default function JobTypeScroller({
       {scrollEdges.left && (
         <button
           type="button"
-          className="absolute left-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-[#cfd5cf] bg-white text-[#173f35] shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-[#f2f5f1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173f35]"
+          className="absolute left-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-brandgray-300 bg-white text-brand-900 shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-brandgray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
           aria-label="Show previous job types"
           onClick={() => scrollByPage(-1)}
         >
@@ -245,7 +190,7 @@ export default function JobTypeScroller({
       {scrollEdges.right && (
         <button
           type="button"
-          className="absolute right-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-[#cfd5cf] bg-white text-[#173f35] shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-[#f2f5f1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173f35]"
+          className="absolute right-2 top-1/2 z-20 grid size-9 -translate-y-1/2 place-items-center rounded-full border border-brandgray-300 bg-white text-brand-900 shadow-[0_3px_12px_rgba(23,63,53,0.16)] transition hover:bg-brandgray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
           aria-label="Show more job types"
           onClick={() => scrollByPage(1)}
         >

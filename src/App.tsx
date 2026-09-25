@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import AppHeader from "./components/AppHeader";
+import AddOfferPage from "./AddOfferPage";
+import AppFooter from "./components/AppFooter";
 import Button from "./components/Button";
+import HomeHero, { AboutJobRater } from "./components/HomeIntro";
 import JobTypeScroller from "./components/JobTypeScroller";
 import SearchInput from "./components/Search";
 import { supabase } from "./lib/supabase";
 import JobCard from "./JobCard";
 import JobOfferPage from "./JobOfferPage";
 import LoginPage from "./LoginPage";
+import LegalPage from "./LegalPage";
+import SettingsPage from "./SettingsPage";
+import ApplicationBoardPage from "./ApplicationBoardPage";
 import {
   jobCategories,
   type JobCategory,
@@ -37,6 +43,10 @@ type JobOfferRow = {
   confirmed_applicants: number;
   replied_applicants: number;
   next_interview_applicants: number;
+  applicants_older_than_30_days?: number;
+  no_reply_after_30_days_applicants?: number;
+  median_days_to_reply?: number | null;
+  median_days_reply_to_interview?: number | null;
   contacted_hr_applicants: number;
   linkedin_connection_applicants: number;
   additional_email_applicants: number;
@@ -58,12 +68,12 @@ type JobOfferSourceRow = {
 };
 
 const logoColors = [
-  "#173f35",
-  "#e85d3f",
-  "#3568d4",
-  "#a15c9c",
-  "#278b83",
-  "#8b6239",
+  "var(--color-brand-900)",
+  "var(--color-orange-500)",
+  "var(--color-blue-500)",
+  "var(--color-purple-400)",
+  "var(--color-teal-500)",
+  "var(--color-amber-800)",
 ];
 
 function getInitials(company: string) {
@@ -113,6 +123,14 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
       clickCount: source.click_count,
     }),
   );
+  const confirmedApplicants = row.confirmed_applicants ?? row.applicants;
+  const offerIsOlderThan30Days = Boolean(
+    row.published_at &&
+      Date.now() - new Date(row.published_at).getTime() >= 30 * 86_400_000,
+  );
+  const applicantsOlderThan30Days =
+    row.applicants_older_than_30_days ??
+    (offerIsOlderThan30Days ? confirmedApplicants : 0);
 
   return {
     id: row.id,
@@ -132,13 +150,24 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
     sources,
     posted: formatPostedAt(row.published_at),
     updated: formatPostedAt(row.updated_at),
-    confirmedApplicants: row.confirmed_applicants ?? row.applicants,
+    confirmedApplicants,
     sourceClicks: sources.reduce(
       (total, source) => total + source.clickCount,
       0,
     ),
     repliedApplicants: row.replied_applicants ?? 0,
     nextInterviewApplicants: row.next_interview_applicants ?? 0,
+    applicantsOlderThan30Days,
+    noReplyAfter30DaysApplicants:
+      row.no_reply_after_30_days_applicants ??
+      (offerIsOlderThan30Days
+        ? Math.max(0, confirmedApplicants - (row.replied_applicants ?? 0))
+        : 0),
+    medianDaysToReply:
+      row.median_days_to_reply ?? (row.replied_applicants > 0 ? 6 : null),
+    medianDaysReplyToInterview:
+      row.median_days_reply_to_interview ??
+      (row.next_interview_applicants > 0 ? 5 : null),
     contactedHrApplicants: row.contacted_hr_applicants ?? 0,
     linkedinConnectionApplicants: row.linkedin_connection_applicants ?? 0,
     additionalEmailApplicants: row.additional_email_applicants ?? 0,
@@ -227,10 +256,13 @@ function App() {
           <div className="min-h-screen">
             <AppHeader />
 
-            <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-[#dfe3dd] bg-white py-9 sm:py-12">
+            <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+              <HomeHero />
+
               <section
+                id="offers"
                 aria-label="Search and filter jobs"
-                className="mb-6 px-4 sm:px-6 lg:px-8"
+                className="scroll-mt-4 px-4 pb-6 pt-9 sm:px-6 sm:pt-12 lg:px-8"
               >
                 <SearchInput query={query} setQuery={setQuery} />
                 <JobTypeScroller
@@ -242,13 +274,13 @@ function App() {
                 />
               </section>
 
-              <div className="flex items-center justify-between border-b border-[#dfe3dd] px-4 pb-3 sm:px-6 lg:px-8">
-                <p className=" font-semibold text-[#27322c]">
+              <div className="flex items-center justify-between border-b border-brandgray-250 px-4 pb-3 sm:px-6 lg:px-8">
+                <p className=" font-semibold text-brandgray-900">
                   {isLoading
                     ? "Loading offers..."
                     : `${filteredJobs.length} ${filteredJobs.length === 1 ? "offer" : "offers"}`}
                 </p>
-                <p className="text-xs text-[#7a847e]">Newest first</p>
+                <p className="text-xs text-brandgray-500">Newest first</p>
               </div>
 
               {isLoading ? (
@@ -256,16 +288,16 @@ function App() {
                   {[0, 1, 2].map((placeholder) => (
                     <div
                       key={placeholder}
-                      className="h-52 animate-pulse border-b border-[#e4e8e3] bg-[#f5f7f4]"
+                      className="h-52 animate-pulse border-b border-brandgray-200 bg-brandgray-50"
                     />
                   ))}
                 </div>
               ) : loadError ? (
-                <div className="border-b border-[#dfe3dd] py-16 text-center">
-                  <h2 className="text-base font-semibold text-[#28332d]">
+                <div className="border-b border-brandgray-250 py-16 text-center">
+                  <h2 className="text-base font-semibold text-brandgray-900">
                     Couldn&apos;t load offers
                   </h2>
-                  <p className="mx-auto mt-1 max-w-md  text-[#707b74]">
+                  <p className="mx-auto mt-1 max-w-md  text-brandgray-550">
                     {loadError}
                   </p>
                   <Button
@@ -282,16 +314,19 @@ function App() {
                   ))}
                 </div>
               ) : (
-                <div className="border-b border-[#dfe3dd] py-16 text-center">
-                  <h2 className="text-base font-semibold text-[#28332d]">
+                <div className="border-b border-brandgray-250 py-16 text-center">
+                  <h2 className="text-base font-semibold text-brandgray-900">
                     No matching offers
                   </h2>
-                  <p className="mt-1  text-[#707b74]">
+                  <p className="mt-1  text-brandgray-550">
                     Try another search or filter.
                   </p>
                 </div>
               )}
+
+              <AboutJobRater />
             </main>
+            <AppFooter />
           </div>
         }
       />
@@ -306,7 +341,30 @@ function App() {
           />
         }
       />
+      <Route
+        path="/offers/new"
+        element={
+          <AddOfferPage
+            onOfferCreated={() => {
+              setIsLoading(true);
+              setReloadToken((token) => token + 1);
+            }}
+          />
+        }
+      />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
+      <Route
+        path="/applications"
+        element={
+          <ApplicationBoardPage
+            jobOffers={jobOffers}
+            isLoading={isLoading}
+          />
+        }
+      />
+      <Route path="/terms" element={<LegalPage type="terms" />} />
+      <Route path="/privacy" element={<LegalPage type="privacy" />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -4,7 +4,10 @@ import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/useAuth";
 import AppHeader from "./components/AppHeader";
+import AppFooter from "./components/AppFooter";
 import Button from "./components/Button";
+import Input from "./components/Input";
+import Label from "./components/Label";
 import { supabase } from "./lib/supabase";
 
 type LoginLocationState = {
@@ -48,11 +51,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-[#dfe3dd] bg-white">
-        <div className="border-b border-[#dfe3dd] px-4 py-4 sm:px-6 lg:px-8">
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-6xl border-x border-brandgray-250 bg-white">
+        <div className="border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8">
           <Link
             to="/"
-            className="inline-flex items-center gap-2  font-semibold text-[#526058] transition hover:text-[#173f35] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#173f35]"
+            className="inline-flex items-center gap-2  font-semibold text-brandgray-700 transition hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-900"
           >
             <ArrowLeftLineIcon aria-hidden="true" width="18" height="18" />
             Back to offers
@@ -61,25 +64,25 @@ export default function LoginPage() {
 
         <section className="px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mx-auto max-w-md">
-            <span className="grid size-11 place-items-center rounded-md bg-[#e7eee8] text-[#173f35]">
+            <span className="grid size-11 place-items-center rounded-md bg-brand-100 text-brand-900">
               <LockLineIcon aria-hidden="true" width="21" height="21" />
             </span>
-            <h1 className="mt-5 text-2xl font-semibold text-[#18201c]">
+            <h1 className="mt-5 text-2xl font-semibold text-brand-950">
               Welcome back
             </h1>
-            <p className="mt-2  leading-6 text-[#667069]">
+            <p className="mt-2  leading-6 text-brandgray-600">
               Log in to save offers and manage your applications.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <div>
-                <label
+                <Label
                   htmlFor="email"
-                  className="mb-2 block  font-semibold text-[#27322c]"
+                  className="mb-2"
                 >
                   Email
-                </label>
-                <input
+                </Label>
+                <Input
                   id="email"
                   name="email"
                   type="email"
@@ -88,18 +91,17 @@ export default function LoginPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="you@example.com"
-                  className="h-11 w-full rounded-md border border-[#cfd5cf] bg-white px-3.5  text-[#27322c] outline-none transition placeholder:text-[#929a95] focus:border-[#2b6558] focus:ring-3 focus:ring-[#2b6558]/10"
                 />
               </div>
 
               <div>
-                <label
+                <Label
                   htmlFor="password"
-                  className="mb-2 block  font-semibold text-[#27322c]"
+                  className="mb-2"
                 >
                   Password
-                </label>
-                <input
+                </Label>
+                <Input
                   id="password"
                   name="password"
                   type="password"
@@ -109,14 +111,13 @@ export default function LoginPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Enter your password"
-                  className="h-11 w-full rounded-md border border-[#cfd5cf] bg-white px-3.5  text-[#27322c] outline-none transition placeholder:text-[#929a95] focus:border-[#2b6558] focus:ring-3 focus:ring-[#2b6558]/10"
                 />
               </div>
 
               {errorMessage && (
                 <p
                   role="alert"
-                  className="border-l-2 border-[#c94b42] pl-3  text-[#9d352e]"
+                  className="border-l-2 border-red-400 pl-3  text-red-600"
                 >
                   {errorMessage}
                 </p>
@@ -133,6 +134,7 @@ export default function LoginPage() {
           </div>
         </section>
       </main>
+      <AppFooter />
     </div>
   );
 }

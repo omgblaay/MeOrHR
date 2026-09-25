@@ -1,118 +1,222 @@
 import MessageLineIcon from "@iconify-react/majesticons/message-line";
 import SendLineIcon from "@iconify-react/majesticons/send-line";
-import { useState, type FormEvent } from "react";
+import TrashLineIcon from "@iconify-react/majesticons/trash-line";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../auth/useAuth";
+import {
+  commentsChangedEvent,
+  commentsStorageKey,
+  readComments,
+  writeComments,
+  type JobComment,
+} from "../lib/comments";
+import { profileInitials, type UserProfile } from "../lib/profile";
+import { supabase } from "../lib/supabase";
 import Button from "./Button";
+import Label from "./Label";
 
-type Comment = {
-  id: number;
-  author: string;
-  initials: string;
-  posted: string;
-  body: string;
-};
-
-const sampleComments: Comment[] = [
-  {
-    id: 1,
-    author: "Marta K.",
-    initials: "MK",
-    posted: "2 hours ago",
-    body: "The first conversation was relaxed and focused on past projects. I heard back after three working days.",
-  },
-  {
-    id: 2,
-    author: "Daniel R.",
-    initials: "DR",
-    posted: "Yesterday",
-    body: "Worth asking how often the team meets in the office. The hybrid schedule seems to vary between projects.",
-  },
-];
-
-export default function CommentsSection() {
-  const [comments, setComments] = useState(sampleComments);
+export default function CommentsSection({ jobId }: { jobId: number }) {
+  const { user, isAuthLoading } = useAuth();
+  const location = useLocation();
+  const [comments, setComments] = useState(() => readComments(jobId));
   const [draft, setDraft] = useState("");
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const refreshComments = (event: Event) => {
+      if (event instanceof CustomEvent && event.detail?.jobId !== jobId) return;
+      setComments(readComments(jobId));
+    };
+    const refreshStoredComments = (event: StorageEvent) => {
+      if (event.key === commentsStorageKey(jobId)) {
+        setComments(readComments(jobId));
+      }
+    };
+
+    window.addEventListener(commentsChangedEvent, refreshComments);
+    window.addEventListener("storage", refreshStoredComments);
+    return () => {
+      window.removeEventListener(commentsChangedEvent, refreshComments);
+      window.removeEventListener("storage", refreshStoredComments);
+    };
+  }, [jobId]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let isCurrent = true;
+    const loadProfile = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, nickname, avatar_url, bio")
+        .eq("id", user.id)
+        .maybeSingle<UserProfile>();
+
+      if (isCurrent) setProfile(data ?? null);
+    };
+
+    loadProfile();
+    return () => {
+      isCurrent = false;
+    };
+  }, [user]);
 
   function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const body = draft.trim();
-    if (!body) return;
+    if (!body || !user) return;
 
-    setComments((currentComments) => [
-      ...currentComments,
-      {
-        id: Date.now(),
-        author: "You",
-        initials: "YO",
-        posted: "Just now",
-        body,
-      },
-    ]);
+    const author =
+      profile?.nickname?.trim() || user.email?.split("@")[0] || "JobRater user";
+    const newComment: JobComment = {
+      id: crypto.randomUUID(),
+      userId: user.id,
+      author,
+      initials: profileInitials(author) || "JR",
+      createdAt: new Date().toISOString(),
+      body,
+    };
+
+    writeComments(jobId, [...comments, newComment]);
     setDraft("");
   }
 
+  function deleteComment(commentId: string) {
+    if (!user) return;
+
+    const comment = comments.find((item) => item.id === commentId);
+    if (comment?.userId !== user.id) return;
+
+    writeComments(
+      jobId,
+      comments.filter((item) => item.id !== commentId),
+    );
+  }
+
   return (
-    <section className="border-b border-[#dfe3dd] px-4 py-8 sm:px-6 lg:px-8">
+    <section
+      id="discussion"
+      className="scroll-mt-4 border-b border-brandgray-250 px-4 py-8 sm:px-6 lg:px-8"
+    >
       <div className="flex items-center gap-2">
         <MessageLineIcon
           aria-hidden="true"
           width="18"
           height="18"
-          className="text-[#526058]"
+          className="text-brandgray-700"
         />
-        <h2 className=" font-semibold uppercase text-[#667069]">Discussion</h2>
-        <span className="text-xs font-semibold text-[#8a938d]">
+        <h2 className="font-semibold uppercase text-brandgray-600">Discussion</h2>
+        <span className="text-xs font-semibold text-brandgray-450">
           {comments.length}
         </span>
       </div>
 
-      <form onSubmit={submitComment} className="mt-5 max-w-3xl">
-        <label htmlFor="new-comment" className="sr-only">
-          Add a comment
-        </label>
-        <textarea
-          id="new-comment"
-          rows={3}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="Share a question or hiring insight"
-          className="block w-full resize-y rounded-md border border-[#cfd5cf] bg-white px-3.5 py-3  leading-6 text-[#27322c] outline-none transition placeholder:text-[#929a95] focus:border-[#2b6558] focus:ring-3 focus:ring-[#2b6558]/10"
-        />
-        <div className="mt-3 flex items-center justify-between gap-4">
-          <p className="text-xs text-[#858e88]">
-            Sample discussion. New comments stay in this browser session.
-          </p>
-          <Button type="submit" size="sm" disabled={!draft.trim()}>
-            <SendLineIcon aria-hidden="true" width="16" height="16" />
-            Post
-          </Button>
-        </div>
-      </form>
-
-      <div className="mt-7 max-w-3xl border-t border-[#edf0ec]">
-        {comments.map((comment) => (
-          <article
-            key={comment.id}
-            className="flex gap-3 border-b border-[#edf0ec] py-5 last:border-b-0"
+      {isAuthLoading ? (
+        <div className="mt-5 h-24 max-w-3xl animate-pulse rounded-md bg-brandgray-100" />
+      ) : user ? (
+        <form onSubmit={submitComment} className="mt-5 max-w-3xl">
+          <Label htmlFor="new-comment" className="sr-only">
+            Add a comment
+          </Label>
+          <textarea
+            id="new-comment"
+            rows={3}
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder="Share a question or hiring insight"
+            className="block w-full resize-y rounded-md border border-brandgray-300 bg-white px-3.5 py-3 leading-6 text-brandgray-900 outline-none transition placeholder:text-brandgray-450 focus:border-brand-700 focus:ring-3 focus:ring-brand-700/10"
+          />
+          <div className="mt-3 flex items-center justify-between gap-4">
+            <p className="text-xs text-brandgray-500">
+              Comments are saved in this browser for now.
+            </p>
+            <Button type="submit" size="sm" disabled={!draft.trim()}>
+              <SendLineIcon aria-hidden="true" width="16" height="16" />
+              Post
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <p className="mt-5 max-w-3xl border-y border-brandgray-150 py-4 text-sm text-brandgray-600">
+          <Link
+            to="/login"
+            state={{ from: `${location.pathname}#discussion` }}
+            className="font-semibold text-brand-900 underline underline-offset-4"
           >
-            <div
-              aria-hidden="true"
-              className="grid size-9 shrink-0 place-items-center rounded-full bg-[#e7eee8] text-xs font-bold text-[#294b40]"
+            Log in
+          </Link>{" "}
+          to join the discussion.
+        </p>
+      )}
+
+      <div className="mt-7 max-w-3xl border-t border-brandgray-150">
+        {comments.map((comment) => {
+          const canDelete = Boolean(user && comment.userId === user.id);
+
+          return (
+            <article
+              key={comment.id}
+              className="flex gap-3 border-b border-brandgray-150 py-5 last:border-b-0"
             >
-              {comment.initials}
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <h3 className=" font-semibold text-[#27322c]">
-                  {comment.author}
-                </h3>
-                <span className="text-xs text-[#8a938d]">{comment.posted}</span>
+              <div
+                aria-hidden="true"
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-850"
+              >
+                {comment.initials}
               </div>
-              <p className="mt-1.5  leading-6 text-[#526058]">{comment.body}</p>
-            </div>
-          </article>
-        ))}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <h3 className="font-semibold text-brandgray-900">
+                      {comment.author}
+                    </h3>
+                    <span className="text-xs text-brandgray-450">
+                      {formatRelativeTime(comment.createdAt)}
+                    </span>
+                  </div>
+                  {canDelete && (
+                    <Button
+                      variant="icon"
+                      size="icon"
+                      className="-mt-1 size-8"
+                      onClick={() => deleteComment(comment.id)}
+                      aria-label="Delete your comment"
+                      title="Delete comment"
+                    >
+                      <TrashLineIcon aria-hidden="true" width="16" height="16" />
+                    </Button>
+                  )}
+                </div>
+                <p className="mt-1.5 leading-6 text-brandgray-700">
+                  {comment.body}
+                </p>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
+}
+
+function formatRelativeTime(value: string) {
+  const elapsedSeconds = Math.max(
+    0,
+    Math.floor((Date.now() - new Date(value).getTime()) / 1000),
+  );
+
+  if (elapsedSeconds < 60) return "Just now";
+  if (elapsedSeconds < 3600) {
+    const minutes = Math.floor(elapsedSeconds / 60);
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
+  if (elapsedSeconds < 86400) {
+    const hours = Math.floor(elapsedSeconds / 3600);
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
+
+  const days = Math.floor(elapsedSeconds / 86400);
+  return `${days} ${days === 1 ? "day" : "days"} ago`;
 }

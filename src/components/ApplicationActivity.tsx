@@ -18,6 +18,7 @@ import TrashLineIcon from "@iconify-react/majesticons/trash-line";
 import UserLineIcon from "@iconify-react/majesticons/user-line";
 import UserGroupLineIcon from "@iconify-react/majesticons/user-group-line";
 import {
+  useEffect,
   useState,
   type ComponentType,
   type FormEvent,
@@ -25,18 +26,22 @@ import {
 } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
+import {
+  applicationStorageKey,
+  notifyApplicationStatusChanged,
+  type ApplicationStatus,
+} from "../lib/applicationStatus";
+import {
+  applicationQuickActionEvent,
+  type ApplicationQuickAction,
+} from "../lib/applicationQuickAction";
 import type { JobOffer } from "../types/job";
 import Button from "./Button";
+import Input from "./Input";
 import JobSourceBadge from "./JobSourceBadge";
-
-type ApplicationStatus =
-  | "saved"
-  | "applied"
-  | "in_review"
-  | "interview"
-  | "offer"
-  | "rejected"
-  | "withdrawn";
+import Label from "./Label";
+import RadioCard from "./RadioCard";
+import ResponsiveModal from "./ResponsiveModal";
 
 type ApplicationEventType =
   | "saved"
@@ -50,6 +55,7 @@ type ApplicationEventType =
   | "contacted_hr"
   | "linkedin_connection"
   | "received_reply"
+  | "no_reply_30"
   | "interview_completed"
   | "task_completed";
 
@@ -93,50 +99,50 @@ const statusOptions: {
     value: "saved",
     label: "Saved",
     icon: BookmarkLineIcon,
-    selectedClasses: "border-[#69736d] bg-[#f0f2f0] text-[#414a45]",
-    iconClasses: "bg-[#69736d] text-white",
+    selectedClasses: "border-brandgray-600 bg-brandgray-100 text-brandgray-850",
+    iconClasses: "bg-brandgray-600 text-white",
   },
   {
     value: "applied",
     label: "Applied",
     icon: ApplicationsLineIcon,
-    selectedClasses: "border-[#3568d4] bg-[#f2f6ff] text-[#244f9f]",
-    iconClasses: "bg-[#3568d4] text-white",
+    selectedClasses: "border-blue-500 bg-blue-50 text-blue-800",
+    iconClasses: "bg-blue-500 text-white",
   },
   {
     value: "in_review",
     label: "In review",
     icon: ClockLineIcon,
-    selectedClasses: "border-[#ad7217] bg-[#fff8e8] text-[#80500b]",
-    iconClasses: "bg-[#ad7217] text-white",
+    selectedClasses: "border-amber-500 bg-amber-50 text-amber-700",
+    iconClasses: "bg-amber-500 text-white",
   },
   {
     value: "interview",
     label: "Interview",
     icon: UserGroupLineIcon,
-    selectedClasses: "border-[#79529a] bg-[#f8f1fc] text-[#633f80]",
-    iconClasses: "bg-[#79529a] text-white",
+    selectedClasses: "border-purple-500 bg-purple-50 text-purple-700",
+    iconClasses: "bg-purple-500 text-white",
   },
   {
     value: "offer",
     label: "Offer",
     icon: CheckCircleLineIcon,
-    selectedClasses: "border-[#278b63] bg-[#edf8f2] text-[#1f704f]",
-    iconClasses: "bg-[#278b63] text-white",
+    selectedClasses: "border-brand-500 bg-brand-50 text-brand-600",
+    iconClasses: "bg-brand-500 text-white",
   },
   {
     value: "rejected",
     label: "Rejected",
     icon: CloseCircleLineIcon,
-    selectedClasses: "border-[#b34a42] bg-[#fff3f1] text-[#913a34]",
-    iconClasses: "bg-[#b34a42] text-white",
+    selectedClasses: "border-red-500 bg-red-50 text-red-700",
+    iconClasses: "bg-red-500 text-white",
   },
   {
     value: "withdrawn",
     label: "Withdrawn",
     icon: DoorExitLineIcon,
-    selectedClasses: "border-[#606a72] bg-[#f1f3f4] text-[#465058]",
-    iconClasses: "bg-[#606a72] text-white",
+    selectedClasses: "border-brandgray-600 bg-brandgray-100 text-brandgray-750",
+    iconClasses: "bg-brandgray-600 text-white",
   },
 ];
 
@@ -147,6 +153,7 @@ const activityOptions: {
 }[] = [
   { value: "follow_up", label: "Sent a follow-up", icon: MailLineIcon },
   { value: "contacted_hr", label: "Contacted HR", icon: UserLineIcon },
+  { value: "rejected", label: "Got rejected", icon: MailLineIcon },
   {
     value: "linkedin_connection",
     label: "Connected on LinkedIn",
@@ -187,6 +194,7 @@ const eventLabels: Record<ApplicationEventType, string> = {
   contacted_hr: "Contacted HR",
   linkedin_connection: "Connected with someone on LinkedIn",
   received_reply: "Received a reply",
+  no_reply_30: "No reply after 30 days",
   interview_completed: "Completed an interview",
   task_completed: "Completed a task",
 };
@@ -278,7 +286,7 @@ function statusLabel(status: ApplicationStatus) {
 }
 
 function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
-  const storageKey = `jobrater:application-progress:${userId}:${job.id}`;
+  const storageKey = applicationStorageKey(userId, job.id);
   const [tracker, setTracker] = useState<ApplicationTracker | null>(() =>
     readTracker(storageKey),
   );
@@ -301,6 +309,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(nextTracker));
       setTracker(nextTracker);
+      notifyApplicationStatusChanged(userId, job.id);
       setMessage("Application tracker updated.");
     } catch {
       setMessage("Could not save this update in your browser.");
@@ -377,13 +386,116 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
     });
   }
 
+  useEffect(() => {
+    function handleQuickAction(event: Event) {
+      const detail = (
+        event as CustomEvent<{
+          jobId: number;
+          action: ApplicationQuickAction;
+        }>
+      ).detail;
+      if (detail.jobId !== job.id) return;
+
+      const currentTracker = readTracker(storageKey);
+      const today = localDateValue();
+      let nextTracker: ApplicationTracker;
+      let nextMessage: string;
+
+      if (detail.action === "applied") {
+        if (currentTracker) {
+          setMessage("This application is already being tracked.");
+          return;
+        }
+        nextTracker = {
+          status: "applied",
+          events: [
+            {
+              ...createEvent("applied", today),
+              source: job.sourcePlatform,
+            },
+          ],
+        };
+        nextMessage = "Application recorded.";
+      } else if (!currentTracker) {
+        setMessage("Record your application before adding this outcome.");
+        return;
+      } else if (detail.action === "received_reply") {
+        const keepTerminalStatus = ["offer", "rejected", "withdrawn"].includes(
+          currentTracker.status,
+        );
+        nextTracker = {
+          status: keepTerminalStatus ? currentTracker.status : "in_review",
+          events: [
+            ...currentTracker.events,
+            createEvent("received_reply", today),
+          ],
+        };
+        nextMessage = "Reply recorded.";
+      } else if (detail.action === "interview") {
+        const keepTerminalStatus = ["offer", "rejected", "withdrawn"].includes(
+          currentTracker.status,
+        );
+        nextTracker = {
+          status: keepTerminalStatus ? currentTracker.status : "interview",
+          events: [
+            ...currentTracker.events,
+            createEvent("interview_invited", today),
+          ],
+        };
+        nextMessage = "Interview invitation recorded.";
+      } else {
+        const appliedEvent = [...currentTracker.events]
+          .sort((first, second) => first.date.localeCompare(second.date))
+          .find((item) => item.type === "applied");
+        if (!appliedEvent) {
+          setMessage("Add an application date before recording no reply.");
+          return;
+        }
+
+        const ageInDays = daysBetween(appliedEvent.date, today);
+        if (ageInDays < 30) {
+          setMessage(
+            `This action becomes available in ${30 - ageInDays} ${30 - ageInDays === 1 ? "day" : "days"}.`,
+          );
+          return;
+        }
+        if (currentTracker.events.some((item) => item.type === "no_reply_30")) {
+          setMessage("No reply after 30 days is already recorded.");
+          return;
+        }
+        nextTracker = {
+          ...currentTracker,
+          events: [...currentTracker.events, createEvent("no_reply_30", today)],
+        };
+        nextMessage = "No reply after 30 days recorded.";
+      }
+
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(nextTracker));
+        setTracker(nextTracker);
+        setStatusDraft(nextTracker.status);
+        notifyApplicationStatusChanged(userId, job.id);
+        setMessage(nextMessage);
+      } catch {
+        setMessage("Could not save this update in your browser.");
+      }
+    }
+
+    window.addEventListener(applicationQuickActionEvent, handleQuickAction);
+    return () =>
+      window.removeEventListener(
+        applicationQuickActionEvent,
+        handleQuickAction,
+      );
+  }, [job.id, job.sourcePlatform, storageKey, userId]);
+
   if (!tracker) {
     return (
-      <div className="border-l-2 border-[#dfe3dd] pl-5">
-        <h3 className="text-base font-semibold text-[#27322c]">
+      <div className="border-l-2 border-brandgray-250 pl-5">
+        <h3 className="text-base font-semibold text-brandgray-900">
           Have you applied for this role?
         </h3>
-        <p className="mt-1 max-w-xl leading-6 text-[#667069]">
+        <p className="mt-1 max-w-xl leading-6 text-brandgray-600">
           Start a private timeline and help improve anonymous hiring insights.
         </p>
         <Button className="mt-5" onClick={startApplication}>
@@ -406,22 +518,22 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
 
   return (
     <div>
-      <div className="flex flex-col gap-5 border-b border-[#dfe3dd] pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-5 border-b border-brandgray-250 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2.5">
             <span
-              className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-sm font-semibold ${currentStatus.selectedClasses}`}
+              className={`inline-flex items-center gap-1.5  text-2xl font-semibold ${currentStatus.selectedClasses}`}
             >
               <CurrentStatusIcon aria-hidden="true" width="15" height="15" />
               {statusLabel(tracker.status)} stage
             </span>
             {appliedEvent && (
-              <span className="text-sm text-[#667069]">
+              <span className="text-sm text-brandgray-600">
                 Applied {formatDate(appliedEvent.date)}
               </span>
             )}
             {lastEvent && (
-              <span className="text-sm text-[#667069]">
+              <span className="text-sm text-brandgray-600">
                 Last activity {formatDate(lastEvent.date)}
               </span>
             )}
@@ -442,17 +554,6 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
           >
             Update status
           </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              setEventDate(localDateValue());
-              setNote("");
-              setOpenForm(openForm === "activity" ? null : "activity");
-            }}
-          >
-            <PlusLineIcon aria-hidden="true" width="17" height="17" />
-            Add activity
-          </Button>
         </div>
       </div>
 
@@ -464,86 +565,106 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
       />
 
       {openForm === "status" && (
-        <EntryForm
+        <ResponsiveModal
           title="Update status"
-          date={eventDate}
-          note={note}
-          onDateChange={setEventDate}
-          onNoteChange={setNote}
-          onCancel={() => setOpenForm(null)}
-          onSubmit={submitStatus}
+          onClose={() => setOpenForm(null)}
         >
-          <StatusRadioGrid value={statusDraft} onChange={setStatusDraft} />
-        </EntryForm>
+          <EntryForm
+            title="Update status"
+            date={eventDate}
+            note={note}
+            presentation="dialog"
+            onDateChange={setEventDate}
+            onNoteChange={setNote}
+            onCancel={() => setOpenForm(null)}
+            onSubmit={submitStatus}
+          >
+            <StatusRadioGrid value={statusDraft} onChange={setStatusDraft} />
+          </EntryForm>
+        </ResponsiveModal>
       )}
 
       {openForm === "activity" && (
-        <EntryForm
-          title="Add activity"
-          date={eventDate}
-          note={note}
-          onDateChange={setEventDate}
-          onNoteChange={setNote}
-          onCancel={() => setOpenForm(null)}
-          onSubmit={submitActivity}
-        >
-          <ActivityRadioGrid
-            value={activityType}
-            onChange={(value) => setActivityType(value as ApplicationEventType)}
-          />
-        </EntryForm>
+        <ResponsiveModal title="Add activity" onClose={() => setOpenForm(null)}>
+          <EntryForm
+            title="Add activity"
+            date={eventDate}
+            note={note}
+            presentation="dialog"
+            onDateChange={setEventDate}
+            onNoteChange={setNote}
+            onCancel={() => setOpenForm(null)}
+            onSubmit={submitActivity}
+          >
+            <ActivityRadioGrid
+              value={activityType}
+              onChange={(value) =>
+                setActivityType(value as ApplicationEventType)
+              }
+            />
+          </EntryForm>
+        </ResponsiveModal>
       )}
 
       <div className="pt-6">
-        <h3 className="font-semibold text-[#27322c]">Timeline</h3>
+        <div className="flex justify-between w-full">
+          <h3 className="font-semibold text-brandgray-900">Your timeline</h3>
+          <Button
+            size="sm"
+            disabled={!!openForm}
+            onClick={() => {
+              setEventDate(localDateValue());
+              setNote("");
+              setOpenForm(openForm === "activity" ? null : "activity");
+            }}
+          >
+            <PlusLineIcon aria-hidden="true" width="17" height="17" />
+            Add activity
+          </Button>
+        </div>
         {sortedEvents.length === 0 ? (
-          <p className="mt-3 text-[#707b74]">No activity recorded yet.</p>
+          <p className="mt-3 text-brandgray-550">No activity recorded yet.</p>
         ) : (
-          <ol className="mt-4 max-w-3xl border-t border-[#dfe3dd]">
-            {sortedEvents.map((event, index) => (
+          <ol className="mt-4 max-w-3xl border-t border-brandgray-250">
+            {sortedEvents.map((event) => (
               <li
                 key={event.id}
                 onMouseEnter={() => setHoveredEventType(event.type)}
                 onMouseLeave={() => setHoveredEventType(null)}
                 onFocusCapture={() => setHoveredEventType(event.type)}
                 onBlurCapture={() => setHoveredEventType(null)}
-                className={`grid grid-cols-[4.5rem_1rem_minmax(0,1fr)_auto] gap-3 border-b border-[#e5e9e5] px-2 py-4 transition-colors sm:grid-cols-[6rem_1rem_minmax(0,1fr)_auto] ${
+                className={`flex w-full gap-3 border-b border-brandgray-200 px-2 py-4 transition-colors ${
                   hoveredEventType === event.type
-                    ? "bg-[#edf2ee]"
-                    : "hover:bg-[#f7f9f7]"
+                    ? "bg-brandgray-150"
+                    : "hover:bg-brandgray-50"
                 }`}
               >
-                <time className="text-sm font-medium text-[#707b74]">
+                <time className="text-sm font-medium text-brandgray-550">
                   {formatDate(event.date)}
                 </time>
-
-                <TimelineDot
-                  event={event}
-                  isLast={index === sortedEvents.length - 1}
-                />
 
                 {editingId === event.id ? (
                   <form
                     onSubmit={saveEditedEvent}
                     className="col-span-2 grid gap-3 sm:grid-cols-[10rem_1fr_auto]"
                   >
-                    <input
+                    <Input
                       type="date"
                       required
                       value={editDate}
                       onChange={(changeEvent) =>
                         setEditDate(changeEvent.target.value)
                       }
-                      className="h-10 rounded-md border border-[#cfd5cf] bg-white px-3 text-sm outline-none focus:border-[#2b6558]"
+                      variant="compact"
                       aria-label="Event date"
                     />
-                    <input
+                    <Input
                       value={editNote}
                       onChange={(changeEvent) =>
                         setEditNote(changeEvent.target.value)
                       }
                       placeholder="Private note (optional)"
-                      className="h-10 rounded-md border border-[#cfd5cf] bg-white px-3 text-sm outline-none focus:border-[#2b6558]"
+                      variant="compact"
                       aria-label="Private note"
                     />
                     <div className="flex gap-2">
@@ -562,28 +683,28 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
                   </form>
                 ) : (
                   <>
-                    <div className="min-w-0">
-                      <p className="font-medium text-[#27322c]">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium flex-1 text-brandgray-900">
                         {eventLabels[event.type]}
                         {event.type === "rejected" && appliedEvent && (
-                          <span className="font-normal text-[#707b74]">
+                          <span className="font-normal text-brandgray-550">
                             {` · ${daysBetween(appliedEvent.date, event.date)} days after applying`}
                           </span>
                         )}
                       </p>
                       {event.type === "applied" && event.source && (
-                        <div className="mt-1 flex flex-wrap items-center gap-1 text-sm text-[#707b74]">
+                        <div className="mt-1 flex flex-wrap items-center gap-1 text-sm text-brandgray-550">
                           <span>Applied through</span>
                           <JobSourceBadge source={event.source} />
                         </div>
                       )}
                       {event.note && (
-                        <p className="mt-1 text-sm leading-5 text-[#667069]">
+                        <p className="mt-1 text-sm leading-5 text-brandgray-600">
                           {event.note}
                         </p>
                       )}
                     </div>
-                    <div className="flex items-start gap-1">
+                    <div className="flex flex-0 items-start gap-1">
                       <IconButton
                         label={`Edit ${eventLabels[event.type]}`}
                         title="Edit event"
@@ -591,8 +712,8 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
                       >
                         <EditPenLineIcon
                           aria-hidden="true"
-                          width="16"
-                          height="16"
+                          width="20"
+                          height="20"
                         />
                       </IconButton>
                       <IconButton
@@ -603,8 +724,8 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
                       >
                         <TrashLineIcon
                           aria-hidden="true"
-                          width="16"
-                          height="16"
+                          width="20"
+                          height="20"
                         />
                       </IconButton>
                     </div>
@@ -617,56 +738,13 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
       </div>
 
       <p
-        className="mt-4 text-xs text-[#707b74]"
+        className="mt-4 text-xs text-brandgray-550"
         role="status"
         aria-live="polite"
       >
         {message}
       </p>
     </div>
-  );
-}
-
-function TimelineDot({
-  event,
-  isLast,
-}: {
-  event: ApplicationEvent;
-  isLast: boolean;
-}) {
-  const tooltipId = `event-details-${event.id}`;
-
-  return (
-    <span className="relative flex self-stretch justify-center">
-      {!isLast && (
-        <span
-          aria-hidden="true"
-          className="absolute bottom-[-1.25rem] top-2.5 w-px bg-[#aeb8b1]"
-        />
-      )}
-      <span
-        tabIndex={0}
-        aria-label={`${eventLabels[event.type]} details`}
-        aria-describedby={tooltipId}
-        className="group/dot relative z-10 mt-1 block size-3 rounded-full border-2 border-white bg-[#18201c] shadow-[0_0_0_1px_#18201c] outline-none focus-visible:ring-2 focus-visible:ring-[#278b63] focus-visible:ring-offset-2"
-      >
-        <span
-          id={tooltipId}
-          role="tooltip"
-          className="pointer-events-none absolute left-1/2 top-5 z-30 w-60 -translate-x-1/2 rounded-md bg-[#18201c] px-3 py-2.5 text-left text-xs leading-5 text-white opacity-0 shadow-lg group-hover/dot:opacity-100 group-focus/dot:opacity-100"
-        >
-          <strong className="block font-semibold">
-            {eventLabels[event.type]}
-          </strong>
-          <span className="block text-[#cbd2cd]">{formatDate(event.date)}</span>
-          {event.note && (
-            <span className="mt-1 block border-t border-white/20 pt-1.5 text-[#edf1ee]">
-              {event.note}
-            </span>
-          )}
-        </span>
-      </span>
-    </span>
   );
 }
 
@@ -694,7 +772,7 @@ function StatusProgress({
         label: "Outcome",
         icon: FlagLineIcon,
         selectedClasses: "",
-        iconClasses: "bg-[#69736d] text-white",
+        iconClasses: "bg-brandgray-600 text-white",
       };
   const progressStages = [
     statusOptions.find((option) => option.value === "saved")!,
@@ -711,14 +789,14 @@ function StatusProgress({
       );
 
   return (
-    <div className="job-type-scrollbar overflow-x-auto border-b border-[#dfe3dd] py-6">
+    <div className="job-type-scrollbar overflow-x-auto border-b border-brandgray-250 py-6">
       <div
         className="relative min-w-[36rem] px-4"
         aria-label="Application progress"
       >
-        <div className="absolute left-[10%] right-[10%] top-[1.125rem] h-1 bg-[#e0e4e0]">
+        <div className="absolute left-[10%] right-[10%] top-[1.125rem] h-1 bg-brandgray-250">
           <span
-            className="block h-full bg-[#278b63] transition-[width] duration-300"
+            className="block h-full bg-brand-500 transition-[width] duration-300"
             style={{ width: `${currentIndex * 25}%` }}
           />
         </div>
@@ -737,33 +815,33 @@ function StatusProgress({
               <li
                 key={`${stage.value}-${stage.label}`}
                 className={`flex flex-col items-center rounded-md px-2 py-1 text-center transition-colors ${
-                  isLinked ? "bg-[#e7eee8]" : ""
+                  isLinked ? "bg-brand-100" : ""
                 }`}
                 aria-current={isCurrent ? "step" : undefined}
                 onMouseEnter={() => onHover(stageEvent ? stageEventType : null)}
                 onMouseLeave={() => onHover(null)}
               >
                 <span
-                  className={`grid size-9 place-items-center rounded-full border-2 border-white shadow-[0_0_0_1px_#d5dbd6] transition-transform ${
+                  className={`grid size-9 place-items-center rounded-full border-2 border-white shadow-[0_0_0_1px_var(--color-brandgray-300)] transition-transform ${
                     isReached
                       ? stage.iconClasses
-                      : "bg-[#eef1ee] text-[#8b948e]"
-                  } ${isLinked ? "scale-110 ring-2 ring-[#173f35]/20" : ""}`}
+                      : "bg-brandgray-150 text-brandgray-450"
+                  } ${isLinked ? "scale-110 ring-2 ring-brand-900/20" : ""}`}
                 >
                   <StageIcon aria-hidden="true" width="17" height="17" />
                 </span>
                 <span
                   className={`mt-2 text-xs font-semibold ${
                     isCurrent
-                      ? "text-[#18201c]"
+                      ? "text-brand-950"
                       : isReached
-                        ? "text-[#526058]"
-                        : "text-[#929a95]"
+                        ? "text-brandgray-700"
+                        : "text-brandgray-450"
                   }`}
                 >
                   {stage.label}
                 </span>
-                <span className="mt-0.5 text-[11px] text-[#7a847e]">
+                <span className="mt-0.5 text-[11px] text-brandgray-500">
                   {stageEvent ? formatDate(stageEvent.date) : "—"}
                 </span>
               </li>
@@ -784,50 +862,22 @@ function StatusRadioGrid({
 }) {
   return (
     <fieldset className="sm:col-span-2">
-      <legend className="mb-2 font-semibold text-[#27322c]">
-        Current stage
-      </legend>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {statusOptions.map((option) => {
-          const StatusIcon = option.icon;
-          const isSelected = value === option.value;
-
           return (
-            <label
+            <RadioCard
               key={option.value}
-              className={`relative flex min-h-22 cursor-pointer flex-col items-start rounded-md border p-3.5 transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#173f35] ${
-                isSelected
-                  ? option.selectedClasses
-                  : "border-[#d6dcd6] bg-white text-[#465149] hover:border-[#9eaaa2] hover:bg-[#fafcfa]"
-              }`}
-            >
-              <input
-                type="radio"
-                name="applicationStatus"
-                value={option.value}
-                checked={isSelected}
-                onChange={() => onChange(option.value)}
-                className="sr-only"
-              />
-              <span
-                className={`grid size-8 place-items-center rounded-md ${
-                  isSelected
-                    ? option.iconClasses
-                    : "bg-[#edf0ec] text-[#526058]"
-                }`}
-              >
-                <StatusIcon aria-hidden="true" width="17" height="17" />
-              </span>
-              {isSelected && (
-                <CheckLineIcon
-                  aria-hidden="true"
-                  width="17"
-                  height="17"
-                  className="absolute right-3 top-3"
-                />
-              )}
-              <span className="mt-2 text-sm font-medium">{option.label}</span>
-            </label>
+              name="applicationStatus"
+              value={option.value}
+              label={option.label}
+              icon={option.icon}
+              checked={value === option.value}
+              onChange={onChange}
+              selectedClasses={option.selectedClasses}
+              selectedIconClasses="text-current"
+              checkClasses="text-current"
+              focusClasses="focus-within:outline-brand-900"
+            />
           );
         })}
       </div>
@@ -844,50 +894,21 @@ function ActivityRadioGrid({
 }) {
   return (
     <fieldset className="sm:col-span-2">
-      <legend className="mb-2 font-semibold text-[#27322c]">Activity</legend>
+      <legend className="mb-2 font-semibold text-brandgray-900">
+        Activity
+      </legend>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         {activityOptions.map((option) => {
-          const ActivityIcon = option.icon;
-          const isSelected = value === option.value;
-
           return (
-            <label
+            <RadioCard
               key={option.value}
-              className={`relative flex min-h-24 cursor-pointer flex-col items-start rounded-md border p-3.5 transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#173f35] ${
-                isSelected
-                  ? "border-[#173f35] bg-[#edf4f0] text-[#173f35]"
-                  : "border-[#d6dcd6] bg-white text-[#465149] hover:border-[#9eaaa2] hover:bg-[#fafcfa]"
-              }`}
-            >
-              <input
-                type="radio"
-                name="activityType"
-                value={option.value}
-                checked={isSelected}
-                onChange={() => onChange(option.value)}
-                className="sr-only"
-              />
-              <span
-                className={`grid size-8 place-items-center rounded-md ${
-                  isSelected
-                    ? "bg-[#173f35] text-white"
-                    : "bg-[#edf0ec] text-[#526058]"
-                }`}
-              >
-                <ActivityIcon aria-hidden="true" width="17" height="17" />
-              </span>
-              {isSelected && (
-                <CheckLineIcon
-                  aria-hidden="true"
-                  width="17"
-                  height="17"
-                  className="absolute right-3 top-3 text-[#278b63]"
-                />
-              )}
-              <span className="mt-3 text-sm font-medium leading-5">
-                {option.label}
-              </span>
-            </label>
+              name="activityType"
+              value={option.value}
+              label={option.label}
+              icon={option.icon}
+              checked={value === option.value}
+              onChange={onChange}
+            />
           );
         })}
       </div>
@@ -904,6 +925,7 @@ function EntryForm({
   onCancel,
   onSubmit,
   children,
+  presentation = "inline",
 }: {
   title: string;
   date: string;
@@ -913,46 +935,56 @@ function EntryForm({
   onCancel: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   children: ReactNode;
+  presentation?: "inline" | "dialog";
 }) {
+  const isDialog = presentation === "dialog";
+
   return (
     <form
       onSubmit={onSubmit}
-      className="border-b border-[#dfe3dd] bg-[#f8faf8] px-4 py-5 sm:px-5"
+      className={
+        isDialog
+          ? "bg-white px-4 py-5 sm:px-6 sm:py-6"
+          : "border-b border-brandgray-250 bg-white px-4 py-5 sm:px-5"
+      }
     >
-      <h3 className="font-semibold text-[#27322c]">{title}</h3>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      {!isDialog && (
+        <h3 className="font-semibold text-brandgray-900">{title}</h3>
+      )}
+      <div className={`${isDialog ? "" : "mt-4"} grid gap-4 sm:grid-cols-2`}>
         {children}
         <label className="block">
-          <span className="mb-2 block font-semibold text-[#27322c]">Date</span>
+          <Label asSpan className="mb-2">
+            Date
+          </Label>
           <span className="relative block">
             <CalendarLineIcon
               aria-hidden="true"
               width="17"
               height="17"
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#657168]"
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-brandgray-600"
             />
-            <input
+            <Input
               type="date"
               required
               value={date}
               max={localDateValue()}
               onChange={(event) => onDateChange(event.target.value)}
-              className="h-11 w-full rounded-md border border-[#cfd5cf] bg-white pl-10 pr-3 text-[#27322c] outline-none focus:border-[#2b6558] focus:ring-3 focus:ring-[#2b6558]/10"
+              className="pl-10"
             />
           </span>
         </label>
       </div>
       <label className="mt-4 block">
-        <span className="mb-2 block font-semibold text-[#27322c]">
-          Private note{" "}
-          <span className="font-normal text-[#7a847e]">(optional)</span>
-        </span>
+        <Label asSpan optional className="mb-2">
+          Private note
+        </Label>
         <textarea
           rows={2}
           value={note}
           onChange={(event) => onNoteChange(event.target.value)}
           placeholder="Add context you may want later"
-          className="block w-full resize-y rounded-md border border-[#cfd5cf] bg-white px-3.5 py-3 leading-6 text-[#27322c] outline-none placeholder:text-[#929a95] focus:border-[#2b6558] focus:ring-3 focus:ring-[#2b6558]/10"
+          className="block w-full resize-y rounded-md border border-brandgray-300 bg-white px-3.5 py-3 leading-6 text-brandgray-900 outline-none placeholder:text-brandgray-450 focus:border-brand-700 focus:ring-3 focus:ring-brand-700/10"
         />
       </label>
       <div className="mt-4 flex gap-2">
@@ -984,10 +1016,10 @@ function IconButton({
     <button
       type="button"
       onClick={onClick}
-      className={`grid size-8 place-items-center rounded-md text-[#657168] transition focus-visible:outline-2 ${
+      className={`grid size-8 place-items-center rounded-md text-brandgray-600 transition focus-visible:outline-2 ${
         danger
-          ? "hover:bg-[#fff0ed] hover:text-[#9d352e] focus-visible:outline-[#9d352e]"
-          : "hover:bg-[#edf0ec] hover:text-[#173f35] focus-visible:outline-[#173f35]"
+          ? "hover:bg-red-50 hover:text-red-600 focus-visible:outline-red-600"
+          : "hover:bg-brandgray-150 hover:text-brand-900 focus-visible:outline-brand-900"
       }`}
       aria-label={label}
       title={title}
@@ -999,7 +1031,7 @@ function IconButton({
 
 function PrivacyNote() {
   return (
-    <p className="mt-3 max-w-2xl text-xs leading-5 text-[#7a847e]">
+    <p className="mt-3 max-w-2xl text-xs leading-5 text-brandgray-500">
       Your dates and notes are private and currently saved only on this device.
       Anonymous event totals will contribute to offer insights after account
       sync is enabled.
@@ -1012,14 +1044,17 @@ export default function ApplicationActivity({ job }: { job: JobOffer }) {
   const location = useLocation();
 
   return (
-    <section className="border-b bg-[#f9faf4] border-[#dfe3dd]">
+    <section
+      id="your-application"
+      className="scroll-mt-4 border-b border-brandgray-250 bg-lime-50"
+    >
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           <ApplicationsLineIcon
             aria-hidden="true"
             width="18"
             height="18"
-            className="text-[#526058]"
+            className="text-brandgray-700"
           />
           <h2 className="font-semibold ">Your application</h2>
         </div>
@@ -1028,27 +1063,30 @@ export default function ApplicationActivity({ job }: { job: JobOffer }) {
           {isAuthLoading ? (
             <div className="space-y-3" aria-label="Loading your application">
               {[0, 1, 2].map((item) => (
-                <div key={item} className="h-11 animate-pulse bg-[#f1f4f0]" />
+                <div
+                  key={item}
+                  className="h-11 animate-pulse bg-brandgray-100"
+                />
               ))}
             </div>
           ) : user ? (
             <TrackerForm key={job.id} job={job} userId={user.id} />
           ) : (
-            <div className="border-l-2 border-[#dfe3dd] pl-5">
-              <span className="grid size-9 place-items-center rounded-md bg-[#e7eee8] text-[#173f35]">
+            <div className="border-l-2 border-brandgray-250 pl-5">
+              <span className="grid size-9 place-items-center rounded-md bg-brand-100 text-brand-900">
                 <LockLineIcon aria-hidden="true" width="18" height="18" />
               </span>
-              <h3 className="mt-4 text-base font-semibold text-[#27322c]">
+              <h3 className="mt-4 text-base font-semibold text-brandgray-900">
                 Track your application
               </h3>
-              <p className="mt-1 max-w-md leading-6 text-[#667069]">
+              <p className="mt-1 max-w-md leading-6 text-brandgray-600">
                 Log in to keep a private status and dated activity timeline for
                 this offer.
               </p>
               <Link
                 to="/login"
                 state={{ from: location.pathname }}
-                className="mt-4 inline-flex h-9 items-center justify-center rounded-md bg-[#eaff6a] px-3.5 font-semibold text-[#173f35] transition hover:bg-[#def258] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#173f35]"
+                className="mt-4 inline-flex h-9 items-center justify-center rounded-md bg-lime-300 px-3.5 font-semibold text-brand-900 transition hover:bg-lime-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
               >
                 Log in to track
               </Link>

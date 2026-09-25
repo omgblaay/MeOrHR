@@ -18,11 +18,11 @@ export default function ResponseBar({
       aria-valuemax={100}
       aria-valuenow={safeResponseRate}
     >
-      <span className="left-2 m-0 z-20 text-xs invert top-0 absolute font-extrabold">
+      {/* <span className="left-2 m-0 z-20 text-xs invert top-0 absolute font-extrabold">
         {responseRate}%
-      </span>
+      </span> */}
       <span
-        className="block h-full bg-[#35a36f]"
+        className="block h-full bg-brand-400"
         style={{ width: `${safeResponseRate}%` }}
       />
     </div>

@@ -30,14 +30,11 @@ Each connected offer row displays:
 
 Every offer has a detail page containing its company and source, role metadata, compensation, tags, publication date, and last update time. A link opens the original listing on its source platform.
 
-The applicant activity summary shows counts and percentages for:
-
-- Applications
-- Replies
-- Invitations to the next interview step
-- HR outreach without a reply
-- LinkedIn connections
-- Additional follow-up emails
+The public recruitment pipeline shows anonymized applications, replies, and
+interview invitations. A separate 30-day signal counts applications that did
+not receive a reply, using only applications old enough to qualify. Offers
+remain available as a private tracker status and are not shown as a public
+company metric until enough reliable outcome data exists.
 
 The page also includes an expandable role description and a prototype discussion area. Descriptions are currently generated from offer metadata, and comments are sample data that remain only for the current browser session.
 
@@ -48,6 +45,38 @@ Supabase email and password authentication is available. Before an application e
 The current stage can be Saved, Applied, In review, Interview, Offer, Rejected, or Withdrawn. Repeatable activities include follow-ups, HR outreach, LinkedIn connections, replies, completed interviews, and completed tasks. Every status change and activity has a date and can include a private note. Timeline entries can be edited or removed, and rejection timing is calculated from the application date.
 
 Personal progress is currently stored per user and offer in browser local storage. It is private to that browser and is not yet synchronized to Supabase.
+
+### Application board
+
+Signed-in users can view every tracked offer on a private Kanban board with
+columns for Saved, Applied, In review, Interview, Offer, Rejected, and
+Withdrawn. Offers can be moved between stages by dragging or with an accessible
+stage menu on each card. A move updates the shared local tracker and adds a
+dated event to the offer timeline.
+
+### Add an offer
+
+Signed-in users can add a job offer from the header. The submission form captures
+the role, company, location, category, work model, contract type, optional
+compensation and technology tags, plus the original source and publication date.
+Successful submissions create both the offer and its first source record before
+opening the new offer page. Duplicate source URLs are rejected with an inline
+message.
+
+### Profile settings
+
+Signed-in users can optionally set a public nickname, profile picture, and short
+role or bio. Profile images are limited to image formats up to 2 MB and stored
+in Supabase Storage. Profile data is stored in Supabase and the account shortcut
+in the header reflects saved changes immediately. Email addresses remain part
+of the private authentication account and are not stored in the public profile.
+
+### Legal and navigation
+
+A shared footer links to offers, offer submission, Terms of Service, and the
+Privacy Policy. The legal pages describe community contributions, third-party
+job links, Supabase account and profile storage, browser-local application data,
+moderation, and user privacy choices.
 
 ## Job sources
 
@@ -88,7 +117,9 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 ## Priorytetowe funkcje
 
-Pierwszy etap wdrożenia jest już rozpoczęty: oferty obsługują wiele powiązanych źródeł, każde źródło ma własny link i datę publikacji, a kliknięcia są zliczane niezależnie od potwierdzonych aplikacji.
+Pierwszy etap wdrożenia obejmuje wiele źródeł jednej oferty, potwierdzone
+aplikacje oraz anonimową oś rekrutacji z konwersją i medianami czasu między
+etapami.
 
 | Funkcja | Co widzi lub robi użytkownik | Dlaczego jest wartościowa |
 | --- | --- | --- |
@@ -102,8 +133,6 @@ Pierwszy etap wdrożenia jest już rozpoczęty: oferty obsługują wiele powiąz
 
 ## Najbliższe prace techniczne
 
-- Add the complete authenticated offer-submission flow.
 - Store imported offer descriptions and additional source metadata.
 - Persist individual application activity in Supabase and update aggregate metrics from real user actions.
-- Replace sample discussions with authenticated, persistent comments.
-- Add saved offers and richer account-level application management.
+- Move browser-persisted, authenticated comments to Supabase for shared discussions.
