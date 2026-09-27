@@ -9,9 +9,17 @@ import Label from "./components/Label";
 import SearchInput from "./components/Search";
 import Select from "./components/Select";
 import JobCard from "./JobCard";
-import { jobCategories, type JobCategory, type JobOffer } from "./types/job";
+import { countryName } from "./lib/countries";
+import {
+  jobCategories,
+  roleLevels,
+  type JobCategory,
+  type JobOffer,
+  type RoleLevel,
+} from "./types/job";
 
 type JobCategoryFilter = "all" | JobCategory;
+type RoleLevelFilter = "all" | RoleLevel;
 type PageSize = 5 | 10 | 25;
 type AvailabilityFilter = "all" | "active" | "gone";
 
@@ -37,7 +45,23 @@ export default function ExploreOffersPage({
   const [pageSize, setPageSize] = useState<PageSize>(5);
   const [availability, setAvailability] =
     useState<AvailabilityFilter>("all");
+  const [roleLevel, setRoleLevel] = useState<RoleLevelFilter>("all");
+  const [companyCountryCode, setCompanyCountryCode] = useState("");
   const [page, setPage] = useState(1);
+
+  const companyCountries = useMemo(
+    () =>
+      [
+        ...new Set(
+          jobOffers
+            .map((job) => job.companyCountryCode)
+            .filter((code): code is string => Boolean(code)),
+        ),
+      ]
+        .map((code) => ({ code, label: countryName(code) }))
+        .sort((first, second) => first.label.localeCompare(second.label)),
+    [jobOffers],
+  );
 
   const filteredOffers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -48,6 +72,8 @@ export default function ExploreOffersPage({
         [
           job.title,
           job.company,
+          job.companyCountryCode,
+          job.companyCountryCode ? countryName(job.companyCountryCode) : null,
           job.location,
           job.workplace,
           job.category,
@@ -63,10 +89,28 @@ export default function ExploreOffersPage({
       const matchesAvailability =
         availability === "all" ||
         (availability === "gone" ? job.isGone : !job.isGone);
+      const matchesRoleLevel =
+        roleLevel === "all" || job.roleLevel === roleLevel;
+      const matchesCompanyCountry =
+        !companyCountryCode ||
+        job.companyCountryCode === companyCountryCode;
 
-      return matchesSearch && matchesCategory && matchesAvailability;
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesAvailability &&
+        matchesRoleLevel &&
+        matchesCompanyCountry
+      );
     });
-  }, [activeCategory, availability, jobOffers, query]);
+  }, [
+    activeCategory,
+    availability,
+    companyCountryCode,
+    jobOffers,
+    query,
+    roleLevel,
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOffers.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -100,13 +144,55 @@ export default function ExploreOffersPage({
           aria-label="Search and filter jobs"
           className="px-4 pb-6 pt-7 sm:px-6 lg:px-8"
         >
-          <SearchInput
-            query={query}
-            setQuery={(nextQuery) => {
-              setQuery(nextQuery);
-              setPage(1);
-            }}
-          />
+          <div className="mb-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem_16rem] md:items-end">
+            <SearchInput
+              query={query}
+              setQuery={(nextQuery) => {
+                setQuery(nextQuery);
+                setPage(1);
+              }}
+            />
+            <div>
+              <Label htmlFor="role-level-filter" className="mb-1 text-xs">
+                Role level
+              </Label>
+              <Select
+                id="role-level-filter"
+                value={roleLevel}
+                onChange={(event) => {
+                  setRoleLevel(event.target.value as RoleLevelFilter);
+                  setPage(1);
+                }}
+              >
+                <option value="all">All levels</option>
+                {roleLevels.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="company-country-filter" className="mb-1 text-xs">
+                Company country
+              </Label>
+              <Select
+                id="company-country-filter"
+                value={companyCountryCode}
+                onChange={(event) => {
+                  setCompanyCountryCode(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">All countries</option>
+                {companyCountries.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
           <JobTypeScroller
             options={categoryFilters}
             value={activeCategory}
@@ -133,7 +219,7 @@ export default function ExploreOffersPage({
           </div>
           <div className="flex gap-3">
             <div className="w-36">
-              <Label htmlFor="offer-availability" className="text-xs">
+              <Label htmlFor="offer-availability" className="mb-1 text-xs">
                 Status
               </Label>
               <Select
@@ -144,7 +230,6 @@ export default function ExploreOffersPage({
                   setAvailability(event.target.value as AvailabilityFilter);
                   setPage(1);
                 }}
-                className="mt-1"
               >
                 <option value="all">All offers</option>
                 <option value="active">Active</option>
@@ -152,7 +237,7 @@ export default function ExploreOffersPage({
               </Select>
             </div>
             <div className="w-28">
-              <Label htmlFor="offers-per-page" className="text-xs">
+              <Label htmlFor="offers-per-page" className="mb-1 text-xs">
                 Per page
               </Label>
               <Select
@@ -163,7 +248,6 @@ export default function ExploreOffersPage({
                   setPageSize(Number(event.target.value) as PageSize);
                   setPage(1);
                 }}
-                className="mt-1"
               >
                 <option value={5}>5</option>
                 <option value={10}>10</option>
@@ -206,7 +290,7 @@ export default function ExploreOffersPage({
               No matching offers
             </h2>
             <p className="mt-1 text-brandgray-550">
-              Try another search or category.
+              Try another search or adjust the filters.
             </p>
           </div>
         )}
