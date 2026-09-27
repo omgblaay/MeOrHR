@@ -1,10 +1,10 @@
-# JobRater
+# Meor HR
 
 Community-powered job offers and recruitment insights.
 
-[Open the live app](https://job-rater.vercel.app/)
+[Open the live app](https://meorhr.com/)
 
-JobRater helps candidates understand whether silence after an application is
+Meor HR helps candidates understand whether silence after an application is
 personal or part of a wider company pattern. People can share job offers, track
 their own applications, and compare aggregate signals about replies, interviews,
 and long periods without a response.
@@ -36,7 +36,7 @@ up to date:
 Confirmed applications -> Replies -> Interview invitations
 ```
 
-JobRater also shows applications with no reply after 30 days. Newer
+Meor HR also shows applications with no reply after 30 days. Newer
 applications are excluded from this metric so they are not incorrectly treated
 as ignored.
 
@@ -129,8 +129,7 @@ anonymized activity.
 
 ## Deployment
 
-The application is deployed on Vercel at
-[job-rater.vercel.app](https://job-rater.vercel.app/).
+The application is available at [meorhr.com](https://meorhr.com/).
 
 For another Vercel deployment, configure these project environment variables
 for every required environment:

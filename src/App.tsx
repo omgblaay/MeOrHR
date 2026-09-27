@@ -6,7 +6,7 @@ import EditOfferPage from "./EditOfferPage";
 import ExploreOffersPage from "./ExploreOffersPage";
 import AppFooter from "./components/AppFooter";
 import Button from "./components/Button";
-import HomeHero, { AboutJobRater } from "./components/HomeIntro";
+import HomeHero, { AboutMeorHR } from "./components/HomeIntro";
 import PageMetadata from "./components/PageMetadata";
 import ProfileCountryRequirement from "./components/ProfileCountryRequirement";
 import { supabase } from "./lib/supabase";
@@ -401,7 +401,7 @@ function App() {
                 )}
               </section>
 
-              <AboutJobRater />
+              <AboutMeorHR />
             </main>
             <AppFooter />
           </div>

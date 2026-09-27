@@ -2,8 +2,8 @@ import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import type { JobOffer } from "../types/job";
 
-const siteName = "JobRater";
-const siteUrl = "https://job-rater.vercel.app";
+const siteName = "Meor HR";
+const siteUrl = "https://meorhr.com";
 const defaultDescription =
   "Discover community-posted technology jobs, compare real hiring signals, and track what happens after you apply.";
 
@@ -48,7 +48,7 @@ export default function PageMetadata({ jobOffers }: { jobOffers: JobOffer[] }) {
 function getMetadata(pathname: string, jobOffers: JobOffer[]): Metadata {
   if (pathname === "/") {
     return {
-      title: "JobRater | Community Job Offers and Hiring Signals",
+      title: "Meor HR | Community Job Offers and Hiring Signals",
       description: defaultDescription,
       canonicalPath: "/",
     };
@@ -56,7 +56,7 @@ function getMetadata(pathname: string, jobOffers: JobOffer[]): Metadata {
 
   if (pathname === "/explore") {
     return {
-      title: "Explore Technology Job Offers | JobRater",
+      title: "Explore Technology Job Offers | Meor HR",
       description:
         "Search technology job offers by role, company, location, work model, category, technology, or original source link.",
       canonicalPath: "/explore",
@@ -97,13 +97,13 @@ function getMetadata(pathname: string, jobOffers: JobOffer[]): Metadata {
   const routes: Record<string, Metadata> = {
     "/login": {
       title: `Log In | ${siteName}`,
-      description: "Log in to track applications and contribute to JobRater.",
+      description: "Log in to track applications and contribute to Meor HR.",
       canonicalPath: "/login",
       robots: "noindex, nofollow",
     },
     "/offers/new": {
       title: `Add a Job Offer | ${siteName}`,
-      description: "Share a job offer with the JobRater community.",
+      description: "Share a job offer with the Meor HR community.",
       canonicalPath: "/offers/new",
       robots: "noindex, nofollow",
     },
@@ -121,18 +121,18 @@ function getMetadata(pathname: string, jobOffers: JobOffer[]): Metadata {
     },
     "/settings": {
       title: `Profile Settings | ${siteName}`,
-      description: "Manage your JobRater profile settings.",
+      description: "Manage your Meor HR profile settings.",
       canonicalPath: "/settings",
       robots: "noindex, nofollow",
     },
     "/terms": {
       title: `Terms of Service | ${siteName}`,
-      description: "Read the JobRater terms of service.",
+      description: "Read the Meor HR terms of service.",
       canonicalPath: "/terms",
     },
     "/privacy": {
       title: `Privacy Policy | ${siteName}`,
-      description: "Read how JobRater handles account and application data.",
+      description: "Read how Meor HR handles account and application data.",
       canonicalPath: "/privacy",
     },
   };

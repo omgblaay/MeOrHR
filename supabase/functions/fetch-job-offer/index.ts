@@ -201,7 +201,7 @@ async function fetchHtml(initialUrl: URL) {
       redirect: "manual",
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; JobRater/1.0; +https://jobrater.app)",
+        "User-Agent": "Mozilla/5.0 (compatible; MeorHR/1.0; +https://meorhr.com)",
         Accept: "text/html,application/xhtml+xml",
       },
     }).finally(() => clearTimeout(timeout));

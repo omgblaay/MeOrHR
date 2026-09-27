@@ -107,7 +107,7 @@ export default function HomeHero({
   );
 }
 
-export function AboutJobRater() {
+export function AboutMeorHR() {
   return (
     <section
       aria-labelledby="about-jobrater"
@@ -116,12 +116,12 @@ export function AboutJobRater() {
       <div className="border-b border-white/15 px-4 py-8 sm:px-6 md:border-b-0 md:border-r lg:px-8 lg:py-10">
         <p className="text-sm font-semibold text-brand-300">About the app</p>
         <h2 id="about-jobrater" className="mt-2 text-2xl font-semibold">
-          Why I made JobRater
+          Why I made Meor HR
         </h2>
       </div>
       <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <p className="max-w-2xl text-base leading-7 text-brandgray-250">
-          I made JobRater because getting no reply after an application is
+          I made Meor HR because getting no reply after an application is
           frustrating, and it leaves you wondering whether your resume or
           portfolio was the problem, or whether anyone even looked at it. By
           sharing what happens after we apply, we can see whether an experience

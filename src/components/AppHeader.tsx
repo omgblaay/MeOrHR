@@ -92,7 +92,7 @@ export default function AppHeader() {
           <span className="grid size-9 place-items-center rounded-md bg-brand-900 text-white">
             <BriefcaseIcon aria-hidden="true" width="19" height="19" />
           </span>
-          JobRater
+          Meor HR
         </Link>
         <div className="flex items-center gap-2">
           {isAuthLoading ? (
