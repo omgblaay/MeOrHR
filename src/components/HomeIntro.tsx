@@ -3,7 +3,7 @@ import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import ChartBarLineIcon from "@iconify-react/majesticons/chart-bar-line";
 import PlusLineIcon from "@iconify-react/majesticons/plus-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "./Button";
 import HomeOfferSearch from "./HomeOfferSearch";
 import type { JobOffer } from "../types/job";
@@ -70,6 +70,9 @@ export default function HomeHero({
                 height="17"
               />
             </Button>
+            <Button href="/about" variant="secondary">
+              Read About
+            </Button>
           </div>
         </div>
 
@@ -110,12 +113,12 @@ export default function HomeHero({
 export function AboutMeOrHR() {
   return (
     <section
-      aria-labelledby="about-jobrater"
+      aria-labelledby="about-meorhr"
       className="grid border-t border-brandgray-250 bg-brand-950 text-white md:grid-cols-[0.7fr_1.3fr]"
     >
       <div className="border-b border-white/15 px-4 py-8 sm:px-6 md:border-b-0 md:border-r lg:px-8 lg:py-10">
         <p className="text-sm font-semibold text-brand-300">About the app</p>
-        <h2 id="about-jobrater" className="mt-2 text-2xl font-semibold">
+        <h2 id="about-meorhr" className="mt-2 text-2xl font-semibold">
           Why I made MeOrHR
         </h2>
       </div>
@@ -128,6 +131,12 @@ export function AboutMeOrHR() {
           is just ours or reflects how a company generally runs its hiring
           process.
         </p>
+        <Link
+          to="/about"
+          className="mt-5 inline-flex font-semibold text-lime-300 underline decoration-white/30 underline-offset-4 transition hover:decoration-lime-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-lime-300"
+        >
+          Learn more about MeOrHR
+        </Link>
       </div>
     </section>
   );

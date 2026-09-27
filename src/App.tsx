@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import AppHeader from "./components/AppHeader";
+import AboutPage from "./AboutPage";
 import AddOfferPage from "./AddOfferPage";
 import EditOfferPage from "./EditOfferPage";
 import ExploreOffersPage from "./ExploreOffersPage";
@@ -460,6 +461,7 @@ function App() {
         }
       />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/about" element={<AboutPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route
         path="/applications"

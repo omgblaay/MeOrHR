@@ -30,6 +30,9 @@ export default function AppFooter() {
           <Link className="hover:text-brand-900" to="/applications">
             My board
           </Link>
+          <Link className="hover:text-brand-900" to="/about">
+            About
+          </Link>
           <Link className="hover:text-brand-900" to="/terms">
             Terms
           </Link>

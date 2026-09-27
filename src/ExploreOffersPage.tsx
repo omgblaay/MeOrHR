@@ -1,13 +1,21 @@
-import ChevronLeftLineIcon from "@iconify-react/majesticons/chevron-left-line";
-import ChevronRightLineIcon from "@iconify-react/majesticons/chevron-right-line";
 import { useMemo, useState } from "react";
 import AppFooter from "./components/AppFooter";
 import AppHeader from "./components/AppHeader";
 import Button from "./components/Button";
 import JobTypeScroller from "./components/JobTypeScroller";
-import Label from "./components/Label";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectEmpty,
+  MultiSelectInput,
+  MultiSelectItem,
+  MultiSelectList,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "./components/motion/multi-select";
+import Pagination, { type PageSize } from "./components/Pagination";
+import RadioGroup from "./components/RadioGroup";
 import SearchInput from "./components/Search";
-import Select from "./components/Select";
 import JobCard from "./JobCard";
 import { countryName } from "./lib/countries";
 import {
@@ -19,8 +27,6 @@ import {
 } from "./types/job";
 
 type JobCategoryFilter = "all" | JobCategory;
-type RoleLevelFilter = "all" | RoleLevel;
-type PageSize = 5 | 10 | 25;
 type AvailabilityFilter = "all" | "active" | "gone";
 
 const categoryFilters: { value: JobCategoryFilter; label: string }[] = [
@@ -43,10 +49,11 @@ export default function ExploreOffersPage({
   const [activeCategory, setActiveCategory] =
     useState<JobCategoryFilter>("all");
   const [pageSize, setPageSize] = useState<PageSize>(5);
-  const [availability, setAvailability] =
-    useState<AvailabilityFilter>("all");
-  const [roleLevel, setRoleLevel] = useState<RoleLevelFilter>("all");
-  const [companyCountryCode, setCompanyCountryCode] = useState("");
+  const [availability, setAvailability] = useState<AvailabilityFilter>("all");
+  const [selectedRoleLevels, setSelectedRoleLevels] = useState<RoleLevel[]>([]);
+  const [selectedCompanyCountries, setSelectedCompanyCountries] = useState<
+    string[]
+  >([]);
   const [page, setPage] = useState(1);
 
   const companyCountries = useMemo(
@@ -90,10 +97,12 @@ export default function ExploreOffersPage({
         availability === "all" ||
         (availability === "gone" ? job.isGone : !job.isGone);
       const matchesRoleLevel =
-        roleLevel === "all" || job.roleLevel === roleLevel;
+        selectedRoleLevels.length === 0 ||
+        (job.roleLevel !== null && selectedRoleLevels.includes(job.roleLevel));
       const matchesCompanyCountry =
-        !companyCountryCode ||
-        job.companyCountryCode === companyCountryCode;
+        selectedCompanyCountries.length === 0 ||
+        (job.companyCountryCode !== null &&
+          selectedCompanyCountries.includes(job.companyCountryCode));
 
       return (
         matchesSearch &&
@@ -106,10 +115,10 @@ export default function ExploreOffersPage({
   }, [
     activeCategory,
     availability,
-    companyCountryCode,
     jobOffers,
     query,
-    roleLevel,
+    selectedCompanyCountries,
+    selectedRoleLevels,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOffers.length / pageSize));
@@ -119,11 +128,6 @@ export default function ExploreOffersPage({
     firstOfferIndex,
     firstOfferIndex + pageSize,
   );
-
-  function changePage(nextPage: number) {
-    setPage(Math.min(totalPages, Math.max(1, nextPage)));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
 
   return (
     <div className="min-h-screen">
@@ -144,7 +148,7 @@ export default function ExploreOffersPage({
           aria-label="Search and filter jobs"
           className="px-4 pb-6 pt-7 sm:px-6 lg:px-8"
         >
-          <div className="mb-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem_16rem] md:items-end">
+          <div className="mb-4 grid gap-3 md:grid-cols-[minmax(5rem,1fr)_20rem_20rem] md:items-end">
             <SearchInput
               query={query}
               setQuery={(nextQuery) => {
@@ -152,46 +156,59 @@ export default function ExploreOffersPage({
                 setPage(1);
               }}
             />
-            <div>
-              <Label htmlFor="role-level-filter" className="mb-1 text-xs">
-                Role level
-              </Label>
-              <Select
-                id="role-level-filter"
-                value={roleLevel}
-                onChange={(event) => {
-                  setRoleLevel(event.target.value as RoleLevelFilter);
-                  setPage(1);
-                }}
-              >
-                <option value="all">All levels</option>
-                {roleLevels.map((level) => (
-                  <option key={level} value={level}>
-                    {level}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="company-country-filter" className="mb-1 text-xs">
-                Company country
-              </Label>
-              <Select
-                id="company-country-filter"
-                value={companyCountryCode}
-                onChange={(event) => {
-                  setCompanyCountryCode(event.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">All countries</option>
-                {companyCountries.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
+            <MultiSelect
+              value={selectedRoleLevels}
+              onValueChange={(values) => {
+                setSelectedRoleLevels(values as RoleLevel[]);
+                setPage(1);
+              }}
+            >
+              <MultiSelectTrigger className="min-w-0 border-brandgray-300 bg-white text-brandgray-900 hover:border-brandgray-450 focus-within:ring-brand-700/10">
+                <MultiSelectValue placeholder="All levels" />
+                <MultiSelectInput aria-label="Search role levels" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectList ariaLabel="Role levels">
+                  {roleLevels.map((level) => (
+                    <MultiSelectItem
+                      key={level}
+                      value={level}
+                      textValue={level}
+                    >
+                      {level}
+                    </MultiSelectItem>
+                  ))}
+                  <MultiSelectEmpty>No levels found.</MultiSelectEmpty>
+                </MultiSelectList>
+              </MultiSelectContent>
+            </MultiSelect>
+
+            <MultiSelect
+              value={selectedCompanyCountries}
+              onValueChange={(values) => {
+                setSelectedCompanyCountries(values);
+                setPage(1);
+              }}
+            >
+              <MultiSelectTrigger className="min-w-0 border-brandgray-300 bg-white text-brandgray-900 hover:border-brandgray-450 focus-within:ring-brand-700/10">
+                <MultiSelectValue placeholder="All countries" />
+                <MultiSelectInput aria-label="Search company countries" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectList ariaLabel="Company countries">
+                  {companyCountries.map((country) => (
+                    <MultiSelectItem
+                      key={country.code}
+                      value={country.code}
+                      textValue={country.label}
+                    >
+                      {country.label}
+                    </MultiSelectItem>
+                  ))}
+                  <MultiSelectEmpty>No countries found.</MultiSelectEmpty>
+                </MultiSelectList>
+              </MultiSelectContent>
+            </MultiSelect>
           </div>
           <JobTypeScroller
             options={categoryFilters}
@@ -218,41 +235,22 @@ export default function ExploreOffersPage({
             )}
           </div>
           <div className="flex gap-3">
-            <div className="w-36">
-              <Label htmlFor="offer-availability" className="mb-1 text-xs">
-                Status
-              </Label>
-              <Select
-                id="offer-availability"
-                variant="compact"
-                value={availability}
-                onChange={(event) => {
-                  setAvailability(event.target.value as AvailabilityFilter);
+            <div className="w-64">
+              <RadioGroup
+                name="offer-availability"
+                value={
+                  availability === "all"
+                    ? "All"
+                    : availability === "active"
+                      ? "Active"
+                      : "Gone"
+                }
+                options={["All", "Active", "Gone"]}
+                onChange={(option) => {
+                  setAvailability(option.toLowerCase() as AvailabilityFilter);
                   setPage(1);
                 }}
-              >
-                <option value="all">All offers</option>
-                <option value="active">Active</option>
-                <option value="gone">Gone</option>
-              </Select>
-            </div>
-            <div className="w-28">
-              <Label htmlFor="offers-per-page" className="mb-1 text-xs">
-                Per page
-              </Label>
-              <Select
-                id="offers-per-page"
-                variant="compact"
-                value={pageSize}
-                onChange={(event) => {
-                  setPageSize(Number(event.target.value) as PageSize);
-                  setPage(1);
-                }}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-              </Select>
+              />
             </div>
           </div>
         </div>
@@ -299,7 +297,12 @@ export default function ExploreOffersPage({
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={changePage}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(nextPageSize) => {
+              setPageSize(nextPageSize);
+              setPage(1);
+            }}
           />
         )}
       </main>
@@ -307,59 +310,4 @@ export default function ExploreOffersPage({
     </div>
   );
 }
-
-function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}) {
-  return (
-    <nav
-      aria-label="Job offers pagination"
-      className="flex items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-8"
-    >
-      <Button
-        variant="secondary"
-        size="sm"
-        disabled={currentPage === 1}
-        onClick={() => onPageChange(currentPage - 1)}
-      >
-        <ChevronLeftLineIcon aria-hidden="true" width="17" height="17" />
-        Previous
-      </Button>
-      <div className="flex items-center gap-1" aria-label="Pages">
-        {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-          (page) => (
-            <button
-              key={page}
-              type="button"
-              onClick={() => onPageChange(page)}
-              aria-current={page === currentPage ? "page" : undefined}
-              aria-label={`Page ${page}`}
-              className={`grid size-9 place-items-center rounded-md text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900 ${
-                page === currentPage
-                  ? "bg-brand-900 text-white"
-                  : "text-brandgray-600 hover:bg-brandgray-100 hover:text-brandgray-900"
-              }`}
-            >
-              {page}
-            </button>
-          ),
-        )}
-      </div>
-      <Button
-        variant="secondary"
-        size="sm"
-        disabled={currentPage === totalPages}
-        onClick={() => onPageChange(currentPage + 1)}
-      >
-        Next
-        <ChevronRightLineIcon aria-hidden="true" width="17" height="17" />
-      </Button>
-    </nav>
-  );
-}
+a;

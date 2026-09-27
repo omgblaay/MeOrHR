@@ -95,6 +95,12 @@ function getMetadata(pathname: string, jobOffers: JobOffer[]): Metadata {
   }
 
   const routes: Record<string, Metadata> = {
+    "/about": {
+      title: `About ${siteName} | Community Hiring Signals`,
+      description:
+        "Learn why MeOrHR combines community-posted job offers with anonymous applicant outcomes and private application tracking.",
+      canonicalPath: "/about",
+    },
     "/login": {
       title: `Log In | ${siteName}`,
       description: "Log in to track applications and contribute to MeOrHR.",
