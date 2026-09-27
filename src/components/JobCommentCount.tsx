@@ -4,17 +4,13 @@ import {
   commentsChangedEvent,
   commentsStorageKey,
   readCommentCount,
-  sampleCommentCount,
 } from "../lib/comments";
 
 export default function JobCommentCount({ jobId }: { jobId: number }) {
   const count = useSyncExternalStore(
     (onStoreChange) => {
       const handleCommentChange = (event: Event) => {
-        if (
-          event instanceof CustomEvent &&
-          event.detail?.jobId !== jobId
-        ) {
+        if (event instanceof CustomEvent && event.detail?.jobId !== jobId) {
           return;
         }
         onStoreChange();
@@ -31,7 +27,6 @@ export default function JobCommentCount({ jobId }: { jobId: number }) {
       };
     },
     () => readCommentCount(jobId),
-    () => sampleCommentCount,
   );
 
   return (

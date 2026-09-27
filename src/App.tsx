@@ -8,6 +8,7 @@ import AppFooter from "./components/AppFooter";
 import Button from "./components/Button";
 import HomeHero, { AboutJobRater } from "./components/HomeIntro";
 import PageMetadata from "./components/PageMetadata";
+import ProfileCountryRequirement from "./components/ProfileCountryRequirement";
 import { supabase } from "./lib/supabase";
 import {
   offerFlagChangedEvent,
@@ -25,6 +26,7 @@ import {
   type JobOffer,
   type JobOfferSource,
   type JobSource,
+  type RoleLevel,
 } from "./types/job";
 
 type JobOfferRow = {
@@ -33,13 +35,18 @@ type JobOfferRow = {
   created_at: string;
   title: string;
   company: string;
+  company_country_code: string | null;
   company_logo_url: string | null;
   category: JobCategory;
   location: string;
+  hiring_regions: string[];
+  hiring_country_codes: string[];
   workplace: JobOffer["workplace"];
   employment_type: JobOffer["type"];
+  role_level: RoleLevel | null;
   salary: string | null;
   tags: string[];
+  description: string;
   source_url: string | null;
   source_platform: JobSource;
   published_at: string | null;
@@ -64,6 +71,13 @@ type JobOfferRow = {
 
 type JobOfferFlagRow = {
   flag: "talent_pool" | "gone";
+};
+
+type ApplicantCountryRow = {
+  job_offer_id: number;
+  country_code: string;
+  applicant_count: number;
+  percentage: number;
 };
 
 type JobOfferSourceRow = {
@@ -120,7 +134,10 @@ function formatPostedAt(value: string | null) {
   return `${elapsedDays}d ago`;
 }
 
-function mapJobOffer(row: JobOfferRow): JobOffer {
+function mapJobOffer(
+  row: JobOfferRow,
+  applicantCountries: ApplicantCountryRow[] = [],
+): JobOffer {
   const sources: JobOfferSource[] = (row.job_offer_sources ?? []).map(
     (source) => ({
       id: source.id,
@@ -157,15 +174,20 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
     createdAt: row.created_at,
     title: row.title,
     company: row.company,
+    companyCountryCode: row.company_country_code ?? null,
     companyLogoUrl: row.company_logo_url,
     initials: getInitials(row.company),
     logoColor: getLogoColor(row.company),
     location: row.location,
+    hiringRegions: row.hiring_regions ?? [],
+    hiringCountryCodes: row.hiring_country_codes ?? [],
     workplace: row.workplace,
     category: row.category,
+    roleLevel: row.role_level ?? null,
     type: row.employment_type,
     salary: row.salary,
     tags: row.tags,
+    description: row.description ?? "",
     sourceUrl: row.source_url,
     sourcePlatform: row.source_platform ?? "other",
     sources,
@@ -173,6 +195,11 @@ function mapJobOffer(row: JobOfferRow): JobOffer {
     posted: formatPostedAt(row.published_at),
     updated: formatPostedAt(row.updated_at),
     confirmedApplicants,
+    applicantCountries: applicantCountries.map((country) => ({
+      countryCode: country.country_code,
+      applicantCount: Number(country.applicant_count),
+      percentage: Number(country.percentage),
+    })),
     sourceClicks: sources.reduce(
       (total, source) => total + source.clickCount,
       0,
@@ -215,10 +242,14 @@ function App() {
       setIsLoading(true);
       setLoadError(null);
 
-      const { data, error } = await supabase
-        .from("job_offers")
-        .select("*, job_offer_sources(*), job_offer_flags(flag)")
-        .order("published_at", { ascending: false, nullsFirst: false });
+      const [offersResult, countriesResult] = await Promise.all([
+        supabase
+          .from("job_offers")
+          .select("*, job_offer_sources(*), job_offer_flags(flag)")
+          .order("published_at", { ascending: false, nullsFirst: false }),
+        supabase.rpc("get_job_offer_applicant_countries"),
+      ]);
+      const { data, error } = offersResult;
 
       if (!isCurrentRequest) return;
 
@@ -228,7 +259,18 @@ function App() {
         return;
       }
 
-      setJobOffers(((data ?? []) as JobOfferRow[]).map(mapJobOffer));
+      const countriesByOffer = new Map<number, ApplicantCountryRow[]>();
+      for (const country of (countriesResult.data ?? []) as ApplicantCountryRow[]) {
+        const current = countriesByOffer.get(country.job_offer_id) ?? [];
+        current.push(country);
+        countriesByOffer.set(country.job_offer_id, current);
+      }
+
+      setJobOffers(
+        ((data ?? []) as JobOfferRow[]).map((offer) =>
+          mapJobOffer(offer, countriesByOffer.get(offer.id)),
+        ),
+      );
       setIsLoading(false);
     }
 
@@ -281,6 +323,7 @@ function App() {
   return (
     <>
       <PageMetadata jobOffers={jobOffers} />
+      <ProfileCountryRequirement />
       <Routes>
       <Route
         path="/"

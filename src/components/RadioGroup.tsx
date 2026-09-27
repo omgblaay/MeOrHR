@@ -13,7 +13,7 @@ export default function RadioGroup({
 }) {
   return (
     <span
-      className={`mt-2 flex flex-row overflow-hidden rounded-xl border border-brandgray-200 bg-brandgray-200 p-px text-lime-900 ${className}`}
+      className={`flex flex-row overflow-hidden rounded-xl border border-brandgray-200 bg-brandgray-200 p-px text-lime-900 ${className}`}
     >
       {options.map((option) => (
         <label

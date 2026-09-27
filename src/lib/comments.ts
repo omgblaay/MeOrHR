@@ -8,26 +8,8 @@ export type JobComment = {
 };
 
 export const commentsChangedEvent = "jobrater:comments-changed";
-export const sampleCommentCount = 2;
 
-const sampleComments: JobComment[] = [
-  {
-    id: "sample-marta",
-    userId: null,
-    author: "Marta K.",
-    initials: "MK",
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    body: "The first conversation was relaxed and focused on past projects. I heard back after three working days.",
-  },
-  {
-    id: "sample-daniel",
-    userId: null,
-    author: "Daniel R.",
-    initials: "DR",
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    body: "Worth asking how often the team meets in the office. The hybrid schedule seems to vary between projects.",
-  },
-];
+const retiredSampleCommentIds = new Set(["sample-marta", "sample-daniel"]);
 
 export function commentsStorageKey(jobId: number) {
   return `jobrater:comments:${jobId}`;
@@ -35,13 +17,29 @@ export function commentsStorageKey(jobId: number) {
 
 export function readComments(jobId: number): JobComment[] {
   const storedComments = window.localStorage.getItem(commentsStorageKey(jobId));
-  if (!storedComments) return sampleComments;
+
+  if (!storedComments) {
+    return [];
+  }
 
   try {
-    const parsedComments: unknown = JSON.parse(storedComments);
-    return Array.isArray(parsedComments) ? parsedComments : sampleComments;
+    const parsedComments = JSON.parse(storedComments) as JobComment[];
+    if (!Array.isArray(parsedComments)) return [];
+
+    const comments = parsedComments.filter(
+      (comment) => !retiredSampleCommentIds.has(comment.id),
+    );
+
+    if (comments.length !== parsedComments.length) {
+      window.localStorage.setItem(
+        commentsStorageKey(jobId),
+        JSON.stringify(comments),
+      );
+    }
+
+    return comments;
   } catch {
-    return sampleComments;
+    return [];
   }
 }
 
@@ -50,7 +48,10 @@ export function readCommentCount(jobId: number) {
 }
 
 export function writeComments(jobId: number, comments: JobComment[]) {
-  window.localStorage.setItem(commentsStorageKey(jobId), JSON.stringify(comments));
+  window.localStorage.setItem(
+    commentsStorageKey(jobId),
+    JSON.stringify(comments),
+  );
   window.dispatchEvent(
     new CustomEvent(commentsChangedEvent, { detail: { jobId } }),
   );

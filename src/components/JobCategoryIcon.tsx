@@ -50,6 +50,8 @@ const categoryIcons: Record<string, CategoryIconComponent> = {
   Security: FaShieldHalved,
   Data: DatagripOriginal,
   Go: GoOriginal,
+  Webflow: FigmaOriginal,
+  Framer: FigmaOriginal,
   Support: SalesforceOriginal,
   ERP: SalesforceOriginal,
   Architecture: KubernetesOriginal,

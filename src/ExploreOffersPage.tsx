@@ -51,6 +51,7 @@ export default function ExploreOffersPage({
           job.location,
           job.workplace,
           job.category,
+          job.roleLevel,
           job.type,
           ...job.tags,
         ]

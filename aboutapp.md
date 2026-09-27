@@ -18,27 +18,38 @@ The homepage shows the three most recently published job offers. A separate
 Explore page provides the full Supabase-backed offer list, with search,
 category filtering, pagination, and a choice of 5, 10, or 25 offers per page.
 Users can search across titles, companies, locations, work arrangements,
-categories, employment types, and technology tags.
+categories, role levels, employment types, and technology tags.
 
-A horizontally scrollable job-type selector provides filters for categories including JavaScript, AI/ML, Python, DevOps, Data, UX/UI, and others. Edge controls appear when more categories are available outside the visible area.
+A horizontally scrollable job-type selector provides filters for categories
+including JavaScript, AI/ML, Python, DevOps, Data, UX/UI, Webflow, Framer, and
+others. Edge controls appear when more categories are available outside the
+visible area.
 
 Each connected offer row displays:
 
-- Company, title, location, and work arrangement
-- Employment type and salary, when provided
+- Company, title, company country, location, and work arrangement
+- Employment type, role level, and salary, when provided
 - Job category and technology tags
+- Eligible hiring regions and countries
 - Applicant count and response-rate progress
 - Source platform and relative publication time
 
 ### Review an offer
 
-Every offer has a detail page containing its company and source, role metadata, compensation, tags, publication date, and last update time. A link opens the original listing on its source platform.
+Every offer has a detail page containing its company and source, role metadata,
+role level, compensation, tags, company country, eligible hiring locations,
+publication date, and last update time. A link opens the original listing on
+its source platform.
 
 The public recruitment pipeline shows anonymized applications, replies, and
 interview invitations. A separate 30-day signal counts applications that did
 not receive a reply, using only applications old enough to qualify. Offers
 remain available as a private tracker status and are not shown as a public
 company metric until enough reliable outcome data exists.
+
+Applicant countries are shown only as anonymous per-offer totals and
+percentages. Individual profiles and application timelines are never attached
+to those public geography signals.
 
 Authenticated users can independently mark a listing as talent-pool only or
 gone. Each user can contribute at most one mark of each type per offer. Offers
@@ -55,7 +66,11 @@ Supabase email and password authentication is available. Before an application e
 
 The current stage can be Saved, Applied, In review, Interview, Offer, Rejected, or Withdrawn. Repeatable activities include follow-ups, HR outreach, LinkedIn connections, replies, completed interviews, and completed tasks. Every status change and activity has a date and can include a private note. Timeline entries can be edited or removed, and rejection timing is calculated from the application date.
 
-Personal progress is currently stored per user and offer in browser local storage. It is private to that browser and is not yet synchronized to Supabase.
+Detailed personal progress and private notes are stored per user and offer in
+browser local storage. A minimal application record containing the current
+stage, application date, and country is synchronized to Supabase so JobRater can
+produce anonymous offer insights. The detailed timeline is still private to the
+current browser.
 
 ### Application board
 
@@ -68,8 +83,9 @@ dated event to the offer timeline.
 ### Add an offer
 
 Signed-in users can add a job offer from the header. The submission form captures
-the role, company, location, category, work model, contract type, optional
-compensation and technology tags, plus the original source and publication date.
+the role, company, company country, location, category, work model, contract
+type, optional role level, compensation and technology tags, eligible hiring
+regions and countries, plus the original source and publication date.
 Successful submissions create both the offer and its first source record before
 opening the new offer page. Duplicate source URLs are rejected with an inline
 message. Each new offer records its publisher. Publishers can review their
@@ -77,11 +93,13 @@ listings from the account menu and edit only their own offers.
 
 ### Profile settings
 
-Signed-in users can optionally set a public nickname, profile picture, and short
-role or bio. Profile images are limited to image formats up to 2 MB and stored
-in Supabase Storage. Profile data is stored in Supabase and the account shortcut
-in the header reflects saved changes immediately. Email addresses remain part
-of the private authentication account and are not stored in the public profile.
+Signed-in users set their country before tracking applications and can
+optionally add a public nickname, profile picture, and short About me text. The
+country is used only for anonymous applicant-country totals. Profile images are
+limited to image formats up to 2 MB and stored in Supabase Storage. Profile data
+is stored in Supabase and the account shortcut in the header reflects saved
+changes immediately. Email addresses remain part of the private authentication
+account and are not stored in the public profile.
 
 ### Legal and navigation
 
@@ -107,7 +125,15 @@ Offers retain their source URL and platform. The database currently includes a l
 
 ## Data model
 
-Job offers are stored in the Supabase `job_offers` table. The current schema includes offer identity, company information, category, location, workplace mode, employment type, salary, tags, source data, publication and update timestamps, aggregate applicant metrics, response rate, and legacy applied/responded flags.
+Job offers are stored in the Supabase `job_offers` table. The current schema
+includes offer identity, company information, company country, category, role
+level, location, eligible hiring regions and countries, workplace mode,
+employment type, salary, tags, source data, publication and update timestamps,
+aggregate applicant metrics, response rate, and legacy applied/responded flags.
+
+Private per-user application summaries are stored in `job_applications` and
+protected by row-level security. A database function exposes only aggregated
+applicant-country counts and percentages to public offer views.
 
 Row-level security allows public offer reads. Creating, updating, and deleting offers requires an authenticated Supabase user.
 

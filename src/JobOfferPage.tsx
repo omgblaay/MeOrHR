@@ -4,7 +4,7 @@ import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import EditPenLineIcon from "@iconify-react/majesticons/edit-pen-4-line";
 import ExternalLinkLineIcon from "@iconify-react/majesticons/external-link-line";
 import LocationMarkerLineIcon from "@iconify-react/majesticons/location-marker-line";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "./auth/useAuth";
 import AppHeader from "./components/AppHeader";
@@ -13,16 +13,25 @@ import ApplicantActivitySummary from "./components/ApplicantActivitySummary";
 import ApplicationActivity from "./components/ApplicationActivity";
 import Button from "./components/Button";
 import CommentsSection from "./components/CommentsSection";
-import JobCategoryIcon from "./components/JobCategoryIcon";
 import JobCompanyLogo from "./components/JobCompanyLogo";
+import CountryFlag from "./components/CountryFlag";
+import JobCategoryBadge from "./components/JobCategoryBadge";
+import {
+  ApplicantCountryPreview,
+  HiringReach,
+} from "./components/OfferGeography";
 import JobCommentCount from "./components/JobCommentCount";
 import JobSourceBadge from "./components/JobSourceBadge";
+import {
+  PreviewRail,
+  type PreviewRailItem,
+} from "./components/motion/preview-rail";
 import OfferDescription from "./components/OfferDescription";
 import OfferCommunityFlags from "./components/OfferCommunityFlags";
 import OfferPublisher from "./components/OfferPublisher";
-import OfferSources from "./components/OfferSources";
 import TechnologyTag from "./components/TechnologyTag";
 import UserApplicationStatus from "./components/UserApplicationStatus";
+import { countryName } from "./lib/countries";
 import { recordSourceClick } from "./lib/sourceTracking";
 import type { JobOffer } from "./types/job";
 
@@ -110,16 +119,48 @@ export default function JobOfferPage({
         ) : (
           <>
             <OfferCommunityFlags job={job} />
-            <section className="border-b border-brandgray-250 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+            <OfferPreviewRail job={job} />
+            <section
+              id="offer-overview"
+              className="scroll-mt-20 border-b border-brandgray-250 px-4 py-8 sm:px-6 sm:py-10 lg:px-8"
+            >
               <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex min-w-0 gap-4 sm:gap-5">
                   <JobCompanyLogo job={job} size="job-offer" />
                   <div className="min-w-0">
+                    <h1 className=" text-2xl font-semibold text-brand-950 sm:text-3xl">
+                      {job.title}
+                    </h1>
+
+                    <div className="my-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <p className="flex items-center gap-2 text-brandgray-700">
+                        <BriefcaseLineIcon
+                          aria-hidden="true"
+                          width="16"
+                          height="16"
+                        />
+                        {job.company}
+                        <span className="text-brandgray-350" aria-hidden="true">
+                          ·
+                        </span>
+                        {job.companyCountryCode && (
+                          <>
+                            <CountryFlag countryCode={job.companyCountryCode} />
+                            <span className="text-sm text-brandgray-550">
+                              {countryName(job.companyCountryCode)}
+                            </span>
+                          </>
+                        )}
+                      </p>
+                      <UserApplicationStatus jobId={job.id} />
+                    </div>
                     <div className="flex flex-wrap items-center gap-2.5">
                       <JobSourceBadge source={job.sourcePlatform} />
                       <span className="text-brandgray-350" aria-hidden="true">
                         ·
                       </span>
+                      <JobCategoryBadge category={job.category} />
+
                       <span className="text-sm text-brandgray-550">
                         Posted {job.posted}
                       </span>
@@ -138,22 +179,6 @@ export default function JobOfferPage({
                       >
                         <JobCommentCount jobId={job.id} />
                       </a>
-                    </div>
-
-                    <h1 className="mt-3 text-2xl font-semibold text-brand-950 sm:text-3xl">
-                      {job.title}
-                    </h1>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-                      <p className="flex items-center gap-2 text-brandgray-700">
-                        <BriefcaseLineIcon
-                          aria-hidden="true"
-                          width="16"
-                          height="16"
-                        />
-                        {job.company}
-                      </p>
-                      <UserApplicationStatus jobId={job.id} />
                     </div>
                   </div>
                 </div>
@@ -206,7 +231,10 @@ export default function JobOfferPage({
               </div>
             </section>
 
-            <section className="border-b border-brandgray-250">
+            <section
+              id="offer-details"
+              className="scroll-mt-20 border-b border-brandgray-250"
+            >
               <div className="px-4 sm:px-6 lg:px-8">
                 <dl className="grid divide-y divide-brandgray-200 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x [&>div]:py-5 lg:[&>div]:px-6 lg:[&>div:first-child]:pl-0 lg:[&>div:last-child]:pr-0">
                   <div>
@@ -243,17 +271,36 @@ export default function JobOfferPage({
                     </Dd>
                   </div>
                   <div>
-                    <Dt>Category</Dt>
+                    <Dt>Role level</Dt>
                     <Dd>
-                      <JobCategoryIcon
-                        category={job.category}
-                        size={17}
-                        className="size-7"
+                      <BriefcaseLineIcon
+                        aria-hidden="true"
+                        width="15"
+                        height="15"
                       />
-                      {job.category}
+                      {job.roleLevel ?? "Not specified"}
                     </Dd>
                   </div>
                 </dl>
+
+                {(job.companyCountryCode ||
+                  job.hiringRegions.length > 0 ||
+                  job.hiringCountryCodes.length > 0) && (
+                  <div className="flex flex-col gap-3 border-t border-brandgray-200 py-4 text-sm sm:flex-row sm:items-center sm:gap-8">
+                    {job.companyCountryCode && (
+                      <span className="inline-flex items-center gap-2 text-brandgray-700">
+                        <span className="text-brandgray-500">
+                          Company based in
+                        </span>
+                        <CountryFlag countryCode={job.companyCountryCode} />
+                        <strong className="font-semibold text-brandgray-900">
+                          {countryName(job.companyCountryCode)}
+                        </strong>
+                      </span>
+                    )}
+                    <HiringReach job={job} />
+                  </div>
+                )}
 
                 <div className="flex flex-wrap items-center gap-10 border-t border-brandgray-200 py-4 text-sm text-brandgray-600">
                   <span className=" text-brandgray-400">Offer lifecycle</span>
@@ -278,9 +325,6 @@ export default function JobOfferPage({
                 </div>
               </div>
             </section>
-
-            <ApplicantActivitySummary job={job} />
-
             <section className="border-b border-brandgray-250">
               <div id="your-status" className="px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mb-5 flex flex-wrap gap-2">
@@ -291,8 +335,17 @@ export default function JobOfferPage({
                 <OfferDescription job={job} />
               </div>
             </section>
+
+            <ApplicantActivitySummary job={job} />
+
+            {job.applicantCountries.length > 0 && (
+              <section className="border-b border-brandgray-250 px-4 sm:px-6 lg:px-8">
+                <ApplicantCountryPreview job={job} />
+              </section>
+            )}
+
             <ApplicationActivity job={job} />
-            <OfferSources sources={job.sources} />
+            {/* <OfferSources sources={job.sources} /> */}
             <CommentsSection key={job.id} jobId={job.id} />
             <OfferPublisher
               createdBy={job.createdBy}
@@ -311,6 +364,134 @@ function Dd({ children }: { children: ReactNode }) {
     <dd className="mt-1  flex flex-row gap-1 items-center  font-semibold text-brandgray-900">
       {children}
     </dd>
+  );
+}
+
+function OfferPreviewRail({ job }: { job: JobOffer }) {
+  const items = useMemo<PreviewRailItem[]>(
+    () => [
+      {
+        id: "overview",
+        label: "Overview",
+        href: "#offer-overview",
+        description: `${job.company} · ${job.location}`,
+      },
+      {
+        id: "details",
+        label: "Role details",
+        href: "#offer-details",
+        description: `${job.roleLevel ?? "Level not specified"} · ${job.workplace}`,
+      },
+      {
+        id: "description",
+        label: "Description",
+        href: "#offer-description",
+        description: job.tags.length
+          ? `${job.tags.length} ${job.tags.length === 1 ? "skill" : "skills"} listed`
+          : "Role responsibilities and requirements",
+      },
+      {
+        id: "activity",
+        label: "Hiring activity",
+        href: "#recruitment-pipeline-heading",
+        description: `${job.confirmedApplicants} confirmed ${job.confirmedApplicants === 1 ? "application" : "applications"}`,
+      },
+      {
+        id: "application",
+        label: "Your application",
+        href: "#your-application",
+        description: "Track your status, dates, and follow-ups",
+      },
+      {
+        id: "discussion",
+        label: "Discussion",
+        href: "#discussion",
+        description: "Questions and notes from the community",
+      },
+    ],
+    [job],
+  );
+  const [activeId, setActiveId] = useState("overview");
+
+  useEffect(() => {
+    let animationFrameId: number | null = null;
+
+    const updateActiveSection = () => {
+      animationFrameId = null;
+      const sections = items.flatMap((item) => {
+        const elementId = item.href?.startsWith("#")
+          ? item.href.slice(1)
+          : null;
+        const element = elementId ? document.getElementById(elementId) : null;
+
+        return element ? [{ id: item.id, element }] : [];
+      });
+
+      if (!sections.length) return;
+
+      const readingLine = window.innerHeight * 0.28;
+      let nextActiveId = sections[0].id;
+
+      for (const section of sections) {
+        if (section.element.getBoundingClientRect().top <= readingLine) {
+          nextActiveId = section.id;
+        } else {
+          break;
+        }
+      }
+
+      const pageBottom = window.scrollY + window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      if (pageBottom >= documentHeight - 2) {
+        nextActiveId = sections.at(-1)?.id ?? nextActiveId;
+      }
+
+      setActiveId((currentId) =>
+        currentId === nextActiveId ? currentId : nextActiveId,
+      );
+    };
+
+    const queueUpdate = () => {
+      if (animationFrameId === null) {
+        animationFrameId = window.requestAnimationFrame(updateActiveSection);
+      }
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", queueUpdate, { passive: true });
+    window.addEventListener("resize", queueUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", queueUpdate);
+      window.removeEventListener("resize", queueUpdate);
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [items]);
+
+  return (
+    <PreviewRail
+      items={items}
+      label="Job offer sections"
+      activeId={activeId}
+      onActiveChange={setActiveId}
+      highlightActive
+      previewSide="before"
+      className="pointer-events-none fixed right-3 top-1/2 z-40 hidden h-[min(32rem,calc(100vh-8rem))] w-80 -translate-y-1/2 xl:flex"
+      railClassName="pointer-events-auto ml-auto py-2 text-brandgray-500"
+      previewContainerClassName="left-0"
+      renderPreview={(item) => (
+        <div className="rounded-md border p-3 shadow-md">
+          <p className="font-semibold text-brandgray-900">{item.label}</p>
+          {item.description ? (
+            <div className="mt-1 text-sm leading-5 text-brandgray-550">
+              {item.description}
+            </div>
+          ) : null}
+        </div>
+      )}
+    />
   );
 }
 

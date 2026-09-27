@@ -5,6 +5,18 @@ import type { JobOffer } from "../types/job";
 
 export default function OfferDescription({ job }: { job: JobOffer }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const paragraphs = job.description.trim()
+    ? job.description
+        .trim()
+        .split(/\n{2,}/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean)
+    : [
+        `${job.company} is looking for a ${job.title} to join its team in ${job.location}. You will work in a ${job.workplace.toLowerCase()} setup and help shape reliable, thoughtful products used by customers every day.`,
+        "In this role, you will take ownership of projects from discovery through delivery, collaborate closely with product and design, and turn ambiguous requirements into maintainable solutions. The team values clear communication, pragmatic decisions, and steady improvements over unnecessary complexity.",
+        `You should be comfortable working with ${job.tags.join(", ")} and sharing context with people across different disciplines. Experience mentoring teammates, reviewing work, and improving team practices will be useful.`,
+        `${job.company} offers a ${job.type.toLowerCase()} position with room to influence both the product and the way the team works. The hiring process includes an introductory conversation, a practical discussion, and a final meeting with the people you would work with most closely.`,
+      ];
 
   return (
     <>
@@ -14,31 +26,11 @@ export default function OfferDescription({ job }: { job: JobOffer }) {
           isExpanded ? "max-h-[60rem]" : "max-h-40"
         }`}
       >
-        <p>
-          {job.company} is looking for a {job.title} to join its team in{" "}
-          {job.location}. You will work in a {job.workplace.toLowerCase()} setup
-          and help shape reliable, thoughtful products used by customers every
-          day.
-        </p>
-        <p>
-          In this role, you will take ownership of projects from discovery
-          through delivery, collaborate closely with product and design, and
-          turn ambiguous requirements into maintainable solutions. The team
-          values clear communication, pragmatic decisions, and steady
-          improvements over unnecessary complexity.
-        </p>
-        <p>
-          You should be comfortable working with {job.tags.join(", ")} and
-          sharing context with people across different disciplines. Experience
-          mentoring teammates, reviewing work, and improving team practices will
-          be useful.
-        </p>
-        <p>
-          {job.company} offers a {job.type.toLowerCase()} position with room to
-          influence both the product and the way the team works. The hiring
-          process includes an introductory conversation, a practical discussion,
-          and a final meeting with the people you would work with most closely.
-        </p>
+        {paragraphs.map((paragraph, index) => (
+          <p key={`${job.id}-description-${index}`} className="whitespace-pre-line">
+            {paragraph}
+          </p>
+        ))}
       </div>
       <button
         type="button"

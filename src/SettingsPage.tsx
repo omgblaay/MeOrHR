@@ -7,6 +7,8 @@ import { useAuth } from "./auth/useAuth";
 import AppHeader from "./components/AppHeader";
 import AppFooter from "./components/AppFooter";
 import Button from "./components/Button";
+import CountryFlag from "./components/CountryFlag";
+import CountrySelect from "./components/CountrySelect";
 import Input from "./components/Input";
 import Label from "./components/Label";
 import {
@@ -29,6 +31,7 @@ export default function SettingsPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [shouldRemoveAvatar, setShouldRemoveAvatar] = useState(false);
   const [bio, setBio] = useState("");
+  const [countryCode, setCountryCode] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
@@ -44,7 +47,7 @@ export default function SettingsPage() {
 
     supabase
       .from("profiles")
-      .select("id, nickname, avatar_url, bio")
+      .select("id, nickname, avatar_url, bio, country_code")
       .eq("id", user.id)
       .maybeSingle<UserProfile>()
       .then(({ data, error }) => {
@@ -56,6 +59,7 @@ export default function SettingsPage() {
           setNickname(data.nickname ?? "");
           setAvatarUrl(data.avatar_url ?? "");
           setBio(data.bio ?? "");
+          setCountryCode(data.country_code ?? "");
         }
 
         setIsLoading(false);
@@ -129,6 +133,7 @@ export default function SettingsPage() {
       nickname: nickname.trim() || null,
       avatar_url: savedAvatarUrl,
       bio: bio.trim() || null,
+      country_code: countryCode,
     };
     const { error } = await supabase
       .from("profiles")
@@ -218,8 +223,8 @@ export default function SettingsPage() {
               Profile settings
             </h1>
             <p className="mt-2 text-sm leading-6 text-brandgray-600">
-              All fields are optional. These details may appear beside your
-              future community contributions.
+              Your country is required so JobRater can show anonymous applicant
+              geography. Everything else is optional.
             </p>
           </header>
 
@@ -249,6 +254,27 @@ export default function SettingsPage() {
               </div>
 
               <div className="mt-7 space-y-6">
+                <label className="block">
+                  <Label asSpan>Country</Label>
+                  <span className="relative mt-2 flex items-center">
+                    {countryCode && (
+                      <span className="pointer-events-none absolute left-3.5 z-10">
+                        <CountryFlag countryCode={countryCode} />
+                      </span>
+                    )}
+                    <CountrySelect
+                      required
+                      value={countryCode}
+                      onChange={(event) => setCountryCode(event.target.value)}
+                      className={countryCode ? "pl-11" : ""}
+                      autoComplete="country"
+                    />
+                  </span>
+                  <span className="mt-2 block text-sm text-brandgray-500">
+                    Used only in anonymous applicant-country totals.
+                  </span>
+                </label>
+
                 <label className="block">
                   <Label asSpan optional>
                     Nickname
@@ -311,15 +337,16 @@ export default function SettingsPage() {
 
                 <label className="block">
                   <Label asSpan optional>
-                    Role or short bio
+                    About me
                   </Label>
                   <textarea
+                    name="about-me"
                     value={bio}
                     onChange={(event) => setBio(event.target.value)}
                     maxLength={160}
                     rows={3}
                     className={`${textareaClasses} h-auto min-h-24 resize-y py-3`}
-                    placeholder="Frontend developer looking for a product team"
+                    placeholder="Share a little about yourself"
                   />
                   <span className="mt-1 block text-right text-xs text-brandgray-450">
                     {bio.length}/160

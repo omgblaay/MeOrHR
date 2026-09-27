@@ -32,6 +32,10 @@ import {
   type ApplicationStatus,
 } from "../lib/applicationStatus";
 import {
+  loadProfileCountry,
+  syncApplicationRecord,
+} from "../lib/applicationSync";
+import {
   applicationQuickActionEvent,
   type ApplicationQuickAction,
 } from "../lib/applicationQuickAction";
@@ -304,6 +308,20 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
   const [message, setMessage] = useState("");
   const [hoveredEventType, setHoveredEventType] =
     useState<ApplicationEventType | null>(null);
+  const [countryCode, setCountryCode] = useState<string | null | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    let isCurrent = true;
+    loadProfileCountry(userId).then((country) => {
+      if (isCurrent) setCountryCode(country);
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [userId]);
 
   function saveTracker(nextTracker: ApplicationTracker) {
     try {
@@ -311,6 +329,19 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
       setTracker(nextTracker);
       notifyApplicationStatusChanged(userId, job.id);
       setMessage("Application tracker updated.");
+
+      if (countryCode) {
+        const appliedAt = [...nextTracker.events]
+          .sort((first, second) => first.date.localeCompare(second.date))
+          .find((item) => item.type === "applied")?.date;
+        void syncApplicationRecord({
+          userId,
+          jobId: job.id,
+          status: nextTracker.status,
+          countryCode,
+          appliedAt,
+        });
+      }
     } catch {
       setMessage("Could not save this update in your browser.");
     }
@@ -395,6 +426,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
         }>
       ).detail;
       if (detail.jobId !== job.id) return;
+      if (!countryCode) return;
 
       const currentTracker = readTracker(storageKey);
       const today = localDateValue();
@@ -476,6 +508,16 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
         setStatusDraft(nextTracker.status);
         notifyApplicationStatusChanged(userId, job.id);
         setMessage(nextMessage);
+        const appliedAt = [...nextTracker.events]
+          .sort((first, second) => first.date.localeCompare(second.date))
+          .find((item) => item.type === "applied")?.date;
+        void syncApplicationRecord({
+          userId,
+          jobId: job.id,
+          status: nextTracker.status,
+          countryCode,
+          appliedAt,
+        });
       } catch {
         setMessage("Could not save this update in your browser.");
       }
@@ -487,7 +529,34 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
         applicationQuickActionEvent,
         handleQuickAction,
       );
-  }, [job.id, job.sourcePlatform, storageKey, userId]);
+  }, [countryCode, job.id, job.sourcePlatform, storageKey, userId]);
+
+  if (countryCode === undefined) {
+    return (
+      <div className="h-24 animate-pulse bg-brandgray-100" aria-label="Loading profile" />
+    );
+  }
+
+  if (!countryCode) {
+    return (
+      <div className="border-l-2 border-amber-400 pl-5">
+        <h3 className="font-semibold text-brandgray-900">
+          Add your country before tracking applications
+        </h3>
+        <p className="mt-1 max-w-xl leading-6 text-brandgray-600">
+          Your country contributes only to anonymous applicant geography and is
+          never shown with your profile or timeline.
+        </p>
+        <Link
+          to="/settings"
+          state={{ from: `/jobs/${job.id}` }}
+          className="mt-4 inline-flex h-9 items-center justify-center rounded-md bg-lime-300 px-3.5 font-semibold text-brand-900 transition hover:bg-lime-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
+        >
+          Set my country
+        </Link>
+      </div>
+    );
+  }
 
   if (!tracker) {
     return (
@@ -1032,9 +1101,8 @@ function IconButton({
 function PrivacyNote() {
   return (
     <p className="mt-3 max-w-2xl text-xs leading-5 text-brandgray-500">
-      Your dates and notes are private and currently saved only on this device.
-      Anonymous event totals will contribute to offer insights after account
-      sync is enabled.
+      Your dates and notes stay private on this device. Only your current stage,
+      application date, and country contribute to anonymous offer insights.
     </p>
   );
 }

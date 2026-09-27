@@ -49,7 +49,7 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
     const loadProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, nickname, avatar_url, bio")
+        .select("id, nickname, avatar_url, bio, country_code")
         .eq("id", user.id)
         .maybeSingle<UserProfile>();
 

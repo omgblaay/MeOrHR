@@ -8,6 +8,8 @@ import { Link, useNavigate } from "react-router-dom";
 import JobCategoryBadge from "./components/JobCategoryBadge";
 import JobCompanyLogo from "./components/JobCompanyLogo";
 import JobCommentCount from "./components/JobCommentCount";
+import CountryFlag from "./components/CountryFlag";
+import { HiringReach } from "./components/OfferGeography";
 import JobSourceBadge from "./components/JobSourceBadge";
 import ResponseBar from "./components/ResponseBar";
 import TechnologyTag from "./components/TechnologyTag";
@@ -64,6 +66,9 @@ export default function JobCard({
                 <span className="truncate font-semibold text-brandgray-900">
                   {job.company}
                 </span>
+                {job.companyCountryCode && (
+                  <CountryFlag countryCode={job.companyCountryCode} />
+                )}
                 <span
                   className="hidden text-brandgray-350 sm:inline"
                   aria-hidden="true"
@@ -102,7 +107,7 @@ export default function JobCard({
             </span>
             <span className="inline-flex items-center gap-1.5">
               <ApplicationsLineIcon aria-hidden="true" width="15" height="15" />
-              {job.workplace} · {job.type}
+              {[job.workplace, job.type, job.roleLevel].filter(Boolean).join(" · ")}
             </span>
           </div>
 
@@ -110,6 +115,10 @@ export default function JobCard({
             {job.salary && (
               <span className="font-semibold text-brand-850">{job.salary}</span>
             )}
+          </div>
+
+          <div className="mt-3 text-sm">
+            <HiringReach job={job} compact />
           </div>
 
           <div className="job-type-scrollbar -mr-4 mt-4 flex gap-1.5 overflow-x-auto pr-4 sm:mr-0 flex-wrap sm:gap-2 sm:overflow-visible sm:pr-0">

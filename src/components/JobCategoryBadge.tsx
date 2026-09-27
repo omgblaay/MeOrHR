@@ -23,6 +23,8 @@ const categoryClasses: Record<JobCategory, string> = {
   Security: "border-red-200 bg-red-100 text-red-800",
   Data: "border-blue-200 bg-blue-100 text-blue-800",
   Go: "border-blue-200 bg-blue-100 text-blue-800",
+  Webflow: "border-blue-200 bg-blue-50 text-blue-800",
+  Framer: "border-purple-200 bg-purple-50 text-purple-700",
   Support: "border-blue-200 bg-blue-100 text-blue-800",
   ERP: "border-blue-200 bg-blue-100 text-blue-800",
   Architecture: "border-blue-200 bg-blue-100 text-blue-800",

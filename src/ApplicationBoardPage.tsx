@@ -175,7 +175,7 @@ export default function ApplicationBoardPage({
                 value={view}
                 options={["Board", "List"]}
                 onChange={(opt) => setView(String(opt) as BoardView)}
-                className="max-w-64"
+                className="mt-2 max-w-64"
               />
             </div>
             <div className="flex items-end gap-5">

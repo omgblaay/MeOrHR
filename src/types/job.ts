@@ -20,6 +20,8 @@ export const jobCategories = [
   'Security',
   'Data',
   'Go',
+  'Webflow',
+  'Framer',
   'Support',
   'ERP',
   'Architecture',
@@ -27,6 +29,19 @@ export const jobCategories = [
 ] as const
 
 export type JobCategory = (typeof jobCategories)[number]
+
+export const roleLevels = [
+  'Intern',
+  'Junior',
+  'Mid',
+  'Senior',
+  'Lead',
+  'Principal',
+  'Manager',
+  'Director',
+] as const
+
+export type RoleLevel = (typeof roleLevels)[number]
 
 export const jobSources = [
   'linkedin',
@@ -57,21 +72,32 @@ export type JobOfferSource = {
   clickCount: number
 }
 
+export type ApplicantCountry = {
+  countryCode: string
+  applicantCount: number
+  percentage: number
+}
+
 export type JobOffer = {
   id: number
   createdBy: string | null
   createdAt: string
   title: string
   company: string
+  companyCountryCode: string | null
   companyLogoUrl: string | null
   initials: string
   logoColor: string
   location: string
+  hiringRegions: string[]
+  hiringCountryCodes: string[]
   workplace: 'Remote' | 'Hybrid' | 'On-site'
   category: JobCategory
+  roleLevel: RoleLevel | null
   type: 'Full-time' | 'Contract'
   salary: string | null
   tags: string[]
+  description: string
   sourceUrl: string | null
   sourcePlatform: JobSource
   sources: JobOfferSource[]
@@ -79,6 +105,7 @@ export type JobOffer = {
   posted: string
   updated: string
   confirmedApplicants: number
+  applicantCountries: ApplicantCountry[]
   sourceClicks: number
   repliedApplicants: number
   nextInterviewApplicants: number

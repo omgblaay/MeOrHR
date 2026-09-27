@@ -4,6 +4,7 @@ import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
 import ChevronDownLineIcon from "@iconify-react/majesticons/chevron-down-line";
 import LogoutLineIcon from "@iconify-react/majesticons/logout-line";
 import PlusLineIcon from "@iconify-react/majesticons/plus-line";
+import Button from "./Button";
 import SettingsCogLineIcon from "@iconify-react/majesticons/settings-cog-line";
 import UserLineIcon from "@iconify-react/majesticons/user-line";
 import { Link, useLocation } from "react-router-dom";
@@ -31,7 +32,7 @@ export default function AppHeader() {
     const loadProfile = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, nickname, avatar_url, bio")
+        .select("id, nickname, avatar_url, bio, country_code")
         .eq("id", user.id)
         .maybeSingle<UserProfile>();
 
@@ -101,10 +102,10 @@ export default function AppHeader() {
             />
           ) : user ? (
             <>
-              <Link
-                to="/applications"
+              <Button
+                href="/applications"
+                variant="secondary"
                 title="Application board"
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-brandgray-300 bg-white px-2.5 py-2 font-semibold text-brandgray-750 transition hover:border-brandgray-450 hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
               >
                 <ApplicationsLineIcon
                   aria-hidden="true"
@@ -112,14 +113,11 @@ export default function AppHeader() {
                   height="17"
                 />
                 <span className="hidden lg:inline">My board</span>
-              </Link>
-              <Link
-                to="/offers/new"
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-lime-300 px-3.5 py-2 font-semibold text-brand-900 transition hover:bg-lime-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
-              >
+              </Button>
+              <Button href="/offers/new">
                 <PlusLineIcon aria-hidden="true" width="17" height="17" />
                 Add an offer
-              </Link>
+              </Button>
               <div ref={accountMenuRef} className="relative">
                 <button
                   type="button"
@@ -127,7 +125,7 @@ export default function AppHeader() {
                   aria-expanded={isAccountMenuOpen}
                   aria-label="Open account menu"
                   onClick={() => setIsAccountMenuOpen((isOpen) => !isOpen)}
-                  className="flex h-10 min-w-0 cursor-pointer items-center gap-1.5 rounded-md border border-brandgray-300 bg-white p-1 pr-2 text-brandgray-700 transition hover:border-brandgray-450 hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
+                  className="flex h-10 min-w-0 cursor-pointer items-center gap-1.5 rounded-3xl border border-brandgray-300 bg-white p-1 pr-2 text-brandgray-700 transition hover:border-brandgray-450 hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-900"
                 >
                   <span className="relative grid size-7 shrink-0 place-items-center overflow-hidden rounded-full bg-brand-900 text-xs font-semibold text-white">
                     {profileInitials(

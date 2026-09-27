@@ -5,6 +5,7 @@ export type UserProfile = {
   nickname: string | null;
   avatar_url: string | null;
   bio: string | null;
+  country_code: string | null;
 };
 
 export function profileInitials(name: string) {

@@ -173,6 +173,7 @@ function searchableOfferValues(job: JobOffer) {
     job.location,
     job.workplace,
     job.category,
+    job.roleLevel,
     job.type,
     job.salary,
     job.sourceUrl,

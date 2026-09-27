@@ -1,3 +1,5 @@
+import { loadProfileCountry, syncApplicationRecord } from "./applicationSync";
+
 export const applicationStatuses = [
   "saved",
   "applied",
@@ -104,6 +106,28 @@ export function updateApplicationStatus(
     JSON.stringify({ ...tracker, status, events }),
   );
   notifyApplicationStatusChanged(userId, jobId);
+
+  void loadProfileCountry(userId).then((countryCode) => {
+    if (!countryCode) return;
+    const appliedAt = events
+      .filter(
+        (event): event is { type: string; date: string } =>
+          typeof event === "object" &&
+          event !== null &&
+          "type" in event &&
+          "date" in event &&
+          typeof event.type === "string" &&
+          typeof event.date === "string",
+      )
+      .find((event) => event.type === "applied")?.date;
+    void syncApplicationRecord({
+      userId,
+      jobId,
+      status,
+      countryCode,
+      appliedAt,
+    });
+  });
 }
 
 export function readApplicationLastActivity(userId: string, jobId: number) {

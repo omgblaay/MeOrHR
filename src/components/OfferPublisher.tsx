@@ -20,7 +20,7 @@ export default function OfferPublisher({
     let isCurrent = true;
     supabase
       .from("profiles")
-      .select("id, nickname, avatar_url, bio")
+      .select("id, nickname, avatar_url, bio, country_code")
       .eq("id", createdBy)
       .maybeSingle<UserProfile>()
       .then(({ data }) => {
