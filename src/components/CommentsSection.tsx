@@ -69,7 +69,7 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
     if (!body || !user) return;
 
     const author =
-      profile?.nickname?.trim() || user.email?.split("@")[0] || "Meor HR user";
+      profile?.nickname?.trim() || user.email?.split("@")[0] || "MeOrHR user";
     const newComment: JobComment = {
       id: crypto.randomUUID(),
       userId: user.id,

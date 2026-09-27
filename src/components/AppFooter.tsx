@@ -10,7 +10,7 @@ export default function AppFooter() {
             <BriefcaseIcon aria-hidden="true" width="17" height="17" />
           </span>
           <div>
-            <p className="font-semibold text-brandgray-900">Meor HR</p>
+            <p className="font-semibold text-brandgray-900">MeOrHR</p>
             <p className="text-sm text-brandgray-550">
               Community job offers and clearer hiring signals.
             </p>
@@ -39,7 +39,7 @@ export default function AppFooter() {
         </nav>
       </div>
       <div className="border-t border-brandgray-250 px-4 py-3 text-xs text-brandgray-500 sm:px-6 lg:px-8">
-        © {new Date().getFullYear()} Meor HR. Built for applicants who want a
+        © {new Date().getFullYear()} MeOrHR. Built for applicants who want a
         clearer picture.
       </div>
     </footer>

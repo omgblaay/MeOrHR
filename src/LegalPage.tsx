@@ -15,8 +15,8 @@ const termsSections: LegalSection[] = [
     id: "service",
     title: "1. The service",
     paragraphs: [
-      "Meor HR is a community job board where people can share job listings and contribute information about application and recruitment experiences. The service is informational and does not act as an employer, recruiter, or employment agency.",
-      "Job listings, applicant signals, comments, and company information may be submitted by users or imported from third-party sources. Meor HR does not guarantee that any listing is current, complete, genuine, or suitable for you.",
+      "MeOrHR is a community job board where people can share job listings and contribute information about application and recruitment experiences. The service is informational and does not act as an employer, recruiter, or employment agency.",
+      "Job listings, applicant signals, comments, and company information may be submitted by users or imported from third-party sources. MeOrHR does not guarantee that any listing is current, complete, genuine, or suitable for you.",
     ],
   },
   {
@@ -31,13 +31,13 @@ const termsSections: LegalSection[] = [
     title: "3. Community contributions",
     paragraphs: [
       "You may submit job offers, application outcomes, profile information, and other content. Only submit information you are entitled to share, and avoid including confidential recruitment materials, personal data about recruiters or other applicants, or misleading claims.",
-      "You retain ownership of your content. You grant Meor HR a non-exclusive, worldwide, royalty-free licence to host, display, format, aggregate, and use that content as needed to operate and improve the service.",
+      "You retain ownership of your content. You grant MeOrHR a non-exclusive, worldwide, royalty-free licence to host, display, format, aggregate, and use that content as needed to operate and improve the service.",
     ],
   },
   {
     id: "conduct",
     title: "4. Acceptable use",
-    paragraphs: ["You must not use Meor HR to:"],
+    paragraphs: ["You must not use MeOrHR to:"],
     bullets: [
       "post false, discriminatory, defamatory, unlawful, or abusive material;",
       "impersonate another person or company;",
@@ -50,35 +50,35 @@ const termsSections: LegalSection[] = [
     id: "third-parties",
     title: "5. Third-party listings and links",
     paragraphs: [
-      "Meor HR links to external job boards and company websites. Those services have their own terms and privacy practices. Meor HR is not responsible for their content, availability, application process, or hiring decisions.",
+      "MeOrHR links to external job boards and company websites. Those services have their own terms and privacy practices. MeOrHR is not responsible for their content, availability, application process, or hiring decisions.",
     ],
   },
   {
     id: "moderation",
     title: "6. Moderation and suspension",
     paragraphs: [
-      "Meor HR may correct, hide, merge, or remove content that is duplicate, inaccurate, unsafe, unlawful, or inconsistent with these terms. Accounts may be restricted or removed where necessary to protect the service or its community.",
+      "MeOrHR may correct, hide, merge, or remove content that is duplicate, inaccurate, unsafe, unlawful, or inconsistent with these terms. Accounts may be restricted or removed where necessary to protect the service or its community.",
     ],
   },
   {
     id: "availability",
     title: "7. Availability and disclaimers",
     paragraphs: [
-      "The service is provided on an “as is” and “as available” basis. Recruitment statistics reflect only activity reported to Meor HR and should not be treated as a complete measure of a company, a guarantee of response, or professional career advice.",
+      "The service is provided on an “as is” and “as available” basis. Recruitment statistics reflect only activity reported to MeOrHR and should not be treated as a complete measure of a company, a guarantee of response, or professional career advice.",
     ],
   },
   {
     id: "liability",
     title: "8. Liability",
     paragraphs: [
-      "To the extent permitted by applicable law, Meor HR is not liable for hiring decisions, missed opportunities, reliance on community data, third-party content, or indirect losses resulting from use of the service. Nothing in these terms excludes rights or liability that cannot legally be excluded.",
+      "To the extent permitted by applicable law, MeOrHR is not liable for hiring decisions, missed opportunities, reliance on community data, third-party content, or indirect losses resulting from use of the service. Nothing in these terms excludes rights or liability that cannot legally be excluded.",
     ],
   },
   {
     id: "changes",
     title: "9. Changes",
     paragraphs: [
-      "The service and these terms may change as Meor HR develops. The updated date will be revised when material changes are published. Continuing to use the service after a change means you accept the updated terms.",
+      "The service and these terms may change as MeOrHR develops. The updated date will be revised when material changes are published. Continuing to use the service after a change means you accept the updated terms.",
     ],
   },
 ];
@@ -87,7 +87,7 @@ const privacySections: LegalSection[] = [
   {
     id: "collection",
     title: "1. Information we collect",
-    paragraphs: ["Meor HR may process the following information:"],
+    paragraphs: ["MeOrHR may process the following information:"],
     bullets: [
       "account data, including your email address and authentication identifiers;",
       "optional public profile data, including nickname, profile picture, and short bio;",
@@ -100,8 +100,8 @@ const privacySections: LegalSection[] = [
     id: "use",
     title: "2. How information is used",
     paragraphs: [
-      "Information is used to authenticate users, operate profiles, publish job offers, provide application tracking, calculate community hiring signals, prevent abuse, maintain security, and improve Meor HR.",
-      "Depending on the activity, processing is based on providing the service you request, Meor HR’s legitimate interests in operating and securing the community, your consent where specifically requested, or compliance with legal obligations.",
+      "Information is used to authenticate users, operate profiles, publish job offers, provide application tracking, calculate community hiring signals, prevent abuse, maintain security, and improve MeOrHR.",
+      "Depending on the activity, processing is based on providing the service you request, MeOrHR’s legitimate interests in operating and securing the community, your consent where specifically requested, or compliance with legal obligations.",
     ],
   },
   {
@@ -116,7 +116,7 @@ const privacySections: LegalSection[] = [
     id: "storage",
     title: "4. Storage and service providers",
     paragraphs: [
-      "Meor HR uses Supabase for authentication, database storage, and profile images. The deployed website may also be processed by its hosting provider. These providers process information on Meor HR’s behalf and may maintain operational and security logs.",
+      "MeOrHR uses Supabase for authentication, database storage, and profile images. The deployed website may also be processed by its hosting provider. These providers process information on MeOrHR’s behalf and may maintain operational and security logs.",
       "External job links take you to third-party services whose privacy policies apply independently.",
     ],
   },
@@ -124,7 +124,7 @@ const privacySections: LegalSection[] = [
     id: "local-storage",
     title: "5. Browser storage",
     paragraphs: [
-      "Meor HR uses browser local storage for private application tracking and session-related functionality. Clearing your browser data may remove information that has not been synchronized to Supabase.",
+      "MeOrHR uses browser local storage for private application tracking and session-related functionality. Clearing your browser data may remove information that has not been synchronized to Supabase.",
     ],
   },
   {
@@ -139,14 +139,14 @@ const privacySections: LegalSection[] = [
     title: "7. Your choices and rights",
     paragraphs: [
       "You can edit or remove optional profile information from Settings and clear local application data through your browser. Depending on where you live, you may also have rights to access, correct, delete, restrict, or export personal information and to object to certain processing.",
-      "Requests concerning account data can be directed to the Meor HR operator through the contact channel provided with the deployed service. Identity may need to be verified before a request is completed. You may also have the right to complain to the data protection authority in the country where you live or work.",
+      "Requests concerning account data can be directed to the MeOrHR operator through the contact channel provided with the deployed service. Identity may need to be verified before a request is completed. You may also have the right to complain to the data protection authority in the country where you live or work.",
     ],
   },
   {
     id: "security",
     title: "8. Security",
     paragraphs: [
-      "Meor HR uses access controls and Supabase row-level security to limit account changes and file uploads. No online service can guarantee absolute security, so avoid submitting information that is unnecessary or highly sensitive.",
+      "MeOrHR uses access controls and Supabase row-level security to limit account changes and file uploads. No online service can guarantee absolute security, so avoid submitting information that is unnecessary or highly sensitive.",
     ],
   },
   {
@@ -166,8 +166,8 @@ export default function LegalPage({ type }: LegalPageProps) {
   const isTerms = type === "terms";
   const title = isTerms ? "Terms of Service" : "Privacy Policy";
   const intro = isTerms
-    ? "These terms set the ground rules for using Meor HR and contributing to its community data."
-    : "This policy explains what information Meor HR handles, where it is stored, and the choices available to you.";
+    ? "These terms set the ground rules for using MeOrHR and contributing to its community data."
+    : "This policy explains what information MeOrHR handles, where it is stored, and the choices available to you.";
   const sections = isTerms ? termsSections : privacySections;
 
   return (
@@ -180,7 +180,7 @@ export default function LegalPage({ type }: LegalPageProps) {
             className="inline-flex items-center gap-2 font-semibold text-brandgray-700 transition hover:text-brand-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-900"
           >
             <ArrowLeftLineIcon aria-hidden="true" width="18" height="18" />
-            Back to Meor HR
+            Back to MeOrHR
           </Link>
         </div>
 

@@ -1,10 +1,10 @@
-# Meor HR
+# MeOrHR
 
 Community-powered job offers and recruitment insights.
 
 [Open the live app](https://meorhr.com/)
 
-Meor HR helps candidates understand whether silence after an application is
+MeOrHR helps candidates understand whether silence after an application is
 personal or part of a wider company pattern. People can share job offers, track
 their own applications, and compare aggregate signals about replies, interviews,
 and long periods without a response.
@@ -36,7 +36,7 @@ up to date:
 Confirmed applications -> Replies -> Interview invitations
 ```
 
-Meor HR also shows applications with no reply after 30 days. Newer
+MeOrHR also shows applications with no reply after 30 days. Newer
 applications are excluded from this metric so they are not incorrectly treated
 as ignored.
 

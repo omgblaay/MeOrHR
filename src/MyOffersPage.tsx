@@ -133,7 +133,7 @@ export default function MyOffersPage({
               No published offers yet
             </h2>
             <p className="mt-1 text-brandgray-550">
-              Offers you add to Meor HR will appear here.
+              Offers you add to MeOrHR will appear here.
             </p>
           </div>
         )}

@@ -33,10 +33,10 @@ export default function OfferPublisher({
   }, [createdBy]);
 
   const publisherName = !createdBy
-    ? "Meor HR"
+    ? "MeOrHR"
     : createdBy === user?.id
       ? profile?.nickname || "You"
-      : profile?.nickname || "Meor HR member";
+      : profile?.nickname || "MeOrHR member";
 
   return (
     <section className="flex items-center gap-3 border-b border-brandgray-250 bg-brandgray-50 px-4 py-5 sm:px-6 lg:px-8">

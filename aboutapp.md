@@ -1,6 +1,6 @@
-# Meor HR
+# MeOrHR
 
-Meor HR is a community-informed job board for discovering technology roles and understanding what happens after people apply. It combines conventional offer details with aggregated applicant activity, helping candidates compare opportunities using signals such as reply rates, interview progression, and follow-up actions.
+MeOrHR is a community-informed job board for discovering technology roles and understanding what happens after people apply. It combines conventional offer details with aggregated applicant activity, helping candidates compare opportunities using signals such as reply rates, interview progression, and follow-up actions.
 
 ## Product goals
 
@@ -68,7 +68,7 @@ The current stage can be Saved, Applied, In review, Interview, Offer, Rejected, 
 
 Detailed personal progress and private notes are stored per user and offer in
 browser local storage. A minimal application record containing the current
-stage, application date, and country is synchronized to Supabase so Meor HR can
+stage, application date, and country is synchronized to Supabase so MeOrHR can
 produce anonymous offer insights. The detailed timeline is still private to the
 current browser.
 
@@ -161,12 +161,12 @@ etapami.
 
 | Funkcja | Co widzi lub robi użytkownik | Dlaczego jest wartościowa |
 | --- | --- | --- |
-| **Jedna oferta, wiele źródeł** | Meor HR rozpoznaje tę samą rolę dodaną z LinkedIn, Just Join IT i strony firmy oraz pokazuje wszystkie linki i daty publikacji. | Kandydat nie liczy duplikatów jako nowych ofert i może wybrać źródło aplikacji. |
+| **Jedna oferta, wiele źródeł** | MeOrHR rozpoznaje tę samą rolę dodaną z LinkedIn, Just Join IT i strony firmy oraz pokazuje wszystkie linki i daty publikacji. | Kandydat nie liczy duplikatów jako nowych ofert i może wybrać źródło aplikacji. |
 | **Czy ktoś już aplikował?** | Na ofercie widać liczbę osób, które potwierdziły wysłanie aplikacji, a osobno liczbę kliknięć w link. | Odpowiada na konkretne pytanie użytkownika bez mylenia kliknięcia z aplikacją. |
 | **Oś rekrutacji** | Zanonimizowany widok pokazuje kolejne etapy, na przykład: 24 aplikacje, 8 odpowiedzi, 4 rozmowy i 1 oferta. Obok wyświetlane są mediany czasu oczekiwania między etapami. | Pokazuje przebieg procesu, zamiast jednej oderwanej wartości response rate. |
 | **Historia ogłoszenia** | Użytkownik widzi datę pierwszego wykrycia, wznowienia i zamknięcia oferty oraz zmiany w wynagrodzeniu lub wymaganiach. | Pomaga ocenić, czy oferta jest aktualna i jak długo pozostaje otwarta. |
 | **Dziennik doświadczeń kandydatów** | Kandydaci dodają krótkie, ustrukturyzowane wpisy, takie jak: „odpowiedź po 6 dniach”, „zadanie zajęło 5 godzin” lub „otrzymałem feedback”. | Dostarcza praktycznych informacji bez konieczności czytania długich, przypadkowych komentarzy. |
-| **Prywatny Kanban aplikacji** | Użytkownik przenosi oferty przez etapy: Zapisane, Aplikowano, Odpowiedź, Rozmowa, Zadanie oraz Oferta lub Odrzucono. Do każdego etapu może dodać datę, notatki, kontakt i przypomnienie. | Daje powód, by regularnie wracać do Meor HR, a aktualizacje mogą zasilać anonimowe statystyki zbiorcze. |
+| **Prywatny Kanban aplikacji** | Użytkownik przenosi oferty przez etapy: Zapisane, Aplikowano, Odpowiedź, Rozmowa, Zadanie oraz Oferta lub Odrzucono. Do każdego etapu może dodać datę, notatki, kontakt i przypomnienie. | Daje powód, by regularnie wracać do MeOrHR, a aktualizacje mogą zasilać anonimowe statystyki zbiorcze. |
 | **Porównanie ofert** | Użytkownik zestawia 2–3 role według pensji, trybu pracy, wymagań, etapów rekrutacji i danych od kandydatów. | Ułatwia wybór ofert, na które warto poświęcić czas. |
 
 ## Najbliższe prace techniczne

@@ -223,7 +223,7 @@ export default function SettingsPage() {
               Profile settings
             </h1>
             <p className="mt-2 text-sm leading-6 text-brandgray-600">
-              Your country is required so Meor HR can show anonymous applicant
+              Your country is required so MeOrHR can show anonymous applicant
               geography. Everything else is optional.
             </p>
           </header>
