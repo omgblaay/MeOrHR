@@ -2,7 +2,12 @@ import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
 import { Link } from "react-router-dom";
 
-type ButtonVariant = "primary" | "secondary" | "filter" | "icon";
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "filter"
+  | "icon";
 type ButtonSize = "sm" | "md" | "icon";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -17,6 +22,8 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-lime-300 text-brand-900 hover:bg-lime-400",
   secondary:
     "border border-brandgray-300 bg-white text-brandgray-750 hover:border-brandgray-450",
+  danger:
+    "border border-red-200 bg-white text-red-700 hover:border-red-400 hover:bg-red-50",
   filter: "rounded-full border",
   icon: "border  border-brandgray-250 bg-white text-brandgray-700 hover:border-brand-900 hover:bg-brandgray-100 hover:text-brand-900",
 };

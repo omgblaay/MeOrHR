@@ -1,12 +1,11 @@
-import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
 import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import ChartBarLineIcon from "@iconify-react/majesticons/chart-bar-line";
-import LockLineIcon from "@iconify-react/majesticons/lock-line";
 import PlusLineIcon from "@iconify-react/majesticons/plus-line";
 import UsersLineIcon from "@iconify-react/majesticons/users-line";
 import AppFooter from "./components/AppFooter";
 import AppHeader from "./components/AppHeader";
 import Button from "./components/Button";
+import AppLogo from "./components/AppLogo";
 
 const principles = [
   {
@@ -36,9 +35,12 @@ export default function AboutPage() {
       <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
         <header className="grid border-b border-brandgray-250 bg-brandgray-50 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="border-b border-brandgray-250 px-4 py-10 sm:px-6 sm:py-14 lg:border-b-0 lg:border-r lg:px-8 lg:py-16">
-            <p className="text-sm font-semibold text-brand-500">About the app</p>
-            <h1 className="mt-2 text-4xl font-semibold text-brand-950 sm:text-5xl">
-              MeOrHR
+            <p className="text-sm font-semibold text-brand-500">
+              About the app
+            </p>
+            <h1 className="mt-4">
+              <span className="sr-only">MeOrHR</span>
+              <AppLogo alt="" className="h-12 w-auto sm:h-14" />
             </h1>
           </div>
           <div className="px-4 py-10 sm:px-6 sm:py-14 lg:px-10 lg:py-16">
@@ -55,7 +57,9 @@ export default function AboutPage() {
 
         <section className="grid border-b border-brandgray-250 lg:grid-cols-[15rem_1fr]">
           <div className="border-b border-brandgray-250 px-4 py-7 sm:px-6 lg:border-b-0 lg:border-r lg:px-8 lg:py-10">
-            <h2 className="font-semibold text-brandgray-900">Why it exists</h2>
+            <h2 className="mt-1 text-2xl font-semibold text-brandgray-900">
+              Why it exists
+            </h2>
           </div>
           <div className="max-w-3xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
             <p className="text-lg leading-8 text-brandgray-750">
@@ -74,27 +78,27 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section aria-labelledby="about-principles" className="border-b border-brandgray-250">
-          <div className="border-b border-brandgray-250 px-4 py-6 sm:px-6 lg:px-8">
+        <section className="grid border-b border-brandgray-250 lg:grid-cols-[15rem_1fr]">
+          <div className="border-b border-brandgray-250 px-4 py-7 sm:px-6 lg:border-b-0 lg:border-r lg:px-8 lg:py-10">
             <p className="text-sm font-semibold text-brand-500">The approach</p>
-            <h2 id="about-principles" className="mt-1 text-2xl font-semibold text-brandgray-900">
+            <h2
+              id="about-principles"
+              className="mt-1 text-2xl font-semibold text-brandgray-900"
+            >
               Better signals through shared experience
             </h2>
           </div>
-          <div className="grid md:grid-cols-3">
+          <div className="max-w-3xl px-4 py-8 flex flex-col gap-8 sm:px-6 lg:px-10 lg:py-10">
             {principles.map((principle) => {
-              const Icon = principle.icon;
+              // const Icon = principle.icon;
               return (
-                <article
-                  key={principle.title}
-                  className="border-b border-brandgray-250 px-4 py-7 last:border-b-0 sm:px-6 md:border-b-0 md:border-r md:last:border-r-0 lg:px-8"
-                >
-                  <Icon
+                <article key={principle.title}>
+                  {/* <Icon
                     aria-hidden="true"
                     width="22"
                     height="22"
                     className="text-brand-700"
-                  />
+                  /> */}
                   <h3 className="mt-5 font-semibold text-brandgray-900">
                     {principle.title}
                   </h3>
@@ -104,44 +108,43 @@ export default function AboutPage() {
                 </article>
               );
             })}
+            <article>
+              {/* <LockLineIcon
+                aria-hidden="true"
+                width="22"
+                height="22"
+                className="text-brand-800"
+              /> */}
+              <h3 className="mt-5 font-semibold text-brandgray-900">
+                Personal details stay personal
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-brandgray-600">
+                Private notes and detailed application timelines stay in your
+                browser. Public hiring insights use aggregated stages and
+                outcomes, without publishing your personal notes or attaching
+                your identity to an application timeline.
+              </p>
+            </article>
+            <article>
+              {/* <ApplicationsLineIcon
+                aria-hidden="true"
+                width="22"
+                height="22"
+                className="text-brand-800"
+              /> */}
+              <h3 className="mt-5 font-semibold text-brandgray-900">
+                Built around the applicant
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-brandgray-600">
+                Search offers, preserve their original sources, track your own
+                progress, and compare community-reported hiring activity in one
+                place.
+              </p>
+            </article>
           </div>
         </section>
 
-        <section className="grid border-b border-brandgray-250 bg-lime-50 lg:grid-cols-2">
-          <div className="border-b border-brandgray-250 px-4 py-8 sm:px-6 lg:border-b-0 lg:border-r lg:px-8 lg:py-10">
-            <LockLineIcon
-              aria-hidden="true"
-              width="22"
-              height="22"
-              className="text-brand-800"
-            />
-            <h2 className="mt-4 text-xl font-semibold text-brandgray-900">
-              Personal details stay personal
-            </h2>
-            <p className="mt-3 max-w-xl leading-7 text-brandgray-650">
-              Private notes and detailed application timelines stay in your
-              browser. Public hiring insights use aggregated stages and outcomes,
-              without publishing your personal notes or attaching your identity
-              to an application timeline.
-            </p>
-          </div>
-          <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-            <ApplicationsLineIcon
-              aria-hidden="true"
-              width="22"
-              height="22"
-              className="text-brand-800"
-            />
-            <h2 className="mt-4 text-xl font-semibold text-brandgray-900">
-              Built around the applicant
-            </h2>
-            <p className="mt-3 max-w-xl leading-7 text-brandgray-650">
-              Search offers, preserve their original sources, track your own
-              progress, and compare community-reported hiring activity in one
-              place.
-            </p>
-          </div>
-        </section>
+        <section className="grid border-b border-brandgray-250 lg:grid-cols-[15rem_1fr]"></section>
 
         <section className="flex flex-col gap-5 px-4 py-9 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <div>

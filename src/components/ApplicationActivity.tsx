@@ -18,8 +18,10 @@ import TrashLineIcon from "@iconify-react/majesticons/trash-line";
 import UserLineIcon from "@iconify-react/majesticons/user-line";
 import UserGroupLineIcon from "@iconify-react/majesticons/user-group-line";
 import {
+  useCallback,
   useEffect,
   useState,
+  useSyncExternalStore,
   type ComponentType,
   type FormEvent,
   type ReactNode,
@@ -27,12 +29,15 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 import {
+  applicationStatusChangedEvent,
   applicationStorageKey,
   notifyApplicationStatusChanged,
+  readApplicationStatus,
   type ApplicationStatus,
 } from "../lib/applicationStatus";
 import {
   loadProfileCountry,
+  removeApplicationRecord,
   syncApplicationRecord,
 } from "../lib/applicationSync";
 import {
@@ -149,6 +154,26 @@ const statusOptions: {
     iconClasses: "bg-brandgray-600 text-white",
   },
 ];
+
+const statusGradientClasses: Record<ApplicationStatus, string> = {
+  saved: "from-brandgray-100",
+  applied: "from-blue-50",
+  in_review: "from-amber-50",
+  interview: "from-purple-50",
+  offer: "from-brand-50",
+  rejected: "from-red-50",
+  withdrawn: "from-brandgray-100",
+};
+
+const updateStatusOptions = statusOptions.filter(
+  (option) => option.value !== "saved" && option.value !== "in_review",
+);
+
+function updateStatusDefault(status: ApplicationStatus) {
+  if (status === "saved") return "applied";
+  if (status === "in_review") return "interview";
+  return status;
+}
 
 const activityOptions: {
   value: ApplicationEventType;
@@ -306,6 +331,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
   const [editDate, setEditDate] = useState("");
   const [editNote, setEditNote] = useState("");
   const [message, setMessage] = useState("");
+  const [isRemoving, setIsRemoving] = useState(false);
   const [hoveredEventType, setHoveredEventType] =
     useState<ApplicationEventType | null>(null);
   const [countryCode, setCountryCode] = useState<string | null | undefined>(
@@ -373,6 +399,32 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
       ],
     });
     resetEntryForm();
+  }
+
+  async function removeTracker() {
+    const confirmed = window.confirm(
+      "Remove your application status and private timeline for this offer?",
+    );
+    if (!confirmed) return;
+
+    setIsRemoving(true);
+    const { error } = await removeApplicationRecord(userId, job.id);
+    if (error) {
+      setMessage("Could not remove your application status. Please try again.");
+      setIsRemoving(false);
+      return;
+    }
+
+    try {
+      window.localStorage.removeItem(storageKey);
+      setTracker(null);
+      setStatusDraft("applied");
+      setOpenForm(null);
+      setMessage("");
+      notifyApplicationStatusChanged(userId, job.id);
+    } finally {
+      setIsRemoving(false);
+    }
   }
 
   function submitActivity(event: FormEvent<HTMLFormElement>) {
@@ -475,7 +527,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
           ],
         };
         nextMessage = "Interview invitation recorded.";
-      } else {
+      } else if (detail.action === "no_reply_30") {
         const appliedEvent = [...currentTracker.events]
           .sort((first, second) => first.date.localeCompare(second.date))
           .find((item) => item.type === "applied");
@@ -500,6 +552,29 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
           events: [...currentTracker.events, createEvent("no_reply_30", today)],
         };
         nextMessage = "No reply after 30 days recorded.";
+      } else {
+        const activityMessages: Record<
+          | "follow_up"
+          | "contacted_hr"
+          | "rejected"
+          | "linkedin_connection"
+          | "interview_completed"
+          | "task_completed",
+          string
+        > = {
+          follow_up: "Follow-up recorded.",
+          contacted_hr: "HR contact recorded.",
+          rejected: "Rejection recorded.",
+          linkedin_connection: "LinkedIn connection recorded.",
+          interview_completed: "Completed interview recorded.",
+          task_completed: "Completed task recorded.",
+        };
+        nextTracker = {
+          status:
+            detail.action === "rejected" ? "rejected" : currentTracker.status,
+          events: [...currentTracker.events, createEvent(detail.action, today)],
+        };
+        nextMessage = activityMessages[detail.action];
       }
 
       try {
@@ -533,7 +608,10 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
 
   if (countryCode === undefined) {
     return (
-      <div className="h-24 animate-pulse bg-brandgray-100" aria-label="Loading profile" />
+      <div
+        className="h-24 animate-pulse bg-brandgray-100"
+        aria-label="Loading profile"
+      />
     );
   }
 
@@ -615,7 +693,7 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
             variant="secondary"
             size="sm"
             onClick={() => {
-              setStatusDraft(tracker.status);
+              setStatusDraft(updateStatusDefault(tracker.status));
               setEventDate(localDateValue());
               setNote("");
               setOpenForm(openForm === "status" ? null : "status");
@@ -647,6 +725,12 @@ function TrackerForm({ job, userId }: { job: JobOffer; userId: string }) {
             onNoteChange={setNote}
             onCancel={() => setOpenForm(null)}
             onSubmit={submitStatus}
+            dangerAction={{
+              label: "Remove my status",
+              pendingLabel: "Removing...",
+              disabled: isRemoving,
+              onClick: removeTracker,
+            }}
           >
             <StatusRadioGrid value={statusDraft} onChange={setStatusDraft} />
           </EntryForm>
@@ -931,8 +1015,8 @@ function StatusRadioGrid({
 }) {
   return (
     <fieldset className="sm:col-span-2">
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        {statusOptions.map((option) => {
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+        {updateStatusOptions.map((option) => {
           return (
             <RadioCard
               key={option.value}
@@ -995,6 +1079,7 @@ function EntryForm({
   onSubmit,
   children,
   presentation = "inline",
+  dangerAction,
 }: {
   title: string;
   date: string;
@@ -1005,6 +1090,12 @@ function EntryForm({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   children: ReactNode;
   presentation?: "inline" | "dialog";
+  dangerAction?: {
+    label: string;
+    pendingLabel: string;
+    disabled: boolean;
+    onClick: () => void;
+  };
 }) {
   const isDialog = presentation === "dialog";
 
@@ -1056,13 +1147,34 @@ function EntryForm({
           className="block w-full resize-y rounded-md border border-brandgray-300 bg-white px-3.5 py-3 leading-6 text-brandgray-900 outline-none placeholder:text-brandgray-450 focus:border-brand-700 focus:ring-3 focus:ring-brand-700/10"
         />
       </label>
-      <div className="mt-4 flex gap-2">
-        <Button type="submit" size="sm">
-          Save
-        </Button>
-        <Button type="button" size="sm" variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2">
+          <Button type="submit" size="sm">
+            Save
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        </div>
+        {dangerAction && (
+          <Button
+            type="button"
+            size="sm"
+            variant="danger"
+            disabled={dangerAction.disabled}
+            onClick={dangerAction.onClick}
+          >
+            <TrashLineIcon aria-hidden="true" width="16" height="16" />
+            {dangerAction.disabled
+              ? dangerAction.pendingLabel
+              : dangerAction.label}
+          </Button>
+        )}
       </div>
     </form>
   );
@@ -1110,23 +1222,57 @@ function PrivacyNote() {
 export default function ApplicationActivity({ job }: { job: JobOffer }) {
   const { user, isAuthLoading } = useAuth();
   const location = useLocation();
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (!user) return () => undefined;
+
+      const handleStatusChange = (event: Event) => {
+        const detail = (event as CustomEvent<{ userId: string; jobId: number }>)
+          .detail;
+        if (detail.userId === user.id && detail.jobId === job.id) {
+          onStoreChange();
+        }
+      };
+      const handleStorage = (event: StorageEvent) => {
+        if (event.key === applicationStorageKey(user.id, job.id)) {
+          onStoreChange();
+        }
+      };
+
+      window.addEventListener(
+        applicationStatusChangedEvent,
+        handleStatusChange,
+      );
+      window.addEventListener("storage", handleStorage);
+      return () => {
+        window.removeEventListener(
+          applicationStatusChangedEvent,
+          handleStatusChange,
+        );
+        window.removeEventListener("storage", handleStorage);
+      };
+    },
+    [job.id, user],
+  );
+  const getSnapshot = useCallback(
+    () => (user ? readApplicationStatus(user.id, job.id) : null),
+    [job.id, user],
+  );
+  const applicationStatus = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => null,
+  );
+  const gradientClass = applicationStatus
+    ? statusGradientClasses[applicationStatus]
+    : "from-brandgray-50";
 
   return (
     <section
       id="your-application"
-      className="scroll-mt-4 border-b border-brandgray-250 bg-lime-50"
+      className={`scroll-mt-16 border-b border-brandgray-250 bg-gradient-to-b ${gradientClass} to-white`}
     >
-      <div className="px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          <ApplicationsLineIcon
-            aria-hidden="true"
-            width="18"
-            height="18"
-            className="text-brandgray-700"
-          />
-          <h2 className="font-semibold ">Your application</h2>
-        </div>
-
+      <div className="px-4 sm:px-6 py-4 lg:px-8">
         <div className="mt-6">
           {isAuthLoading ? (
             <div className="space-y-3" aria-label="Loading your application">

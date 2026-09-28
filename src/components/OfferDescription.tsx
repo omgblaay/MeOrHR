@@ -21,20 +21,23 @@ export default function OfferDescription({ job }: { job: JobOffer }) {
   return (
     <>
       <div
-        id="offer-description"
-        className={`mt-5 max-w-3xl space-y-4 overflow-hidden  leading-7 text-brandgray-750 transition-[max-height] duration-300 ${
+        id="offer-description-content"
+        className={`mt-6 max-w-4xl space-y-4 overflow-hidden leading-7 text-brandgray-750 transition-[max-height] duration-300 ${
           isExpanded ? "max-h-[60rem]" : "max-h-40"
         }`}
       >
         {paragraphs.map((paragraph, index) => (
-          <p key={`${job.id}-description-${index}`} className="whitespace-pre-line">
+          <p
+            key={`${job.id}-description-${index}`}
+            className="whitespace-pre-line"
+          >
             {paragraph}
           </p>
         ))}
       </div>
       <button
         type="button"
-        aria-controls="offer-description"
+        aria-controls="offer-description-content"
         aria-expanded={isExpanded}
         onClick={() => setIsExpanded((expanded) => !expanded)}
         className="mt-4 inline-flex items-center gap-1.5  font-semibold text-brand-900 transition hover:text-brand-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-900"

@@ -1,12 +1,23 @@
 import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
+import ClipboardListLineIcon from "@iconify-react/majesticons/clipboard-list-line";
 import ClockLineIcon from "@iconify-react/majesticons/clock-line";
+import CloseCircleLineIcon from "@iconify-react/majesticons/close-circle-line";
+import LinkLineIcon from "@iconify-react/majesticons/link-line";
+import MailLineIcon from "@iconify-react/majesticons/mail-line";
 import MessageLineIcon from "@iconify-react/majesticons/message-line";
+import UserLineIcon from "@iconify-react/majesticons/user-line";
 import UserGroupLineIcon from "@iconify-react/majesticons/user-group-line";
-import type { ComponentType } from "react";
 import {
-  triggerApplicationQuickAction,
-  type ApplicationQuickAction,
-} from "../lib/applicationQuickAction";
+  useCallback,
+  useMemo,
+  useSyncExternalStore,
+  type ComponentType,
+} from "react";
+import { useAuth } from "../auth/useAuth";
+import {
+  applicationStatusChangedEvent,
+  applicationStorageKey,
+} from "../lib/applicationStatus";
 import type { JobOffer } from "../types/job";
 
 type StageIcon = ComponentType<{
@@ -15,230 +26,261 @@ type StageIcon = ComponentType<{
   height?: string;
 }>;
 
-type FunnelStage = {
+type StatusRow = {
   label: string;
-  count: number;
-  medianDays: number | null;
-  timingLabel: string;
+  count: number | null;
+  total: number;
   icon: StageIcon;
   color: string;
   surface: string;
-  action: ApplicationQuickAction;
-  actionLabel: string;
+  eventTypes: string[];
 };
 
 function percentage(count: number, total: number) {
   return total > 0 ? Math.round((count / total) * 100) : 0;
 }
 
-function medianLabel(days: number | null, label: string) {
-  if (days === null) return "Not enough data";
-  return `Median ${days} ${days === 1 ? "day" : "days"} ${label}`;
-}
-
 export default function ApplicantActivitySummary({ job }: { job: JobOffer }) {
-  const stages: FunnelStage[] = [
+  const { user } = useAuth();
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (!user) return () => undefined;
+
+      const handleStatusChange = (event: Event) => {
+        const detail = (event as CustomEvent<{ userId: string; jobId: number }>)
+          .detail;
+        if (detail.userId === user.id && detail.jobId === job.id) {
+          onStoreChange();
+        }
+      };
+      const handleStorage = (event: StorageEvent) => {
+        if (event.key === applicationStorageKey(user.id, job.id)) {
+          onStoreChange();
+        }
+      };
+
+      window.addEventListener(
+        applicationStatusChangedEvent,
+        handleStatusChange,
+      );
+      window.addEventListener("storage", handleStorage);
+      return () => {
+        window.removeEventListener(
+          applicationStatusChangedEvent,
+          handleStatusChange,
+        );
+        window.removeEventListener("storage", handleStorage);
+      };
+    },
+    [job.id, user],
+  );
+  const getSnapshot = useCallback(
+    () =>
+      user
+        ? window.localStorage.getItem(applicationStorageKey(user.id, job.id))
+        : null,
+    [job.id, user],
+  );
+  const trackerJson = useSyncExternalStore(subscribe, getSnapshot, () => null);
+  const myEventTypes = useMemo(() => {
+    if (!trackerJson) return new Set<string>();
+
+    try {
+      const tracker = JSON.parse(trackerJson) as {
+        events?: { type?: unknown }[];
+      };
+      return new Set(
+        (tracker.events ?? [])
+          .map((event) => event.type)
+          .filter((type): type is string => typeof type === "string"),
+      );
+    } catch {
+      return new Set<string>();
+    }
+  }, [trackerJson]);
+  const includesMyApplication = myEventTypes.has("applied");
+  const confirmedApplications =
+    job.confirmedApplicants + (includesMyApplication ? 1 : 0);
+  const includesMyNoReply = myEventTypes.has("no_reply_30");
+  const matureApplications =
+    job.applicantsOlderThan30Days + (includesMyNoReply ? 1 : 0);
+  const statuses: StatusRow[] = [
     {
-      label: "Applications",
+      label: "Applied",
       count: job.confirmedApplicants,
-      medianDays: null,
-      timingLabel: "",
+      total: confirmedApplications,
       icon: ApplicationsLineIcon,
       color: "var(--color-blue-500)",
       surface: "var(--color-blue-50)",
-      action: "applied",
-      actionLabel: "I applied",
+      eventTypes: ["applied"],
     },
     {
-      label: "Replies",
+      label: "Sent a follow-up",
+      count: job.additionalEmailApplicants,
+      total: confirmedApplications,
+      icon: MailLineIcon,
+      color: "var(--color-brand-500)",
+      surface: "var(--color-brand-50)",
+      eventTypes: ["follow_up"],
+    },
+    {
+      label: "Contacted HR",
+      count: job.contactedHrApplicants,
+      total: confirmedApplications,
+      icon: UserLineIcon,
+      color: "var(--color-blue-600)",
+      surface: "var(--color-blue-50)",
+      eventTypes: ["contacted_hr"],
+    },
+    {
+      label: "Connected on LinkedIn",
+      count: job.linkedinConnectionApplicants,
+      total: confirmedApplications,
+      icon: LinkLineIcon,
+      color: "var(--color-blue-500)",
+      surface: "var(--color-blue-50)",
+      eventTypes: ["linkedin_connection"],
+    },
+    {
+      label: "Received a reply",
       count: job.repliedApplicants,
-      medianDays: job.medianDaysToReply,
-      timingLabel: "to reply",
+      total: confirmedApplications,
       icon: MessageLineIcon,
       color: "var(--color-amber-500)",
       surface: "var(--color-amber-50)",
-      action: "received_reply",
-      actionLabel: "I received a reply",
+      eventTypes: ["received_reply"],
     },
     {
-      label: "Interviews",
+      label: "Invited to interview",
       count: job.nextInterviewApplicants,
-      medianDays: job.medianDaysReplyToInterview,
-      timingLabel: "after reply",
+      total: confirmedApplications,
       icon: UserGroupLineIcon,
       color: "var(--color-purple-500)",
       surface: "var(--color-purple-50)",
-      action: "interview",
-      actionLabel: "I was invited",
+      eventTypes: ["interview_invited"],
+    },
+    {
+      label: "Completed an interview",
+      count: null,
+      total: confirmedApplications,
+      icon: ApplicationsLineIcon,
+      color: "var(--color-purple-500)",
+      surface: "var(--color-purple-50)",
+      eventTypes: ["interview_completed"],
+    },
+    {
+      label: "Completed a task",
+      count: null,
+      total: confirmedApplications,
+      icon: ClipboardListLineIcon,
+      color: "var(--color-orange-400)",
+      surface: "var(--color-amber-50)",
+      eventTypes: ["task_completed"],
+    },
+    {
+      label: "Got rejected",
+      count: null,
+      total: confirmedApplications,
+      icon: CloseCircleLineIcon,
+      color: "var(--color-red-500)",
+      surface: "var(--color-red-50)",
+      eventTypes: ["rejected"],
+    },
+    {
+      label: "No reply after 30 days",
+      count: job.noReplyAfter30DaysApplicants,
+      total: matureApplications,
+      icon: ClockLineIcon,
+      color: "var(--color-red-500)",
+      surface: "var(--color-red-50)",
+      eventTypes: ["no_reply_30"],
     },
   ];
-  const matureApplications = job.applicantsOlderThan30Days;
-  const noReplyPercentage = percentage(
-    job.noReplyAfter30DaysApplicants,
-    matureApplications,
-  );
 
   return (
-    <section
-      className="border-b border-brandgray-250 bg-brandgray-25"
+    <aside
+      className="bg-brandgray-25 px-4 py-8 sm:px-6 lg:px-8"
       aria-labelledby="recruitment-pipeline-heading"
     >
-      <div className="flex flex-col gap-1 px-4 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-6 lg:px-8">
-        <div>
-          <h2
-            id="recruitment-pipeline-heading"
-            className="font-semibold text-brandgray-900"
-          >
-            Recruitment pipeline
-          </h2>
-          <p className="mt-1 text-sm text-brandgray-550">
-            Anonymous outcomes from {job.confirmedApplicants} confirmed{" "}
-            {job.confirmedApplicants === 1 ? "application" : "applications"}
-          </p>
-        </div>
-        <span className="text-xs text-brandgray-500">
-          Stage percentages use confirmed applications
-        </span>
-      </div>
+      <h3
+        id="recruitment-pipeline-heading"
+        className="font-semibold text-brandgray-900"
+      >
+        Applicant activity
+      </h3>
+      <p className="mt-1 text-sm text-brandgray-550">
+        From {confirmedApplications} confirmed{" "}
+        {confirmedApplications === 1 ? "application" : "applications"}
+        {includesMyApplication ? ", including you" : ""}
+      </p>
 
-      <div className="job-type-scrollbar overflow-x-auto border-t border-brandgray-250">
-        <ol className="grid min-w-[46rem] grid-cols-4 sm:min-w-0">
-          {stages.map((stage, index) => {
-            const Icon = stage.icon;
-            const stagePercentage =
-              index === 0
-                ? 100
-                : percentage(stage.count, job.confirmedApplicants);
+      <ol className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        {statuses.map((status) => {
+          const Icon = status.icon;
+          const includesMyInput = status.eventTypes.some((eventType) =>
+            myEventTypes.has(eventType),
+          );
+          const displayedCount =
+            status.count === null
+              ? includesMyInput
+                ? 1
+                : null
+              : status.count + (includesMyInput ? 1 : 0);
+          const statusPercentage = percentage(
+            displayedCount ?? 0,
+            status.total,
+          );
+          const hasData = displayedCount !== null && status.total > 0;
 
-            return (
-              <li
-                key={stage.label}
-                className="relative border-r border-brandgray-250 last:border-r-0"
-              >
-                <button
-                  type="button"
-                  className="h-full w-full px-4 py-5 text-left transition-colors hover:bg-white focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-900 sm:px-5 lg:px-6"
-                  onClick={() =>
-                    triggerApplicationQuickAction(job.id, stage.action)
-                  }
-                  aria-label={`${stage.actionLabel} for ${job.title}`}
-                >
-                <div className="relative flex items-center gap-3">
-                  <span
-                    className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full border border-white shadow-[0_0_0_1px_var(--color-brandgray-250)]"
-                    style={{
-                      backgroundColor: stage.surface,
-                      color: stage.color,
-                    }}
-                  >
-                    <Icon aria-hidden="true" width="18" height="18" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-xs font-medium text-brandgray-600">
-                      {stage.label}
-                    </span>
-                    <span className="flex items-baseline gap-1.5">
-                      <strong className="text-xl font-semibold text-brandgray-900">
-                        {stage.count}
-                      </strong>
-                      <span
-                        className="text-xs font-semibold"
-                        style={{ color: stage.color }}
-                      >
-                        {stagePercentage}%
-                      </span>
-                    </span>
-                  </span>
-                </div>
-
-                <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-brandgray-200">
-                  <span
-                    className="block h-full rounded-full"
-                    style={{
-                      backgroundColor: stage.color,
-                      width: `${stagePercentage}%`,
-                    }}
-                  />
-                </div>
-
-                <span className="mt-3 flex items-center gap-1.5 text-xs text-brandgray-550">
-                  {index === 0 ? (
-                    "Starting point"
-                  ) : (
-                    <>
-                      <ClockLineIcon
-                        aria-hidden="true"
-                        width="14"
-                        height="14"
-                      />
-                      {medianLabel(stage.medianDays, stage.timingLabel)}
-                    </>
-                  )}
-                </span>
+          return (
+            <li key={status.label}>
+              <div className="flex items-center gap-3">
                 <span
-                  className="mt-3 block text-xs font-semibold"
-                  style={{ color: stage.color }}
+                  className="grid size-8 shrink-0 place-items-center rounded-full"
+                  style={{
+                    backgroundColor: status.surface,
+                    color: status.color,
+                  }}
                 >
-                  {stage.actionLabel} →
+                  <Icon aria-hidden="true" width="16" height="16" />
                 </span>
-                </button>
-              </li>
-            );
-          })}
-
-          <li className="relative bg-brandgray-25">
-            <button
-              type="button"
-              className="h-full w-full px-4 py-5 text-left transition-colors hover:bg-red-50 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-red-800 sm:px-5 lg:px-6"
-              onClick={() =>
-                triggerApplicationQuickAction(job.id, "no_reply_30")
-              }
-              aria-label={`Still no reply after 30 days for ${job.title}`}
-            >
-            <div className="relative flex items-center gap-3">
-              <span className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full border border-white bg-red-50 text-red-500 shadow-[0_0_0_1px_var(--color-red-200)]">
-                <ClockLineIcon aria-hidden="true" width="18" height="18" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-xs font-medium text-brandgray-600">
-                  No reply after 30 days
-                </span>
-                <span className="flex items-baseline gap-1.5">
-                  <strong className="text-xl font-semibold text-brandgray-900">
-                    {matureApplications > 0
-                      ? job.noReplyAfter30DaysApplicants
-                      : "—"}
-                  </strong>
-                  {matureApplications > 0 && (
-                    <span className="text-xs font-semibold text-red-500">
-                      {noReplyPercentage}%
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center justify-between gap-3 text-sm">
+                    <span className="truncate font-medium text-brandgray-800">
+                      {status.label}
+                      {includesMyInput && (
+                        <span className="ml-2 text-xs font-semibold text-brand-700">
+                          You
+                        </span>
+                      )}
                     </span>
-                  )}
+                    <span className="shrink-0 text-xs font-semibold text-brandgray-700">
+                      {hasData
+                        ? `${displayedCount} · ${statusPercentage}%`
+                        : includesMyInput
+                          ? "You"
+                          : "No data"}
+                    </span>
+                  </span>
+                  <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-brandgray-200">
+                    <span
+                      className="block h-full rounded-full transition-[width] duration-300"
+                      style={{
+                        backgroundColor: status.color,
+                        width: `${hasData ? statusPercentage : 0}%`,
+                      }}
+                    />
+                  </span>
                 </span>
-              </span>
-            </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
 
-            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-brandgray-200">
-              <span
-                className="block h-full rounded-full bg-red-500"
-                style={{
-                  width: `${matureApplications > 0 ? noReplyPercentage : 0}%`,
-                }}
-              />
-            </div>
-
-            <span className="mt-3 flex items-center gap-1.5 text-xs text-brandgray-550">
-              {matureApplications > 0
-                ? `${matureApplications} ${matureApplications === 1 ? "application" : "applications"} reached 30 days`
-                : "No applications have reached 30 days yet"}
-            </span>
-            <span className="mt-3 block text-xs font-semibold text-red-500">
-              Still no reply →
-            </span>
-            </button>
-          </li>
-        </ol>
-      </div>
-    </section>
+      <p className="mt-6 text-xs leading-5 text-brandgray-500">
+        Your contributions are included anonymously and marked here for you.
+      </p>
+    </aside>
   );
 }

@@ -62,7 +62,13 @@ const statusPresentation: Record<
   },
 };
 
-export default function UserApplicationStatus({ jobId }: { jobId: number }) {
+export default function UserApplicationStatus({
+  jobId,
+  linked = true,
+}: {
+  jobId: number;
+  linked?: boolean;
+}) {
   const { user, isAuthLoading } = useAuth();
   const subscribe = useCallback(
     (onStoreChange: () => void) => {
@@ -105,20 +111,27 @@ export default function UserApplicationStatus({ jobId }: { jobId: number }) {
   const presentation = status ? statusPresentation[status] : null;
   const Icon = presentation?.icon ?? UserLineIcon;
 
-  return (
-    <a
-      href="#your-status"
-      className={`inline-flex px-2 shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 h-8 `}
-      // ${
-      //   presentation
-      //     ? presentation.classes
-      //     : "border-gray-200 text-brandgray-550"
-      // }
-      aria-label={`Your application status: ${presentation?.label ?? "Not tracked"}`}
-    >
-      <Icon aria-hidden="true" className="w-5 h-5" />
-      <span className="text-gray-500">Your status:</span>
+  const content = (
+    <>
+      <Icon aria-hidden="true" className="size-4" />
+      <span className="text-current/70">Your status:</span>
       {presentation?.label ?? "Not tracked"}
+    </>
+  );
+  const className = `inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-sm font-medium ${
+    presentation
+      ? presentation.classes
+      : "border-brandgray-250 bg-white text-brandgray-600"
+  }`;
+  const ariaLabel = `Your application status: ${presentation?.label ?? "Not tracked"}`;
+
+  return linked ? (
+    <a href="#your-application" className={className} aria-label={ariaLabel}>
+      {content}
     </a>
+  ) : (
+    <span className={className} aria-label={ariaLabel}>
+      {content}
+    </span>
   );
 }

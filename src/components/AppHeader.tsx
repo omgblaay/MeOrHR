@@ -1,4 +1,3 @@
-import BriefcaseIcon from "@iconify-react/majesticons/briefcase";
 import BriefcaseLineIcon from "@iconify-react/majesticons/briefcase-line";
 import ApplicationsLineIcon from "@iconify-react/majesticons/applications-line";
 import ChevronDownLineIcon from "@iconify-react/majesticons/chevron-down-line";
@@ -16,6 +15,7 @@ import {
   type UserProfile,
 } from "../lib/profile";
 import { supabase } from "../lib/supabase";
+import AppLogo from "./AppLogo";
 
 export default function AppHeader() {
   const { user, isAuthLoading, signOut } = useAuth();
@@ -87,12 +87,9 @@ export default function AppHeader() {
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between border-x border-brandgray-250 bg-white px-4 sm:px-6 lg:px-8">
         <Link
           to="/"
-          className="flex items-center gap-2.5 text-lg font-semibold text-brand-900"
+          className="inline-flex items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-900"
         >
-          <span className="grid size-9 place-items-center rounded-md bg-brand-900 text-white">
-            <BriefcaseIcon aria-hidden="true" width="19" height="19" />
-          </span>
-          MeOrHR
+          <AppLogo className="h-8 w-auto" />
         </Link>
         <div className="flex items-center gap-2">
           {isAuthLoading ? (
