@@ -1,0 +1,14 @@
+project_id = "JobRater"
+
+[auth]
+site_url = "https://meorhr.com"
+additional_redirect_urls = [
+  "https://meorhr.com/**",
+  "https://www.meorhr.com/**",
+  "https://job-rater-blaays-projects.vercel.app/",
+  "https://job-rater-blaays-projects.vercel.app/**",
+  "https://job-*-rater-blaays-projects.vercel.app",
+  "https://job-*-rater-blaays-projects.vercel.app/**",
+  "http://localhost:5173/**",
+  "http://127.0.0.1:5173/**",
+]

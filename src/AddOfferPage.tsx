@@ -26,6 +26,7 @@ import {
   type HiringRegion,
 } from "./lib/countries";
 import { importJobOffer } from "./lib/jobOfferImport";
+import { submitProtectedAction } from "./lib/recaptcha";
 import { supabase } from "./lib/supabase";
 import {
   jobCategories,
@@ -247,47 +248,35 @@ export default function AddOfferPage({
       return;
     }
 
-    const { data: createdOffer, error: offerError } = await supabase
-      .from("job_offers")
-      .insert({ ...offerFields, created_by: user.id })
-      .select("id")
-      .single();
-
-    if (offerError || !createdOffer) {
-      setErrorMessage(
-        offerError?.code === "23505"
-          ? "This source URL is already attached to an offer."
-          : offerError?.message || "Could not create the offer.",
-      );
-      setIsSubmitting(false);
-      return;
-    }
-
     const now = new Date().toISOString();
-    const { error: sourceError } = await supabase
-      .from("job_offer_sources")
-      .insert({
-        job_offer_id: createdOffer.id,
-        platform: sourcePlatform,
-        url: sourceUrl.trim(),
-        published_at: publishedTimestamp,
-        first_seen_at: now,
-        last_seen_at: now,
-      });
+    try {
+      const result = await submitProtectedAction<{
+        verified: boolean;
+        offerId: number;
+      }>(
+        "add_offer",
+        {
+          offer: offerFields,
+          source: {
+            platform: sourcePlatform,
+            url: sourceUrl.trim(),
+            published_at: publishedTimestamp,
+            first_seen_at: now,
+            last_seen_at: now,
+          },
+        },
+      );
 
-    if (sourceError) {
-      await supabase.from("job_offers").delete().eq("id", createdOffer.id);
+      if (!result?.offerId) throw new Error("Could not create the offer.");
+
+      onOfferSaved();
+      navigate(`/jobs/${result.offerId}`);
+    } catch (error) {
       setErrorMessage(
-        sourceError.code === "23505"
-          ? "This source URL is already attached to an offer."
-          : sourceError.message,
+        error instanceof Error ? error.message : "Could not create the offer.",
       );
       setIsSubmitting(false);
-      return;
     }
-
-    onOfferSaved();
-    navigate(`/jobs/${createdOffer.id}`);
   }
 
   async function handleImport(event: FormEvent<HTMLFormElement>) {

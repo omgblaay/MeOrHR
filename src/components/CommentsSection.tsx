@@ -12,6 +12,7 @@ import {
   type JobComment,
 } from "../lib/comments";
 import { profileInitials, type UserProfile } from "../lib/profile";
+import { submitProtectedAction } from "../lib/recaptcha";
 import { supabase } from "../lib/supabase";
 import Button from "./Button";
 import Label from "./Label";
@@ -22,6 +23,8 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
   const [comments, setComments] = useState(() => readComments(jobId));
   const [draft, setDraft] = useState("");
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const refreshComments = (event: Event) => {
@@ -62,11 +65,24 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
     };
   }, [user]);
 
-  function submitComment(event: FormEvent<HTMLFormElement>) {
+  async function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const body = draft.trim();
-    if (!body || !user) return;
+    if (!body || !user || isSubmitting) return;
+
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      await submitProtectedAction<{ verified: boolean }>("post_comment");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Could not post the comment.",
+      );
+      setIsSubmitting(false);
+      return;
+    }
 
     const author =
       profile?.nickname?.trim() || user.email?.split("@")[0] || "MeOrHR user";
@@ -81,6 +97,7 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
 
     writeComments(jobId, [...comments, newComment]);
     setDraft("");
+    setIsSubmitting(false);
   }
 
   function deleteComment(commentId: string) {
@@ -129,13 +146,24 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
             placeholder="Share a question or hiring insight"
             className="block w-full resize-y rounded-md border border-brandgray-300 bg-white px-3.5 py-3 leading-6 text-brandgray-900 outline-none transition placeholder:text-brandgray-450 focus:border-brand-700 focus:ring-3 focus:ring-brand-700/10"
           />
-          <div className="mt-3 flex items-center justify-between gap-4">
-            <p className="text-xs text-brandgray-500">
-              Comments are saved in this browser for now.
-            </p>
-            <Button type="submit" size="sm" disabled={!draft.trim()}>
+          <div className="mt-3 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs text-brandgray-500">
+                Comments are saved in this browser for now.
+              </p>
+              {errorMessage && (
+                <p className="mt-1 text-sm text-red-700" role="alert">
+                  {errorMessage}
+                </p>
+              )}
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!draft.trim() || isSubmitting}
+            >
               <SendLineIcon aria-hidden="true" width="16" height="16" />
-              Post
+              {isSubmitting ? "Checking..." : "Post"}
             </Button>
           </div>
         </form>
