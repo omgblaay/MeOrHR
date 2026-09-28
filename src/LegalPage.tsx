@@ -116,7 +116,7 @@ const privacySections: LegalSection[] = [
     id: "storage",
     title: "4. Storage and service providers",
     paragraphs: [
-      "MeOrHR uses Supabase for authentication, database storage, and profile images. If you choose Google sign-in, Google processes the authentication request under its own privacy terms. The deployed website may also be processed by its hosting provider. These providers may maintain operational and security logs.",
+      "MeOrHR uses Supabase for authentication, database storage, and profile images. If you choose Google sign-in, Google processes the authentication request under its own privacy terms. Google reCAPTCHA helps protect offer and comment submissions from abuse and may process device and interaction data for that purpose. The deployed website may also be processed by its hosting provider. These providers may maintain operational and security logs.",
       "External job links take you to third-party services whose privacy policies apply independently.",
     ],
   },

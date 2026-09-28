@@ -77,18 +77,29 @@ under-report.
    cp .env.example .env.local
    ```
 
-3. Add your Supabase project credentials to `.env.local`:
+3. Add your Supabase and reCAPTCHA v3 credentials to `.env.local`:
 
    ```dotenv
    VITE_SUPABASE_URL=https://your-project.supabase.co
    VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   VITE_RECAPTCHA_SITE_KEY=your-recaptcha-v3-site-key
    ```
 
-4. Apply the SQL files from [`supabase/migrations`](supabase/migrations) to the
+4. Configure the matching reCAPTCHA secret and deploy the Edge Function:
+
+   ```bash
+   npx supabase secrets set RECAPTCHA_SECRET_KEY=your-recaptcha-v3-secret
+   npx supabase functions deploy protected-submission
+   ```
+
+   You can optionally configure `RECAPTCHA_ALLOWED_HOSTNAMES` as a
+   comma-separated list and `RECAPTCHA_MIN_SCORE` (defaults to `0.5`).
+
+5. Apply the SQL files from [`supabase/migrations`](supabase/migrations) to the
    Supabase project in timestamp order. You can use the Supabase CLI or the SQL
    editor in the Supabase dashboard.
 
-5. Start the development server:
+6. Start the development server:
 
    ```bash
    npm run dev
