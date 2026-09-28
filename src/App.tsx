@@ -10,6 +10,7 @@ import Button from "./components/Button";
 import HomeHero, { AboutMeOrHR } from "./components/HomeIntro";
 import PageMetadata from "./components/PageMetadata";
 import ProfileCountryRequirement from "./components/ProfileCountryRequirement";
+import CookieConsent from "./components/CookieConsent";
 import { supabase } from "./lib/supabase";
 import {
   offerFlagChangedEvent,
@@ -325,6 +326,7 @@ function App() {
     <>
       <PageMetadata jobOffers={jobOffers} />
       <ProfileCountryRequirement />
+      <CookieConsent />
       <Routes>
       <Route
         path="/"

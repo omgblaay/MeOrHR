@@ -1,7 +1,13 @@
 export type ApplicationQuickAction =
   | "applied"
+  | "follow_up"
+  | "contacted_hr"
+  | "rejected"
+  | "linkedin_connection"
   | "received_reply"
   | "interview"
+  | "interview_completed"
+  | "task_completed"
   | "no_reply_30";
 
 export const applicationQuickActionEvent =

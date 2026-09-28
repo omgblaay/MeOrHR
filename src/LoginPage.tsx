@@ -1,6 +1,7 @@
 import ArrowLeftLineIcon from "@iconify-react/majesticons/arrow-left-line";
 import LockLineIcon from "@iconify-react/majesticons/lock-line";
 import { useState, type FormEvent } from "react";
+import { FcGoogle } from "react-icons/fc";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/useAuth";
 import AppHeader from "./components/AppHeader";
@@ -14,6 +15,10 @@ type LoginLocationState = {
   from?: string;
 };
 
+function safeRedirectPath(value: string | null | undefined) {
+  return value?.startsWith("/") && !value.startsWith("//") ? value : "/";
+}
+
 export default function LoginPage() {
   const { user, isAuthLoading } = useAuth();
   const location = useLocation();
@@ -22,7 +27,36 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const redirectTo = (location.state as LoginLocationState | null)?.from ?? "/";
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const redirectTo = safeRedirectPath(
+    new URLSearchParams(location.search).get("returnTo") ??
+      (location.state as LoginLocationState | null)?.from,
+  );
+  const oauthError = new URLSearchParams(location.hash.slice(1)).get(
+    "error_description",
+  );
+  const displayedError = errorMessage ?? oauthError;
+
+  async function handleGoogleSignIn() {
+    setErrorMessage(null);
+    setIsGoogleSubmitting(true);
+
+    const callbackUrl = new URL("/login", window.location.origin);
+    callbackUrl.searchParams.set("returnTo", redirectTo);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl.toString(),
+        queryParams: { prompt: "select_account" },
+      },
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+      setIsGoogleSubmitting(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,7 +108,35 @@ export default function LoginPage() {
               Log in to save offers and manage your applications.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <Button
+              type="button"
+              variant="secondary"
+              className="mt-8 h-11 w-full bg-white"
+              disabled={isGoogleSubmitting || isSubmitting || isAuthLoading}
+              onClick={handleGoogleSignIn}
+            >
+              <FcGoogle aria-hidden="true" className="size-5" />
+              {isGoogleSubmitting ? "Opening Google..." : "Continue with Google"}
+            </Button>
+
+            <div className="my-6 flex items-center gap-3" aria-hidden="true">
+              <span className="h-px flex-1 bg-brandgray-250" />
+              <span className="text-xs font-medium uppercase text-brandgray-450">
+                or
+              </span>
+              <span className="h-px flex-1 bg-brandgray-250" />
+            </div>
+
+            {displayedError && (
+              <p
+                role="alert"
+                className="mb-5 border-l-2 border-red-400 pl-3 text-red-600"
+              >
+                {displayedError}
+              </p>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <Label
                   htmlFor="email"
@@ -114,19 +176,10 @@ export default function LoginPage() {
                 />
               </div>
 
-              {errorMessage && (
-                <p
-                  role="alert"
-                  className="border-l-2 border-red-400 pl-3  text-red-600"
-                >
-                  {errorMessage}
-                </p>
-              )}
-
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isSubmitting || isAuthLoading}
+                disabled={isSubmitting || isGoogleSubmitting || isAuthLoading}
               >
                 {isSubmitting ? "Logging in..." : "Log in"}
               </Button>

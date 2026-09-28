@@ -11,7 +11,13 @@ import type { JobOffer } from "../types/job";
 
 const talentPoolAgeDays = 45;
 
-export default function OfferCommunityFlags({ job }: { job: JobOffer }) {
+export default function OfferCommunityFlags({
+  job,
+  compact = false,
+}: {
+  job: JobOffer;
+  compact?: boolean;
+}) {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -102,16 +108,26 @@ export default function OfferCommunityFlags({ job }: { job: JobOffer }) {
 
   return (
     <section
-      className={`border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8 ${
-        isGone
-          ? "bg-red-50"
-          : talentPoolReports > 0 || mightBeTalentPool
-            ? "bg-amber-50"
-            : "bg-brandgray-50"
-      }`}
+      className={
+        compact
+          ? "min-w-0"
+          : `border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8 ${
+              isGone
+                ? "bg-red-50"
+                : talentPoolReports > 0 || mightBeTalentPool
+                  ? "bg-amber-50"
+                  : "bg-brandgray-50"
+            }`
+      }
       aria-label="Community listing status"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        className={`flex gap-3 ${
+          compact
+            ? "flex-wrap items-center justify-end"
+            : "flex-col lg:flex-row lg:items-center lg:justify-between"
+        }`}
+      >
         <div className="space-y-2">
           {isGone && (
             <FlagMessage
@@ -141,11 +157,14 @@ export default function OfferCommunityFlags({ job }: { job: JobOffer }) {
               color="text-amber-900"
             />
           )}
-          {!isGone && talentPoolReports === 0 && !mightBeTalentPool && (
-            <p className="text-sm text-brandgray-600">
-              Help the community keep this listing accurate.
-            </p>
-          )}
+          {!compact &&
+            !isGone &&
+            talentPoolReports === 0 &&
+            !mightBeTalentPool && (
+              <p className="text-sm text-brandgray-600">
+                Help the community keep this listing accurate.
+              </p>
+            )}
           {errorMessage && (
             <p className="text-sm text-red-700" role="alert">
               {errorMessage}

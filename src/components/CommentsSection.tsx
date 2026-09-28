@@ -96,21 +96,22 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
   }
 
   return (
-    <section
-      id="discussion"
-      className="scroll-mt-4 border-b border-brandgray-250 px-4 py-8 sm:px-6 lg:px-8"
-    >
-      <div className="flex items-center gap-2">
-        <MessageLineIcon
-          aria-hidden="true"
-          width="18"
-          height="18"
-          className="text-brandgray-700"
-        />
-        <h2 className="font-semibold uppercase text-brandgray-600">Discussion</h2>
-        <span className="text-xs font-semibold text-brandgray-450">
-          {comments.length}
-        </span>
+    <section id="discussion" className="scroll-mt-4 px-4 py-8 sm:px-6 lg:px-8">
+      <div>
+        <div className="flex items-center gap-2">
+          <MessageLineIcon
+            aria-hidden="true"
+            width="20"
+            height="20"
+            className="text-brandgray-700"
+          />
+          <h2 className="text-xl font-semibold text-brandgray-950">
+            Discussion
+          </h2>
+          <span className="text-xs font-semibold text-brandgray-450">
+            {comments.length}
+          </span>
+        </div>
       </div>
 
       {isAuthLoading ? (
@@ -185,7 +186,11 @@ export default function CommentsSection({ jobId }: { jobId: number }) {
                       aria-label="Delete your comment"
                       title="Delete comment"
                     >
-                      <TrashLineIcon aria-hidden="true" width="16" height="16" />
+                      <TrashLineIcon
+                        aria-hidden="true"
+                        width="16"
+                        height="16"
+                      />
                     </Button>
                   )}
                 </div>

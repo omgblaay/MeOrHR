@@ -35,3 +35,11 @@ export async function syncApplicationRecord({
     { onConflict: "job_offer_id,user_id" },
   );
 }
+
+export async function removeApplicationRecord(userId: string, jobId: number) {
+  return supabase
+    .from("job_applications")
+    .delete()
+    .eq("user_id", userId)
+    .eq("job_offer_id", jobId);
+}

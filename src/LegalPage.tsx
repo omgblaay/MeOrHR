@@ -116,15 +116,17 @@ const privacySections: LegalSection[] = [
     id: "storage",
     title: "4. Storage and service providers",
     paragraphs: [
-      "MeOrHR uses Supabase for authentication, database storage, and profile images. The deployed website may also be processed by its hosting provider. These providers process information on MeOrHR’s behalf and may maintain operational and security logs.",
+      "MeOrHR uses Supabase for authentication, database storage, and profile images. If you choose Google sign-in, Google processes the authentication request under its own privacy terms. The deployed website may also be processed by its hosting provider. These providers may maintain operational and security logs.",
       "External job links take you to third-party services whose privacy policies apply independently.",
     ],
   },
   {
-    id: "local-storage",
-    title: "5. Browser storage",
+    id: "browser-storage",
+    title: "5. Cookies and browser storage",
     paragraphs: [
-      "MeOrHR uses browser local storage for private application tracking and session-related functionality. Clearing your browser data may remove information that has not been synchronized to Supabase.",
+      "MeOrHR uses essential browser storage for authentication, security, consent preferences, and private application tracking. This storage is required for features you request and cannot be disabled through the consent banner.",
+      "Optional cookies or similar technologies are used only after you select Allow optional. MeOrHR does not currently use advertising cookies. You can review or change your choice at any time through Cookie settings in the footer.",
+      "Clearing your browser data may reset your consent choice and remove application information that has not been synchronized to Supabase.",
     ],
   },
   {
@@ -191,7 +193,7 @@ export default function LegalPage({ type }: LegalPageProps) {
           </h1>
           <p className="mt-4 max-w-2xl leading-7 text-brandgray-650">{intro}</p>
           <p className="mt-5 text-sm text-brandgray-500">
-            Last updated: 25 September 2026
+            Last updated: 28 September 2026
           </p>
         </header>
 

@@ -23,6 +23,8 @@ import TensorflowOriginal from "devicons-react/icons/TensorflowOriginal";
 import UnityOriginal from "devicons-react/icons/UnityOriginal";
 import type { ComponentType, SVGProps } from "react";
 import { FaBriefcase, FaShieldHalved } from "react-icons/fa6";
+import { hasProductBrandIcon } from "../lib/productBrandLogos";
+import ProductBrandIcon from "./ProductBrandIcon";
 
 type CategoryIconComponent = ComponentType<
   SVGProps<SVGElement> & { size?: number | string }
@@ -50,8 +52,6 @@ const categoryIcons: Record<string, CategoryIconComponent> = {
   Security: FaShieldHalved,
   Data: DatagripOriginal,
   Go: GoOriginal,
-  Webflow: FigmaOriginal,
-  Framer: FigmaOriginal,
   Support: SalesforceOriginal,
   ERP: SalesforceOriginal,
   Architecture: KubernetesOriginal,
@@ -67,6 +67,7 @@ export default function JobCategoryIcon({
   size?: number | string;
   className?: string;
 }) {
+  const hasBrandIcon = hasProductBrandIcon(category);
   const Icon = categoryIcons[category] ?? FaBriefcase;
 
   return (
@@ -74,11 +75,15 @@ export default function JobCategoryIcon({
       className={`inline-grid shrink-0 place-items-center ${className}`}
       aria-hidden="true"
     >
-      <Icon
-        aria-hidden="true"
-        className="text-brand-900"
-        size={size}
-      />
+      {hasBrandIcon ? (
+        <ProductBrandIcon name={category} size={size} />
+      ) : (
+        <Icon
+          aria-hidden="true"
+          className="text-brand-900"
+          size={size}
+        />
+      )}
     </span>
   );
 }

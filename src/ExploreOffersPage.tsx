@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AppFooter from "./components/AppFooter";
 import AppHeader from "./components/AppHeader";
 import Button from "./components/Button";
@@ -45,7 +46,8 @@ export default function ExploreOffersPage({
   loadError: string | null;
   onRetry: () => void;
 }) {
-  const [query, setQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get("q") ?? "";
   const [activeCategory, setActiveCategory] =
     useState<JobCategoryFilter>("all");
   const [pageSize, setPageSize] = useState<PageSize>(5);
@@ -152,7 +154,22 @@ export default function ExploreOffersPage({
             <SearchInput
               query={query}
               setQuery={(nextQuery) => {
-                setQuery(nextQuery);
+                setSearchParams(
+                  (currentSearchParams) => {
+                    const nextSearchParams = new URLSearchParams(
+                      currentSearchParams,
+                    );
+
+                    if (nextQuery) {
+                      nextSearchParams.set("q", nextQuery);
+                    } else {
+                      nextSearchParams.delete("q");
+                    }
+
+                    return nextSearchParams;
+                  },
+                  { replace: true },
+                );
                 setPage(1);
               }}
             />

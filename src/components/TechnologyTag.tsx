@@ -17,6 +17,8 @@ import {
   FaCode,
 } from "react-icons/fa6";
 import { SiLooker } from "react-icons/si";
+import { hasProductBrandIcon } from "../lib/productBrandLogos";
+import ProductBrandIcon from "./ProductBrandIcon";
 
 type TechnologyIcon = ComponentType<
   SVGProps<SVGElement> & { size?: number | string }
@@ -49,6 +51,7 @@ const technologyPresentations: Record<string, TechnologyPresentation> = {
 };
 
 export default function TechnologyTag({ technology }: { technology: string }) {
+  const hasBrandIcon = hasProductBrandIcon(technology);
   const presentation = technologyPresentations[technology.toLowerCase()] ?? {
     icon: FaCode,
     color: "var(--color-brandgray-700)",
@@ -57,11 +60,15 @@ export default function TechnologyTag({ technology }: { technology: string }) {
 
   return (
     <span className="inline-flex h-8 items-center gap-2 rounded-full border border-brandgray-200 bg-brandgray-50 px-3 text-sm text-brand-850">
-      <Icon
-        aria-hidden="true"
-        className="size-3.5 shrink-0"
-        style={presentation.color ? { color: presentation.color } : undefined}
-      />
+      {hasBrandIcon ? (
+        <ProductBrandIcon name={technology} size={14} className="size-3.5" />
+      ) : (
+        <Icon
+          aria-hidden="true"
+          className="size-3.5 shrink-0"
+          style={presentation.color ? { color: presentation.color } : undefined}
+        />
+      )}
       {technology}
     </span>
   );

@@ -1,16 +1,14 @@
-import BriefcaseIcon from "@iconify-react/majesticons/briefcase";
 import { Link } from "react-router-dom";
+import { openCookieConsentEvent } from "../lib/cookieConsent";
+import AppLogo from "./AppLogo";
 
 export default function AppFooter() {
   return (
     <footer className="mx-auto max-w-[90rem] border-x border-t border-brandgray-250 bg-brandgray-50">
       <div className="flex flex-col gap-6 px-4 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <span className="grid size-8 place-items-center rounded-md bg-brand-900 text-white">
-            <BriefcaseIcon aria-hidden="true" width="17" height="17" />
-          </span>
+        <div className="flex items-center gap-4">
+          <AppLogo className="h-6 w-auto shrink-0" />
           <div>
-            <p className="font-semibold text-brandgray-900">MeOrHR</p>
             <p className="text-sm text-brandgray-550">
               Community job offers and clearer hiring signals.
             </p>
@@ -39,6 +37,13 @@ export default function AppFooter() {
           <Link className="hover:text-brand-900" to="/privacy">
             Privacy
           </Link>
+          <button
+            type="button"
+            className="font-semibold hover:text-brand-900"
+            onClick={() => window.dispatchEvent(new Event(openCookieConsentEvent))}
+          >
+            Cookie settings
+          </button>
         </nav>
       </div>
       <div className="border-t border-brandgray-250 px-4 py-3 text-xs text-brandgray-500 sm:px-6 lg:px-8">
