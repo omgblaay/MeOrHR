@@ -4,6 +4,8 @@ import type { JobOffer } from "../types/job";
 
 const siteName = "MeOrHR";
 const siteUrl = "https://meorhr.com";
+const socialImageUrl = `${siteUrl}/og-image.png`;
+const socialImageAlt = "MeOrHR logo";
 const defaultDescription =
   "Discover community-posted technology jobs, compare real hiring signals, and track what happens after you apply.";
 
@@ -36,9 +38,17 @@ export default function PageMetadata({ jobOffers }: { jobOffers: JobOffer[] }) {
     setMeta("property", "og:url", canonicalUrl);
     setMeta("property", "og:site_name", siteName);
     setMeta("property", "og:locale", "en_US");
+    setMeta("property", "og:image", socialImageUrl);
+    setMeta("property", "og:image:secure_url", socialImageUrl);
+    setMeta("property", "og:image:type", "image/png");
+    setMeta("property", "og:image:width", "1200");
+    setMeta("property", "og:image:height", "1200");
+    setMeta("property", "og:image:alt", socialImageAlt);
     setMeta("name", "twitter:card", "summary");
     setMeta("name", "twitter:title", metadata.title);
     setMeta("name", "twitter:description", metadata.description);
+    setMeta("name", "twitter:image", socialImageUrl);
+    setMeta("name", "twitter:image:alt", socialImageAlt);
     setCanonicalUrl(canonicalUrl);
   }, [metadata]);
 
