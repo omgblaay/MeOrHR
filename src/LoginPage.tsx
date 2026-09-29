@@ -85,7 +85,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
+      <main
+        data-hj-suppress
+        className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white"
+      >
         <div className="border-b border-brandgray-250 px-4 py-4 sm:px-6 lg:px-8">
           <Link
             to="/"

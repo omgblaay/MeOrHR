@@ -94,6 +94,7 @@ const privacySections: LegalSection[] = [
       "job offers, source links, comments, and recruitment activity you contribute;",
       "private application dates and notes stored locally in your browser;",
       "basic technical and security logs processed by hosting and database providers.",
+      "if you allow optional cookies, usage data collected through Hotjar, including pages visited, device and browser details, approximate location, clicks, taps, scrolling, mouse movement, and session replay data.",
     ],
   },
   {
@@ -117,6 +118,7 @@ const privacySections: LegalSection[] = [
     title: "4. Storage and service providers",
     paragraphs: [
       "MeOrHR uses Supabase for authentication, database storage, and profile images. If you choose Google sign-in, Google processes the authentication request under its own privacy terms. The deployed website may also be processed by its hosting provider. These providers may maintain operational and security logs.",
+      "If you consent to optional analytics, MeOrHR uses Hotjar, provided by Hotjar Ltd, to create heatmaps and session replays and to understand how visitors navigate and interact with the service. Hotjar acts as a service provider and may process technical identifiers and usage data on MeOrHR’s behalf under its own privacy and security terms.",
       "External job links take you to third-party services whose privacy policies apply independently.",
     ],
   },
@@ -125,7 +127,9 @@ const privacySections: LegalSection[] = [
     title: "5. Cookies and browser storage",
     paragraphs: [
       "MeOrHR uses essential browser storage for authentication, security, consent preferences, and private application tracking. This storage is required for features you request and cannot be disabled through the consent banner.",
-      "Optional cookies or similar technologies are used only after you select Allow optional. MeOrHR does not currently use advertising cookies. You can review or change your choice at any time through Cookie settings in the footer.",
+      "Hotjar cookies and similar technologies are used only after you select Allow optional. They help distinguish visits, maintain a session, produce aggregated usage insights, heatmaps, and session replays, and diagnose usability problems. MeOrHR does not currently use advertising cookies.",
+      "MeOrHR marks login, profile settings, and private application areas for suppression so their contents, including credentials, email and profile details, application dates, and private notes, are not included in Hotjar session replays.",
+      "You can withdraw or grant consent at any time through Cookie settings in the footer. Withdrawing consent stops Hotjar from loading on later page views and removes Hotjar data stored in your browser; it does not retroactively delete information already collected by Hotjar.",
       "Clearing your browser data may reset your consent choice and remove application information that has not been synchronized to Supabase.",
     ],
   },
@@ -133,7 +137,7 @@ const privacySections: LegalSection[] = [
     id: "retention",
     title: "6. Retention",
     paragraphs: [
-      "Account and profile data is kept while your account remains active or while needed to operate the service. Community contributions may be retained after account deletion where necessary to preserve shared offer history, unless removal is legally required. Security logs are retained according to provider settings.",
+      "Account and profile data is kept while your account remains active or while needed to operate the service. Community contributions may be retained after account deletion where necessary to preserve shared offer history, unless removal is legally required. Security logs are retained according to provider settings. Hotjar analytics and session replay data is retained according to the retention period configured for the MeOrHR Hotjar account and is then deleted or aggregated.",
     ],
   },
   {
@@ -141,6 +145,7 @@ const privacySections: LegalSection[] = [
     title: "7. Your choices and rights",
     paragraphs: [
       "You can edit or remove optional profile information from Settings and clear local application data through your browser. Depending on where you live, you may also have rights to access, correct, delete, restrict, or export personal information and to object to certain processing.",
+      "Hotjar analytics is based on your consent. You can withdraw that consent at any time through Cookie settings without affecting the lawfulness of processing performed before withdrawal.",
       "Requests concerning account data can be directed to the MeOrHR operator through the contact channel provided with the deployed service. Identity may need to be verified before a request is completed. You may also have the right to complain to the data protection authority in the country where you live or work.",
     ],
   },
@@ -193,7 +198,7 @@ export default function LegalPage({ type }: LegalPageProps) {
           </h1>
           <p className="mt-4 max-w-2xl leading-7 text-brandgray-650">{intro}</p>
           <p className="mt-5 text-sm text-brandgray-500">
-            Last updated: 28 September 2026
+            Last updated: 29 September 2026
           </p>
         </header>
 

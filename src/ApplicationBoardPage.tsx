@@ -155,7 +155,10 @@ export default function ApplicationBoardPage({
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white">
+      <main
+        data-hj-suppress
+        className="mx-auto min-h-[calc(100vh-4rem)] max-w-[90rem] border-x border-brandgray-250 bg-white"
+      >
         <header className="border-b border-brandgray-250 bg-brandgray-50 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>

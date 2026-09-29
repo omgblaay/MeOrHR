@@ -2,6 +2,7 @@ export type CookieConsentChoice = "necessary" | "optional";
 
 export const cookieConsentStorageKey = "meorhr-cookie-consent-v1";
 export const openCookieConsentEvent = "meorhr:open-cookie-consent";
+export const cookieConsentChangedEvent = "meorhr:cookie-consent-changed";
 
 export function readCookieConsent(): CookieConsentChoice | null {
   const storedChoice = window.localStorage.getItem(cookieConsentStorageKey);
@@ -12,6 +13,11 @@ export function readCookieConsent(): CookieConsentChoice | null {
 
 export function writeCookieConsent(choice: CookieConsentChoice) {
   window.localStorage.setItem(cookieConsentStorageKey, choice);
+  window.dispatchEvent(
+    new CustomEvent<CookieConsentChoice>(cookieConsentChangedEvent, {
+      detail: choice,
+    }),
+  );
 }
 
 export function optionalCookiesAllowed() {

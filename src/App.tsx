@@ -11,6 +11,7 @@ import HomeHero, { AboutMeOrHR } from "./components/HomeIntro";
 import PageMetadata from "./components/PageMetadata";
 import ProfileCountryRequirement from "./components/ProfileCountryRequirement";
 import CookieConsent from "./components/CookieConsent";
+import HotjarTracking from "./components/HotjarTracking";
 import { supabase } from "./lib/supabase";
 import {
   offerFlagChangedEvent,
@@ -326,6 +327,7 @@ function App() {
     <>
       <PageMetadata jobOffers={jobOffers} />
       <ProfileCountryRequirement />
+      <HotjarTracking />
       <CookieConsent />
       <Routes>
       <Route

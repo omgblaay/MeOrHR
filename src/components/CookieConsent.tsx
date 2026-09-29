@@ -37,8 +37,9 @@ export default function CookieConsent() {
           </h2>
           <p className="mt-1 text-sm leading-6 text-brandgray-600">
             MeOrHR uses essential storage for sign-in, security, and your
-            private application tracker. Optional cookies are only allowed
-            with your permission. See the{" "}
+            private application tracker. With your permission, Hotjar uses
+            optional cookies to help us understand how the site is used. See
+            the{" "}
             <Link
               to="/privacy#browser-storage"
               className="font-semibold text-brand-800 underline underline-offset-4"

@@ -1270,6 +1270,7 @@ export default function ApplicationActivity({ job }: { job: JobOffer }) {
   return (
     <section
       id="your-application"
+      data-hj-suppress
       className={`scroll-mt-16 border-b border-brandgray-250 bg-gradient-to-b ${gradientClass} to-white`}
     >
       <div className="px-4 sm:px-6 py-4 lg:px-8">
